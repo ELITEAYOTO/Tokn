@@ -493,3 +493,20 @@ P6 remains IN PROGRESS until one controlled real PreToolUse callback proves the 
 - README / STATUS / ROADMAP / docs INDEX / maintenance / V0.1 plan / test matrix / next-session checklist synchronized ;
 - historical Experiment 001 cap/runbook/baseline documents explicitly labeled historical ;
 - documentation governance now separates status, roadmap, plans, design, decisions, research and experiments.
+
+## 2026-09-29 - P7 experiment validity reducer started
+
+- added ADR-004 experiment validity and structured causal claim gate ;
+- added machine-readable validity domain model with PASS / FAIL / UNKNOWN / NOT_REQUIRED ;
+- added five verdicts: VALID_FOR_CAUSAL_AB, VALID_FOR_DESCRIPTIVE_COMPARISON, INSTRUMENTATION_ONLY, INVALID_CAPTURE, INCOMPLETE_TASK ;
+- added conservative reducer with explicit verdict precedence and structured reason codes ;
+- added Experiment 001 validity fixture and golden reducer test ;
+- added text renderer with explicit causal winner/savings BLOCKED/ALLOWED gate ;
+- added `tokn-observe evaluate-validity <input.json> --output-json <path>` command ;
+- Experiment 001 harness result: INSTRUMENTATION_ONLY, causal_claims_allowed=false, descriptive_metrics_allowed=true ;
+- core validation: cargo fmt PASS, tokn-domain + tokn-analysis 26 tests PASS, Clippy -D warnings PASS ;
+- validity renderer standalone Rust test PASS and CLI source standalone compile PASS ;
+- Visual Studio Community 2026 was incomplete for native C builds, but existing Visual Studio Build Tools 2022 provided the complete validated toolchain ;
+- full workspace tests PASS, workspace Clippy -D warnings PASS, release tokn-observe build PASS ;
+- real release CLI fixture matrix PASS: causal, descriptive-only, incomplete-task, invalid-capture, plus Experiment 001 golden ;
+- P7 closed DONE ; P8 is NEXT.

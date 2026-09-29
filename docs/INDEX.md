@@ -14,7 +14,7 @@ Lire seulement :
 5. `plans/NEXT-SESSION-CHECKLIST.md` - prochaine action concrete.
 
 Etat actuel :
-**P0-P6 DONE ; P7 NEXT.**
+**P0-P7 DONE ; P8 NEXT.**
 
 ## Sources de verite par sujet
 
@@ -37,6 +37,8 @@ Un document historique ne doit pas remplacer une source de verite courante.
   Zero observation ne peut pas devenir PASS.
 - `decisions/ADR-003-QUALITY-PRESERVING-EFFICIENCY.md`
   Optimiser le contexte inutile, pas la capacite du modele.
+- `decisions/ADR-004-EXPERIMENT-VALIDITY.md`
+  Seule une preuve experimentale suffisante autorise une conclusion causale.
 
 ## Design - mesure
 

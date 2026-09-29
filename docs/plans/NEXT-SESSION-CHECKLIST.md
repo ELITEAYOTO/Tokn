@@ -4,9 +4,9 @@ Derniere mise a jour : **2026-09-29**
 
 ## Etat de depart
 
-P0-P6 : DONE
-P7 : NEXT
-P8-P9 : TODO
+P0-P7 : DONE
+P8 : NEXT
+P9 : TODO
 Experiment 002 : BLOCKED
 
 Workspace :
@@ -24,16 +24,22 @@ Ne pas refaire l'enquete P6.
 
 ## Premiere action
 
-Implementer **P7 - Experiment validity reducer**.
+Implementer **P8 - Runner V0.1 self-contained**.
 
-Le reducer doit consommer :
-- source health ;
-- RunGroup coverage ;
+Le runner doit reutiliser P0-P7 sans dupliquer leurs reducers :
+- root session identity ;
+- descendants RunGroup ;
+- source health + fallback ;
 - terminal status ;
-- workspace resolution ;
+- dynamic workspace resolution ;
+- quality gate on resolved output ;
 - policy evidence ;
-- runtime/model/task comparability ;
-- quality gate.
+- experiment validity reducer ;
+- self-contained evidence folder ;
+- safe recovery of temporary placements.
+
+Build/test environment valide :
+Visual Studio Build Tools 2022 via `vcvars64.bat`.
 
 ## P7 acceptance
 

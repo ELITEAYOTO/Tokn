@@ -6,6 +6,7 @@ mod policy;
 mod run_group;
 mod source_health;
 mod text;
+mod validity;
 mod workspace;
 
 pub use attribution::*;
@@ -16,4 +17,5 @@ pub use policy::*;
 pub use run_group::*;
 pub use source_health::*;
 pub use text::*;
+pub use validity::*;
 pub use workspace::*;

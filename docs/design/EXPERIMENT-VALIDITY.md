@@ -36,6 +36,29 @@ before displaying a winner or savings claim.
 ### Quality validity
 - automated gates executed;
 - human/host gates recorded when required.
+## Reducer contract
+
+Normalized checks use:
+- PASS;
+- FAIL;
+- UNKNOWN;
+- NOT_REQUIRED.
+
+UNKNOWN never silently becomes PASS.
+
+The reducer emits a verdict, structured reasons,
+`causal_claims_allowed` and `descriptive_metrics_allowed`.
+
+Verdict precedence:
+1. unusable core capture -> INVALID_CAPTURE;
+2. instrumentation intent -> INSTRUMENTATION_ONLY;
+3. required incomplete task -> INCOMPLETE_TASK;
+4. descriptive intent -> VALID_FOR_DESCRIPTIVE_COMPARISON;
+5. complete causal controls -> VALID_FOR_CAUSAL_AB;
+6. otherwise a usable causal comparison degrades to descriptive only.
+
+See `../decisions/ADR-004-EXPERIMENT-VALIDITY.md`.
+
 ## Experiment verdicts
 
 VALID_FOR_CAUSAL_AB

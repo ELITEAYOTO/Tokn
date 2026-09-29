@@ -4,6 +4,7 @@ mod check_caps;
 mod common;
 mod compare;
 mod doctor;
+mod evaluate_validity;
 mod health;
 mod hook_pre_tool_use;
 mod hook_probe_pre_tool_use;
@@ -29,6 +30,9 @@ pub fn run(cli: Cli) -> anyhow::Result<()> {
             source,
             output_json,
         } => analyze_run::run(&source, output_json.as_deref()),
+        Command::EvaluateValidity { input, output_json } => {
+            evaluate_validity::run(&input, output_json.as_deref())
+        }
         Command::InspectPolicy {
             source,
             policy_id,

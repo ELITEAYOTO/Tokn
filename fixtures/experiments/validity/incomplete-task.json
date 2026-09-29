@@ -1,0 +1,46 @@
+{
+  "experiment_id": "incomplete-task",
+  "intent": "CAUSAL_AB",
+  "capture": {
+    "model_usage": "PASS",
+    "tool_evidence": "PASS",
+    "source_health": "HEALTHY",
+    "fallback_recovered": false,
+    "run_group_resolved": "PASS"
+  },
+  "task": {
+    "exact_task_captured": "PASS",
+    "terminal_status": "INCOMPLETE_ERROR",
+    "completion_required": true
+  },
+  "workspace": {
+    "output_workspace_resolved": "PASS",
+    "before_state_captured": "PASS",
+    "after_state_captured": "PASS",
+    "quality_gate_on_output": "PASS"
+  },
+  "policy": {
+    "required": false,
+    "identity_captured": "NOT_REQUIRED",
+    "exposure_known": "NOT_REQUIRED",
+    "compliance_evidence": "NOT_REQUIRED",
+    "enforcement_accurately_labeled": "NOT_REQUIRED"
+  },
+  "runtime": {
+    "model_recorded": "PASS",
+    "runtime_recorded": "PASS",
+    "configuration_recorded": "PASS",
+    "comparable_to_baseline": "PASS"
+  },
+  "quality": {
+    "automated_gates": "PASS",
+    "human_or_host_gates": "NOT_REQUIRED"
+  },
+  "causal": {
+    "baseline_available": "PASS",
+    "same_task": "PASS",
+    "same_starting_workspace": "PASS",
+    "same_runtime_model_config": "PASS",
+    "single_primary_variable": "PASS"
+  }
+}

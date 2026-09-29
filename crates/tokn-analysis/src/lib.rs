@@ -7,6 +7,7 @@ mod integrity;
 mod policy;
 mod summary;
 pub mod token;
+mod validity;
 mod workspace;
 
 pub use agent_graph::*;
@@ -18,4 +19,5 @@ pub use integrity::*;
 pub use policy::*;
 pub use summary::*;
 pub use token::*;
+pub use validity::*;
 pub use workspace::*;

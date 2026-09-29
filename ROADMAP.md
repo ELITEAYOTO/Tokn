@@ -41,8 +41,8 @@ P3 terminal status : DONE
 P4 session tool adapter : DONE
 P5 dynamic workspace : DONE
 P6 policy evidence/runtime capability : DONE
-P7 experiment validity reducer : NEXT
-P8 runner V0.1 : TODO
+P7 experiment validity reducer : DONE
+P8 runner V0.1 : NEXT
 P9 golden replay/release validation : TODO
 
 ### P6 closure

@@ -6,7 +6,7 @@ Binaire/Cargo : **V0.0 / 0.0.0**
 
 ## Resume
 
-**P0-P6 DONE. P7 est la prochaine phase. P8-P9 restent a faire.**
+**P0-P7 DONE. P8 est NEXT. P9 reste a faire.**
 
 Le projet est revenu sur une direction unique :
 mesurer l'efficacite du contexte sans reduire la capacite d'Astra.
@@ -17,15 +17,23 @@ Ils restent une evidence/diagnostic historique.
 
 ## Validation technique courante
 
-- cargo fmt : PASS ;
-- Clippy -D warnings : PASS ;
-- tests workspace : PASS ;
-- build release : PASS ;
-- maintainability audit : CLEAN / NO MAJOR REFACTOR REQUIRED ;
-- Git local : main, aucun remote.
+P7 full gate :
+- cargo fmt --check : PASS ;
+- Clippy workspace -D warnings : PASS ;
+- cargo test --workspace : PASS ;
+- build release tokn-observe : PASS ;
+- real CLI Experiment 001 validity replay : PASS ;
+- verdict INSTRUMENTATION_ONLY ;
+- causal_claims_allowed=false ;
+- descriptive_metrics_allowed=true.
 
-Dernier commit avant cette reorganisation documentaire :
-`416a3d2 fix: classify unavailable hook cap input`.
+Build environment note:
+Visual Studio Community 2026 is incomplete for native C builds,
+but the already-installed Visual Studio Build Tools 2022 toolchain is complete
+and is the validated build environment.
+
+Maintainability audit : CLEAN / NO MAJOR REFACTOR REQUIRED.
+Git local : main, aucun remote.
 
 ## V0.1
 
@@ -36,8 +44,8 @@ P3 - terminal task status : DONE
 P4 - session tool adapter : DONE
 P5 - dynamic workspace tracking : DONE
 P6 - policy evidence/runtime capability research : DONE
-P7 - experiment validity reducer : NEXT
-P8 - runner V0.1 : TODO
+P7 - experiment validity reducer : DONE
+P8 - runner V0.1 : NEXT
 P9 - golden replay/release validation : TODO
 
 P6 est ferme avec une limitation connue :
@@ -119,14 +127,21 @@ Tous commencent observation-only.
 
 ## Prochaine action
 
-Implementer **P7 - Experiment validity reducer**.
+Implementer **P8 - Runner V0.1 self-contained**.
 
-Objectif :
-Experiment 001 doit produire automatiquement `INSTRUMENTATION_ONLY`
-et toute comparaison invalide doit interdire le langage causal/savings.
+P7 fournit maintenant le contrat de validite que le runner doit appeler :
+- input machine-readable ;
+- five verdict reducer ;
+- structured reasons ;
+- causal claim gate ;
+- Experiment 001 golden fixture ;
+- `evaluate-validity` text + JSON.
+
+Objectif P8 :
+un seul run produit un dossier de preuves complet sans reparation forensique manuelle.
 
 Ensuite :
-P8 runner self-contained -> P9 golden/release -> Experiment 002.
+P9 golden/release -> Experiment 002.
 
 Aucun nouveau run Astra n'est necessaire pour P7-P9.
 

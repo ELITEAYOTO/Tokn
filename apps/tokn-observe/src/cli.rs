@@ -61,6 +61,11 @@ pub enum Command {
         #[arg(long)]
         output_json: Option<PathBuf>,
     },
+    EvaluateValidity {
+        input: PathBuf,
+        #[arg(long)]
+        output_json: Option<PathBuf>,
+    },
     ResolveWorkspace {
         source: String,
         #[arg(long)]

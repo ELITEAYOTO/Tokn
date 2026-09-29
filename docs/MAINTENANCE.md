@@ -126,7 +126,7 @@ Par defaut :
 ## Reprise
 
 Etat :
-**P0-P6 DONE ; P7 NEXT.**
+**P0-P7 DONE ; P8 NEXT.**
 
 Lire :
 `INDEX.md` -> `../STATUS.md` -> `../ROADMAP.md` ->

@@ -8,7 +8,7 @@ Version binaire actuelle : **V0.0** (workspace Cargo 0.0.0)
 Release de travail : **V0.1 Measurement Hardening**
 
 Etat au 2026-09-29 :
-**P0-P6 DONE ; P7 NEXT ; P8-P9 TODO.**
+**P0-P7 DONE ; P8 NEXT ; P9 TODO.**
 
 ## Principe
 
@@ -46,10 +46,10 @@ DONE :
 - P3 terminal status ;
 - P4 session tool adapter + policy observation ;
 - P5 dynamic workspace tracking ;
-- P6 policy hint/observation/enforcement + limite hook documentee.
+- P6 policy hint/observation/enforcement + limite hook documentee ;
+- P7 experiment validity reducer + structured causal claim gate.
 
 NEXT :
-- P7 experiment validity reducer ;
 - P8 runner V0.1 self-contained ;
 - P9 golden replay + release validation.
 
