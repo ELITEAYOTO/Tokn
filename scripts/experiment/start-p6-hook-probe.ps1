@@ -96,7 +96,9 @@ $state = [ordered]@{
 }
 $state | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $ActivePath -Encoding UTF8
 
-$hookConfig | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $HooksPath -Encoding UTF8
+$hookJson = $hookConfig | ConvertTo-Json -Depth 10
+$utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+[System.IO.File]::WriteAllText($HooksPath, $hookJson, $utf8NoBom)
 $InstalledHash = (Get-FileHash -LiteralPath $HooksPath -Algorithm SHA256).Hash.ToLowerInvariant()
 $state.installed_hooks_sha256 = $InstalledHash
 $state | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $ActivePath -Encoding UTF8
