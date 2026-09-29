@@ -1,0 +1,4 @@
+{"timestamp":"2026-09-27T17:00:00Z","payload":{"type":"rollout_started","thread_id":"thread-fixture-parent"}}
+{"timestamp":"2026-09-27T17:00:01Z","payload":{"type":"thread_started","thread_id":"thread-fixture-parent"}}
+{"timestamp":"2026-09-27T17:00:02Z","payload":{"type":"protocol_event_observed","event":"fixture-event-a"}}
+{"timestamp":"2026-09-27T17:00:03Z","payload":{"type":"protocol_event_observed","event":"fixture-event-b"}}

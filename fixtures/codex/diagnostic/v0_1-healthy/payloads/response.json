@@ -1,0 +1,11 @@
+{
+  "response_id": "resp-fixture-healthy",
+  "token_usage": {
+    "input_tokens": 12000,
+    "cached_input_tokens": 11000,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 700,
+    "reasoning_output_tokens": 100,
+    "total_tokens": 12700
+  }
+}

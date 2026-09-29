@@ -1,0 +1,2 @@
+{"schema_version":1,"seq":1,"wall_time_unix_ms":1790000000001,"thread_id":"thread-fixture-parent","codex_turn_id":"turn-fixture-1","payload":{"type":"inference_started","inference_call_id":"inf-fixture-1","model":"fixture-model"}}
+{"schema_version":1,"seq":2,"wall_time_unix_ms":1790000000100,"thread_id":"thread-fixture-parent","codex_turn_id":"turn-fixture-1","payload":{"type":"inference_completed","inference_call_id":"inf-fixture-1","response_id":"resp-fixture-healthy","response_payload":{"path":"payloads/response.json"}}}

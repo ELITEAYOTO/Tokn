@@ -1,0 +1,10 @@
+[package]
+name = "tokn-platform"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+tokn-domain = { path = "../tokn-domain" }

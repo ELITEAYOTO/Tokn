@@ -1,0 +1,12 @@
+[package]
+name = "tokn-ingest"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+blake3.workspace = true
+tokn-domain = { path = "../tokn-domain" }
+serde_json.workspace = true
+thiserror.workspace = true

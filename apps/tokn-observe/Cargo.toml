@@ -1,0 +1,20 @@
+[package]
+name = "tokn-observe"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+clap.workspace = true
+tokn-analysis = { path = "../../crates/tokn-analysis" }
+tokn-codex = { path = "../../crates/tokn-codex" }
+tokn-domain = { path = "../../crates/tokn-domain" }
+tokn-ingest = { path = "../../crates/tokn-ingest" }
+tokn-platform = { path = "../../crates/tokn-platform" }
+tokn-report = { path = "../../crates/tokn-report" }
+tokn-storage = { path = "../../crates/tokn-storage" }
+serde_json.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true

@@ -1,0 +1,12 @@
+[package]
+name = "tokn-report"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+tokn-analysis = { path = "../tokn-analysis" }
+tokn-domain = { path = "../tokn-domain" }
+tokn-storage = { path = "../tokn-storage" }
+serde_json.workspace = true

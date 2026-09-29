@@ -1,0 +1,5 @@
+{
+  "fixture": true,
+  "schema": "synthetic-rollout-trace",
+  "note": "Synthetic Tokn compatibility fixture; not captured from a user session."
+}

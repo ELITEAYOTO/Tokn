@@ -1,0 +1,5 @@
+{
+  "fixture": true,
+  "schema": "synthetic-partial-rollout-trace",
+  "note": "Synthetic Tokn V0.1 partial-trace fixture; contains no user-session content."
+}

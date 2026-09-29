@@ -1,0 +1,10 @@
+{
+  "fixture": true,
+  "schema_version": 1,
+  "trace_id": "trace-fixture-healthy",
+  "rollout_id": "rollout-fixture-healthy",
+  "root_thread_id": "thread-fixture-parent",
+  "started_at_unix_ms": 1790000000000,
+  "payloads_dir": "payloads",
+  "raw_event_log": "trace.jsonl"
+}

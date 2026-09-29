@@ -1,0 +1,30 @@
+[workspace]
+resolver = "3"
+members = [
+  "apps/tokn-observe",
+  "crates/tokn-domain",
+  "crates/tokn-platform",
+  "crates/tokn-ingest",
+  "crates/tokn-codex",
+  "crates/tokn-analysis",
+  "crates/tokn-storage",
+  "crates/tokn-report",
+]
+
+[workspace.package]
+version = "0.0.0"
+edition = "2024"
+rust-version = "1.97"
+license = "MIT OR Apache-2.0"
+
+[workspace.dependencies]
+anyhow = "1"
+blake3 = "1"
+clap = { version = "4", features = ["derive"] }
+rusqlite = { version = "0.40.1", features = ["bundled"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["raw_value"] }
+thiserror = "2"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
+uuid = { version = "1", features = ["v4", "serde"] }
