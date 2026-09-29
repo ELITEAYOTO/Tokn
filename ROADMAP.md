@@ -87,14 +87,18 @@ Deja implemente :
 - integration FINISH Experiment 001 ;
 - placement/restauration multi-racine par hash sur PROJECT + workspace watch root ;
 - START/FINISH/RECOVER retrocompatibles avec les anciens runs ;
-- prototype `PreToolUse` privacy-first, non installe, avec audit JSONL compact ;
+- prototype `PreToolUse` privacy-first avec audit JSONL compact ;
 - replay reel : hint PRESENT, 0 instruction threads, 4 repository-read threads, observed FAIL 58/17 ;
-- enforcement classe SUPPORTED_UNVERIFIED : hook runtime supporte, exposition de `max_output_tokens` au callback pas encore prouvee.
+- hooks Desktop reellement trusted/active ; lifecycle hook observe pendant les exec Code Mode ;
+- source OpenAI taggee `rust-v0.158.0-alpha.2.1` : PreToolUse `Bash` ne recoit que `tool_input.command` ;
+- `max_output_tokens` existe dans l'appel Code Mode mais est retire avant le callback ;
+- enforcement classe SUPPORTED_INSUFFICIENT_INPUT pour ce mecanisme/runtime ;
+- cap absent dans le prototype => UNOBSERVABLE/fail-open.
 
 A terminer :
-- capturer un vrai callback `PreToolUse` controle et verifier son schema exact ;
-- prouver que `max_output_tokens` est visible/rewriteable ou choisir un autre point d'enforcement ;
-- valider Code Mode avec un vrai callback avant toute activation automatique ;
+- corriger la sonde live qui produit encore zero ligne malgre le lifecycle hook prouve ;
+- rechercher/prototyper un autre point de mediation supporte si un hard cap runtime reste necessaire ;
+- conserver la compatibilite versionnee : ne jamais supposer que le contrat d'un futur Codex est identique a 0.158 ;
 - ne passer a SUPPORTED_NOT_ACTIVE / ENFORCED qu'avec preuve runtime correspondante.
 
 ### P7 - Experiment validity reducer

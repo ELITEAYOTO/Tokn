@@ -47,10 +47,13 @@ P6 en cours :
 - integration FINISH Experiment 001 : PASS ;
 - placement multi-racine PROJECT + workspace watch root avec restauration par hash : PASS ;
 - START/FINISH/RECOVER multi-placement + retrocompatibilite anciens runs : PASS ;
-- prototype `hook-pre-tool-use` + audit JSONL sans contenu de commande : PASS synthetique, NON ACTIVE ;
+- prototype `hook-pre-tool-use` + audit JSONL sans contenu de commande : PASS synthetique ;
 - replay reel : hint PRESENT, instructions 0/4, repository reads 4/4 (5 lectures), observed FAIL 58 cibles / 17 violations ;
-- enforcement : SUPPORTED_UNVERIFIED, car `PreToolUse` est supporte mais l'exposition reelle de `max_output_tokens` au callback n'est pas encore prouvee ;
-- validation controlee d'un vrai callback + Code Mode : RESTE A FAIRE.
+- probe Desktop reel : hooks trusted/active, `feature.hooks=true`, lifecycle `hook/started -> hook/completed` observe pendant les exec Code Mode ;
+- source OpenAI exacte `rust-v0.158.0-alpha.2.1` : unified exec mappe bien vers `Bash`, mais le payload PreToolUse ne contient que `command` ;
+- enforcement : SUPPORTED_INSUFFICIENT_INPUT pour la policy `max_output_tokens` sur ce runtime ;
+- prototype durci : cap runtime absent => UNOBSERVABLE/fail-open, jamais faux DENY ;
+- dette restante : expliquer/corriger l'audit JSONL live a zero ligne et rechercher un autre point d'enforcement si necessaire.
 
 ## Ce qui est valide aujourd'hui
 

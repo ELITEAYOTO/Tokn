@@ -9,9 +9,10 @@ Codex 0.158.0-alpha.2.1 expose une feature `hooks` stable.
 Les appels d'outils imbriques via Code Mode passent egalement par cette decision.
 
 Cela prouve qu'une interception runtime supportee existe sans patcher Codex.
-Cela ne prouve pas encore que la policy Tokn sur `max_output_tokens` peut etre enforcee :
-la documentation publique garantit `tool_input.command`, mais ne garantit pas actuellement
-que `max_output_tokens` soit present dans le payload PreToolUse.
+La source OpenAI exacte du runtime Desktop `rust-v0.158.0-alpha.2.1` prouve aussi une limite :
+`exec_command` conserve `max_output_tokens` pour l'execution, mais construit le payload
+PreToolUse uniquement avec `tool_input.command`. Le cap est donc retire avant le hook.
+La policy Tokn sur `max_output_tokens` n'est pas enforceable par ce callback sur ce runtime.
 
 Reference publique :
 OpenAI Codex Hooks documentation, section PreToolUse / Tool coverage.
@@ -29,15 +30,17 @@ etre qualifie par la surface cible declaree.
 
 - UNAVAILABLE : aucun mecanisme supporte n'est disponible pour la surface cible.
 - SUPPORTED_UNVERIFIED : un point de mediation existe, mais le contrat necessaire a cette policy n'est pas encore prouve.
+- SUPPORTED_INSUFFICIENT_INPUT : le point de mediation existe, mais le runtime ne transmet pas une entree requise par la policy.
 - SUPPORTED_NOT_ACTIVE : le contrat policy/runtime a ete valide, mais Tokn ne l'a pas active sur ce run.
 - NOT_PROVEN : un mecanisme semble actif mais la preuve du run est insuffisante.
 - ENFORCED : preuve run-scoped suffisante que le mecanisme a mediatise la surface cible.
 
-Experiment 001 est SUPPORTED_UNVERIFIED :
+Experiment 001 est maintenant classe SUPPORTED_INSUFFICIENT_INPUT :
 - meme runtime local : codex-cli 0.158.0-alpha.2.1 ;
 - hooks disponibles ;
 - aucun hook Tokn n'etait configure pour ce run ;
-- la visibilite de `max_output_tokens` dans le vrai callback n'a pas ete capturee ;
+- la source taggee de ce runtime prouve que le PreToolUse Bash ne recoit que `command` ;
+- `max_output_tokens` n'est donc pas observable a ce point de mediation ;
 - le soft policy AGENTS.md reste uniquement un hint.
 
 ## Prototype actuel
@@ -52,11 +55,13 @@ Comportement du prototype sur payload synthetique :
 - classifie la commande avec le meme classifieur que l'Analyzer ;
 - ne cible actuellement que file_read et search ;
 - accepte un cap explicite conforme s'il existe dans `tool_input.max_output_tokens` ;
-- refuse un cap absent ou superieur a la policy ;
+- marque un cap absent UNOBSERVABLE sans bloquer ; refuse uniquement un cap explicitement superieur a la policy ;
 - ignore build/test, write, git et autres familles non ciblees.
 
-Important : `tool_input.max_output_tokens` est une hypothese de prototype,
-pas encore un champ garanti par le contrat public PreToolUse.
+Important : sur Codex Desktop 0.158.0-alpha.2.1, `tool_input.max_output_tokens`
+est prouve absent du payload PreToolUse construit pour unified exec.
+Le prototype traite donc un cap absent comme UNOBSERVABLE et laisse passer l'appel ;
+il ne doit jamais transformer une entree runtime indisponible en violation.
 
 ## Audit privacy-first
 
@@ -85,11 +90,11 @@ Tokn ne doit produire ENFORCED que si le run prouve au minimum :
 6. absence d'erreur/timeout de hook connue sur cette surface ;
 7. toute violation observee est bloquee avant execution.
 
-Sans ces preuves, rester SUPPORTED_UNVERIFIED, SUPPORTED_NOT_ACTIVE ou NOT_PROVEN selon le niveau de preuve atteint.
+Sans ces preuves, rester SUPPORTED_UNVERIFIED, SUPPORTED_INSUFFICIENT_INPUT, SUPPORTED_NOT_ACTIVE ou NOT_PROVEN selon le niveau de preuve atteint.
 
 ## Strategie d'activation
 
-P6 ne modifie pas automatiquement ~/.codex/hooks.json.
+Les runs normaux P6 ne laissent aucun hook installe. Le probe controle peut poser temporairement ~/.codex/hooks.json, puis FINISH/RECOVER le retire ou restaure l'etat precedent.
 
 Ordre :
 1. garder le handler desactive par defaut ;
@@ -103,17 +108,23 @@ Cette separation preserve la mesure :
 le mecanisme d'enforcement est versionne et auditable,
 mais il n'est pas injecte silencieusement dans les sessions normales.
 
-## First real probe result - 2026-09-29
+## Real Desktop probe findings - 2026-09-29
 
-The first Desktop/Astra probe captured zero hook callbacks.
-The associated rollouts prove Astra did execute Code Mode custom tool `exec` with nested `tools.exec_command` calls, including `max_output_tokens: 5000` on read operations. Runtime execution events identify the path as `unified_exec_startup`.
+Two controlled Desktop/Astra probes were performed. The second probe used explicitly trusted hooks:
+`PreToolUse Installed=1 Active=1` and `SessionStart Installed=1 Active=1`.
 
-Current OpenAI documentation explicitly states that unified exec / `exec_command` is covered by PreToolUse and matches canonical tool name `Bash`.
-Therefore the `^Bash$` matcher is not considered the failure.
+The Tokn JSONL adapter still wrote zero rows, but Codex local logs prove the runtime hook path was active:
+- the real Astra turn reports `feature.hooks=true` ;
+- several `hook/started` -> `hook/completed` pairs occur at the nested exec calls ;
+- the rollout proves Code Mode requested `max_output_tokens: 6000`.
 
-The remaining likely cause is hook trust: non-managed hooks are skipped until the exact hook definition hash is reviewed and trusted. The next probe adds a SessionStart witness and requires explicit trust before the Astra turn.
+The exact OpenAI source tag `rust-v0.158.0-alpha.2.1` resolves the policy question independently of the adapter bug:
+`ExecCommandHandler::pre_tool_use_payload` maps unified exec to canonical `Bash`, but serializes only
+`{ "command": args.cmd }`. It does not copy `max_output_tokens` into `tool_input`.
 
-Interpretation for the next run:
-- SessionStart = 0 => hook was not active/trusted ;
-- SessionStart > 0 and PreToolUse = 0 => investigate an unexpected runtime coverage issue ;
-- PreToolUse > 0 => inspect the real `tool_input` keys and determine whether `max_output_tokens` survives into the hook payload.
+Therefore:
+- hook activation on the Desktop runtime is proven ;
+- nested Code Mode mediation is proven by lifecycle logs ;
+- cap visibility is disproven for this PreToolUse contract ;
+- the Tokn adapter's zero-row bug remains diagnostic debt, not evidence that hooks were inactive ;
+- hard cap enforcement must use another supported mediation point or a future runtime contract.

@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 pub enum PolicyEnforcementStatus {
     Unavailable,
     SupportedUnverified,
+    SupportedInsufficientInput,
     SupportedNotActive,
     Enforced,
     #[default]
@@ -16,6 +17,7 @@ impl PolicyEnforcementStatus {
         match self {
             Self::Unavailable => "UNAVAILABLE",
             Self::SupportedUnverified => "SUPPORTED_UNVERIFIED",
+            Self::SupportedInsufficientInput => "SUPPORTED_INSUFFICIENT_INPUT",
             Self::SupportedNotActive => "SUPPORTED_NOT_ACTIVE",
             Self::Enforced => "ENFORCED",
             Self::NotProven => "NOT_PROVEN",

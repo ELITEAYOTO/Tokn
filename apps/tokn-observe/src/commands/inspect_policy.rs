@@ -105,6 +105,7 @@ fn parse_enforcement(value: &str) -> anyhow::Result<PolicyEnforcementStatus> {
     match value {
         "unavailable" => Ok(PolicyEnforcementStatus::Unavailable),
         "supported-unverified" => Ok(PolicyEnforcementStatus::SupportedUnverified),
+        "supported-insufficient-input" => Ok(PolicyEnforcementStatus::SupportedInsufficientInput),
         "supported-not-active" => Ok(PolicyEnforcementStatus::SupportedNotActive),
         "enforced" => Ok(PolicyEnforcementStatus::Enforced),
         "not-proven" => Ok(PolicyEnforcementStatus::NotProven),

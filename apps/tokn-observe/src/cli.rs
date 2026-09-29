@@ -55,7 +55,7 @@ pub enum Command {
         #[arg(
             long,
             default_value = "not-proven",
-            value_parser = ["not-proven", "unavailable", "supported-unverified", "supported-not-active", "enforced"]
+            value_parser = ["not-proven", "unavailable", "supported-unverified", "supported-insufficient-input", "supported-not-active", "enforced"]
         )]
         enforcement: String,
         #[arg(long)]

@@ -249,7 +249,7 @@ $policyEvidenceArgs = @(
     "--marker", "Tokn Experiment 001 - Runtime Output Policy",
     "--cap", "file_read=$fileReadCap",
     "--cap", "search=$searchCap",
-    "--enforcement", "supported-unverified",
+    "--enforcement", "supported-insufficient-input",
     "--output-json", $PolicyEvidenceJson
 )
 $policyEvidencePaths = $(if ($run.policy_placements) {

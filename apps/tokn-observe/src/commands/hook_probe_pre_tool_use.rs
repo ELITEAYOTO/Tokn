@@ -14,15 +14,10 @@ pub fn run(audit_jsonl: &Path) -> anyhow::Result<()> {
         .get("hook_event_name")
         .and_then(Value::as_str)
         .unwrap_or("UNKNOWN");
-    if !matches!(hook_event_name, "SessionStart" | "PreToolUse") {
-        return Ok(());
-    }
-    if hook_event_name == "PreToolUse"
-        && input.get("tool_name").and_then(Value::as_str) != Some("Bash")
-    {
-        return Ok(());
-    }
-
+    let top_level_keys = input
+        .as_object()
+        .map(|object| object.keys().cloned().collect::<Vec<_>>())
+        .unwrap_or_default();
     let tool_input = input.get("tool_input").and_then(Value::as_object);
     let keys = tool_input
         .map(|object| object.keys().cloned().collect::<Vec<_>>())
@@ -37,6 +32,8 @@ pub fn run(audit_jsonl: &Path) -> anyhow::Result<()> {
 
     let entry = json!({
         "hook_event_name": hook_event_name,
+        "recognized_event": matches!(hook_event_name, "SessionStart" | "PreToolUse"),
+        "top_level_keys": top_level_keys,
         "session_id": input.get("session_id").and_then(Value::as_str),
         "turn_id": input.get("turn_id").and_then(Value::as_str),
         "tool_name": input.get("tool_name").and_then(Value::as_str),

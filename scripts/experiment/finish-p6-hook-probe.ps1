@@ -98,7 +98,7 @@ Write-Host "max_output_tokens observed in callback: $($withMax -gt 0)"
 Write-Host "Summary: $SummaryPath"
 Write-Host "Audit:   $AuditPath"
 if ($entries.Count -eq 0) {
-    Write-Warning "No hook callback was captured. The temporary hook was most likely not trusted/activated."
+    Write-Warning "No Tokn audit rows were captured. Do not infer hook inactivity from this alone; inspect Codex lifecycle logs."
 } elseif ($sessionStartCallbacks -gt 0 -and $preToolCallbacks -eq 0) {
     Write-Warning "Hook activation is proven by SessionStart, but no PreToolUse/Bash callback was captured."
 }

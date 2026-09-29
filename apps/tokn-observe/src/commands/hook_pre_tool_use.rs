@@ -13,6 +13,7 @@ struct HookEvaluation {
     category: String,
     required_max: u64,
     observed_cap: Option<u64>,
+    observable: bool,
     denied: bool,
     output: Option<Value>,
 }
@@ -54,24 +55,31 @@ fn evaluate_pre_tool_use(input: &Value, policy: &BTreeMap<String, u64>) -> Optio
         .get("max_output_tokens")
         .and_then(parse_u64_value);
 
-    if observed_cap.is_some_and(|cap| cap <= required_max) {
+    let Some(observed_cap) = observed_cap else {
         return Some(HookEvaluation {
             category,
             required_max,
-            observed_cap,
+            observed_cap: None,
+            observable: false,
+            denied: false,
+            output: None,
+        });
+    };
+
+    if observed_cap <= required_max {
+        return Some(HookEvaluation {
+            category,
+            required_max,
+            observed_cap: Some(observed_cap),
+            observable: true,
             denied: false,
             output: None,
         });
     }
 
-    let reason = match observed_cap {
-        Some(cap) => format!(
-            "Tokn policy: {category} max_output_tokens={cap} exceeds required maximum {required_max}."
-        ),
-        None => format!(
-            "Tokn policy: {category} requires explicit max_output_tokens <= {required_max}."
-        ),
-    };
+    let reason = format!(
+        "Tokn policy: {category} max_output_tokens={observed_cap} exceeds required maximum {required_max}."
+    );
 
     let output = json!({
         "hookSpecificOutput": {
@@ -84,7 +92,8 @@ fn evaluate_pre_tool_use(input: &Value, policy: &BTreeMap<String, u64>) -> Optio
     Some(HookEvaluation {
         category,
         required_max,
-        observed_cap,
+        observed_cap: Some(observed_cap),
+        observable: true,
         denied: true,
         output: Some(output),
     })
@@ -102,7 +111,13 @@ fn append_audit(path: &Path, input: &Value, evaluation: &HookEvaluation) -> anyh
         "category": evaluation.category,
         "required_max_output_tokens": evaluation.required_max,
         "observed_max_output_tokens": evaluation.observed_cap,
-        "decision": if evaluation.denied { "DENY" } else { "ALLOW" }
+        "decision": if !evaluation.observable {
+            "UNOBSERVABLE"
+        } else if evaluation.denied {
+            "DENY"
+        } else {
+            "ALLOW"
+        }
     });
 
     let mut file = OpenOptions::new().create(true).append(true).open(path)?;
@@ -146,7 +161,7 @@ mod tests {
     }
 
     #[test]
-    fn denies_missing_cap_on_targeted_command() {
+    fn leaves_unobservable_missing_cap_unblocked() {
         let input = json!({
             "hook_event_name": "PreToolUse",
             "tool_name": "Bash",
@@ -154,9 +169,10 @@ mod tests {
         });
 
         let evaluation = evaluate_pre_tool_use(&input, &policy()).unwrap();
-        assert!(evaluation.denied);
-        let output = evaluation.output.unwrap();
-        assert_eq!(output["hookSpecificOutput"]["permissionDecision"], "deny");
+        assert!(!evaluation.observable);
+        assert!(!evaluation.denied);
+        assert_eq!(evaluation.observed_cap, None);
+        assert!(evaluation.output.is_none());
     }
 
     #[test]

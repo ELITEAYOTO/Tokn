@@ -464,3 +464,17 @@ P6 remains IN PROGRESS until one controlled real PreToolUse callback proves the 
 - most likely cause of 0 callbacks: temporary non-managed hook was not reviewed/trusted ;
 - probe now also records SessionStart so activation can be distinguished from tool coverage ;
 - START instructions now require explicit hook trust before the test turn.
+
+## 2026-09-29 - P6 live hook contract resolved for Desktop 0.158
+
+- controlled Desktop probe used hooks explicitly trusted in packaged Codex CLI ;
+- Codex local logs prove feature.hooks=true and hook/started -> hook/completed during nested Code Mode exec calls ;
+- rollouts prove model-side tools.exec_command calls requested max_output_tokens=6000 ;
+- exact OpenAI tag rust-v0.158.0-alpha.2.1 proves ExecCommandHandler maps unified exec to Bash but forwards only tool_input.command to PreToolUse ;
+- max_output_tokens is therefore unavailable to this callback on the current Desktop runtime ;
+- added SUPPORTED_INSUFFICIENT_INPUT enforcement state ;
+- Experiment 001 replay now reports policy_enforced=SUPPORTED_INSUFFICIENT_INPUT while preserving 58 targets / 17 violations ;
+- active hook prototype now treats a missing cap as UNOBSERVABLE/fail-open instead of a false DENY ;
+- probe now logs event/top-level metadata before event-specific assumptions ;
+- FINISH no longer infers inactive/untrusted hooks from an empty Tokn audit alone ;
+- temporary hook/debug artifacts cleaned ; no ~/.codex/hooks.json or active P6 probe remains.
