@@ -121,18 +121,11 @@ if ($DryRun) {
     exit 0
 }
 
-$configPath = Join-Path $CodexHome "config.toml"
-$codexCli = $null
-if (Test-Path -LiteralPath $configPath) {
-    $configText = Get-Content -LiteralPath $configPath -Raw
-    $match = [regex]::Match($configText, "(?m)^CODEX_CLI_PATH\s*=\s*'([^']+)'")
-    if ($match.Success) {
-        $codexCli = $match.Groups[1].Value
-    }
+$codexCommand = Get-Command "codex.cmd" -ErrorAction SilentlyContinue
+if (-not $codexCommand) {
+    throw "Packaged Codex CLI not found in PATH. Install it with: npm install -g @openai/codex@alpha"
 }
-if (-not $codexCli -or -not (Test-Path -LiteralPath $codexCli)) {
-    throw "Codex CLI path not found in ~/.codex/config.toml. Run RECOVER-P6-HOOK-PROBE.cmd to restore the hook file."
-}
+$codexCli = $codexCommand.Source
 
 $cliCommand = '"' + $codexCli + '"'
 Start-Process "cmd.exe" -WorkingDirectory $Workspace -ArgumentList "/k", $cliCommand
