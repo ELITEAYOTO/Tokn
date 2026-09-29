@@ -438,3 +438,16 @@ P6 remains IN PROGRESS until one controlled real PreToolUse callback proves the 
 - cargo build --release -p tokn-observe: PASS ;
 - historical inspect-policy replay: FAIL 58/17 as expected ;
 - historical enforcement classification: SUPPORTED_UNVERIFIED.
+
+## 2026-09-29 21:48 +02:00 - P6 real-hook probe harness
+
+- added observation-only hook-probe-pre-tool-use command ;
+- probe logs callback schema/IDs/category and cap presence, never command text ;
+- added disposable p6-hook-probe workspace ;
+- added START / FINISH / RECOVER P6 hook-probe wrappers ;
+- START installs a temporary user hooks.json only when none already exists ;
+- probe prompt is copied automatically to clipboard and Codex Desktop is launched ;
+- FINISH restores/removes the temporary hook and emits summary.json ;
+- synthetic FINISH test: PASS ;
+- probe START dry-run and cleanup: PASS ;
+- no real Codex callback captured yet.

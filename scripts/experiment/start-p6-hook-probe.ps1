@@ -1,0 +1,127 @@
+param([switch]$DryRun)
+
+$ErrorActionPreference = "Stop"
+$ToolRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..")
+$V0Root = Split-Path $ToolRoot -Parent
+$ProbeRoot = Join-Path $V0Root "experiments\p6-hook-probe"
+$Workspace = Join-Path $ProbeRoot "workspace"
+$ActivePath = Join-Path $ProbeRoot "ACTIVE-PROBE.json"
+$Observer = Join-Path $ToolRoot "target\release\tokn-observe.exe"
+$CodexHome = Join-Path $env:USERPROFILE ".codex"
+$HooksPath = Join-Path $CodexHome "hooks.json"
+
+if (Test-Path -LiteralPath $ActivePath) {
+    throw "A P6 hook probe is already active. Finish or recover it first: $ActivePath"
+}
+if (-not (Test-Path -LiteralPath $Observer)) {
+    throw "Tokn release binary not found: $Observer"
+}
+if (-not (Test-Path -LiteralPath $Workspace)) {
+    throw "Probe workspace not found: $Workspace"
+}
+
+$runningDesktop = Get-Process ChatGPT -ErrorAction SilentlyContinue
+$runningCodex = Get-Process codex -ErrorAction SilentlyContinue |
+    Where-Object { $_.Path -like "*\AppData\Local\OpenAI\Codex\bin\*\codex.exe" }
+if (-not $DryRun -and ($runningDesktop -or $runningCodex)) {
+    Write-Host ""
+    Write-Host "TOKN P6 PROBE: Codex Desktop is still running." -ForegroundColor Yellow
+    Write-Host "Close Codex completely, then run START-P6-HOOK-PROBE.cmd again."
+    exit 60
+}
+
+New-Item -ItemType Directory -Force -Path $ProbeRoot | Out-Null
+New-Item -ItemType Directory -Force -Path $CodexHome | Out-Null
+
+$HadHooks = Test-Path -LiteralPath $HooksPath
+if ($HadHooks) {
+    throw "Existing ~/.codex/hooks.json detected. Tokn refuses to overwrite or merge it automatically."
+}
+
+$stamp = Get-Date -Format "yyyyMMdd-HHmmss"
+$RunRoot = Join-Path $ProbeRoot "runs\$stamp"
+New-Item -ItemType Directory -Force -Path $RunRoot | Out-Null
+$AuditPath = Join-Path $RunRoot "pretooluse-audit.jsonl"
+$SummaryPath = Join-Path $RunRoot "summary.json"
+$BackupPath = Join-Path $RunRoot "hooks-before.json"
+
+$observerEscaped = $Observer.Replace('"', '\"')
+$auditEscaped = $AuditPath.Replace('"', '\"')
+$hookCommand = '"' + $observerEscaped + '" hook-probe-pre-tool-use --audit-jsonl "' + $auditEscaped + '"'
+
+$hookConfig = [ordered]@{
+    description = "Temporary Tokn P6 PreToolUse schema probe. Observation only."
+    hooks = [ordered]@{
+        PreToolUse = @(
+            [ordered]@{
+                matcher = "^Bash$"
+                hooks = @(
+                    [ordered]@{
+                        type = "command"
+                        command = $hookCommand
+                        commandWindows = $hookCommand
+                        timeout = 5
+                        statusMessage = "Tokn P6 observing PreToolUse schema"
+                    }
+                )
+            }
+        )
+    }
+}
+
+$state = [ordered]@{
+    schema_version = 1
+    started_at = (Get-Date).ToString("o")
+    run_root = $RunRoot
+    workspace = $Workspace
+    hooks_path = $HooksPath
+    had_hooks_before = $HadHooks
+    hooks_backup = $(if ($HadHooks) { $BackupPath } else { $null })
+    audit_jsonl = $AuditPath
+    summary_json = $SummaryPath
+}
+$state | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $ActivePath -Encoding UTF8
+
+$hookConfig | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $HooksPath -Encoding UTF8
+$InstalledHash = (Get-FileHash -LiteralPath $HooksPath -Algorithm SHA256).Hash.ToLowerInvariant()
+$state.installed_hooks_sha256 = $InstalledHash
+$state | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $ActivePath -Encoding UTF8
+
+$prompt = @"
+Fais uniquement une inspection en lecture seule de ce petit workspace.
+Ne modifie aucun fichier.
+
+1. Lis README.md et notes.txt avec tes outils locaux.
+2. Recherche dans tout le workspace les chaines TODO et TOKN_P6_PROBE_2026.
+3. Donne-moi ensuite un resume tres court de ce que tu as trouve.
+
+Utilise ton fonctionnement normal d'Astra pour inspecter les fichiers, sans implementation ni modification.
+"@
+Set-Clipboard -Value $prompt
+
+if ($DryRun) {
+    Remove-Item -LiteralPath $HooksPath -Force
+    Remove-Item -LiteralPath $ActivePath -Force
+    Remove-Item -LiteralPath $RunRoot -Recurse -Force
+    Write-Host "TOKN P6 HOOK PROBE DRY-RUN: PASS" -ForegroundColor Green
+    exit 0
+}
+
+$app = Get-StartApps |
+    Where-Object { $_.AppID -eq "OpenAI.Codex_2p2nqsd0c76g0!App" } |
+    Select-Object -First 1
+if (-not $app) {
+    throw "Codex Windows AppID not found. Run RECOVER-P6-HOOK-PROBE.cmd to restore the hook file."
+}
+
+Start-Process "explorer.exe" "shell:AppsFolder\$($app.AppID)"
+
+Write-Host ""
+Write-Host "TOKN P6 HOOK PROBE READY" -ForegroundColor Green
+Write-Host "Workspace: $Workspace"
+Write-Host "Audit:     $AuditPath"
+Write-Host ""
+Write-Host "The probe prompt is already in your clipboard." -ForegroundColor Cyan
+Write-Host "If Codex asks you to review/trust this new hook, approve the Tokn hook."
+Write-Host "Then open the probe workspace, create ONE new Astra chat, paste, send, and wait for completion."
+Write-Host "Finally close Codex completely and run FINISH-P6-HOOK-PROBE.cmd."

@@ -6,6 +6,7 @@ mod compare;
 mod doctor;
 mod health;
 mod hook_pre_tool_use;
+mod hook_probe_pre_tool_use;
 mod import;
 mod inspect_policy;
 mod inspect_schema;
@@ -69,6 +70,7 @@ pub fn run(cli: Cli) -> anyhow::Result<()> {
         Command::HookPreToolUse { caps, audit_jsonl } => {
             hook_pre_tool_use::run(&caps, audit_jsonl.as_deref())
         }
+        Command::HookProbePreToolUse { audit_jsonl } => hook_probe_pre_tool_use::run(&audit_jsonl),
         Command::Report => report::run(),
         Command::DbPath => {
             println!("{}", common::db_path()?.display());

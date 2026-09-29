@@ -95,6 +95,11 @@ pub enum Command {
         #[arg(long)]
         audit_jsonl: Option<PathBuf>,
     },
+    #[command(hide = true)]
+    HookProbePreToolUse {
+        #[arg(long)]
+        audit_jsonl: PathBuf,
+    },
     Report,
     DbPath,
     #[command(hide = true)]
