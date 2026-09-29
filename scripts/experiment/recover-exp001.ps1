@@ -4,6 +4,8 @@ $ToolRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..")
 $V0Root = Split-Path $ToolRoot -Parent
 $ExperimentRoot = Join-Path $V0Root "experiments\001-runtime-output-caps"
 $ActivePath = Join-Path $ExperimentRoot "ACTIVE-RUN.json"
+$PolicyPlacementScript = Join-Path $PSScriptRoot "policy-placement.ps1"
+. $PolicyPlacementScript
 
 $runningDesktop = Get-Process ChatGPT -ErrorAction SilentlyContinue
 $runningCodex = Get-Process codex -ErrorAction SilentlyContinue |
@@ -24,7 +26,12 @@ if ($run) {
     $AgentsPath = Join-Path $run.project_root "AGENTS.md"
     $RunRoot = $run.run_root
 
-    if ([bool]$run.original_agents_present) {
+    if ($run.policy_placements) {
+        $placementsRestored = Restore-ToknPolicyPlacements -Placements $run.policy_placements -PreserveDirectory $RunRoot -Prefix "recovery-policy"
+        if (-not $placementsRestored) {
+            Write-Warning "Recovery could not safely restore every known policy placement."
+        }
+    } elseif ([bool]$run.original_agents_present) {
         if (Test-Path $AgentsPath) {
             Copy-Item -LiteralPath $AgentsPath -Destination (Join-Path $RunRoot "AGENTS-at-recovery.md") -Force
         }
@@ -33,10 +40,13 @@ if ($run) {
         } else {
             Write-Warning "Original AGENTS.md backup is missing. Current AGENTS.md was preserved in the run folder."
         }
-    } else {
-        if (Test-Path $AgentsPath) {
-            Copy-Item -LiteralPath $AgentsPath -Destination (Join-Path $RunRoot "AGENTS-at-recovery.md") -Force
+    } elseif (Test-Path $AgentsPath) {
+        $currentHash = (Get-FileHash -LiteralPath $AgentsPath -Algorithm SHA256).Hash.ToLowerInvariant()
+        if ($currentHash -eq [string]$run.policy_sha256) {
             Remove-Item -LiteralPath $AgentsPath -Force
+        } else {
+            Copy-Item -LiteralPath $AgentsPath -Destination (Join-Path $RunRoot "AGENTS-at-recovery.md") -Force
+            Write-Warning "Legacy AGENTS.md changed during the run; preserved and left in place."
         }
     }
 

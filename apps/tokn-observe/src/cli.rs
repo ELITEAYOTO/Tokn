@@ -55,7 +55,7 @@ pub enum Command {
         #[arg(
             long,
             default_value = "not-proven",
-            value_parser = ["not-proven", "unavailable", "enforced"]
+            value_parser = ["not-proven", "unavailable", "supported-unverified", "supported-not-active", "enforced"]
         )]
         enforcement: String,
         #[arg(long)]
@@ -87,6 +87,13 @@ pub enum Command {
         source: String,
         #[arg(long = "cap", value_name = "CATEGORY=TOKENS")]
         caps: Vec<String>,
+    },
+    #[command(hide = true)]
+    HookPreToolUse {
+        #[arg(long = "cap", value_name = "CATEGORY=TOKENS")]
+        caps: Vec<String>,
+        #[arg(long)]
+        audit_jsonl: Option<PathBuf>,
     },
     Report,
     DbPath,

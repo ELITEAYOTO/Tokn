@@ -104,6 +104,8 @@ fn map_observation_status(status: CapPolicyStatus) -> PolicyObservationStatus {
 fn parse_enforcement(value: &str) -> anyhow::Result<PolicyEnforcementStatus> {
     match value {
         "unavailable" => Ok(PolicyEnforcementStatus::Unavailable),
+        "supported-unverified" => Ok(PolicyEnforcementStatus::SupportedUnverified),
+        "supported-not-active" => Ok(PolicyEnforcementStatus::SupportedNotActive),
         "enforced" => Ok(PolicyEnforcementStatus::Enforced),
         "not-proven" => Ok(PolicyEnforcementStatus::NotProven),
         _ => anyhow::bail!("unsupported enforcement status: {value}"),

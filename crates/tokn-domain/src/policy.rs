@@ -4,6 +4,8 @@ use serde::{Deserialize, Serialize};
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum PolicyEnforcementStatus {
     Unavailable,
+    SupportedUnverified,
+    SupportedNotActive,
     Enforced,
     #[default]
     NotProven,
@@ -13,6 +15,8 @@ impl PolicyEnforcementStatus {
     pub const fn as_str(self) -> &'static str {
         match self {
             Self::Unavailable => "UNAVAILABLE",
+            Self::SupportedUnverified => "SUPPORTED_UNVERIFIED",
+            Self::SupportedNotActive => "SUPPORTED_NOT_ACTIVE",
             Self::Enforced => "ENFORCED",
             Self::NotProven => "NOT_PROVEN",
         }

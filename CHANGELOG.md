@@ -392,3 +392,49 @@ Rewritten for current truth:
 - release build: PASS.
 
 P6 remains IN PROGRESS: generic multi-placement lifecycle and supported enforcement-hook research are still required.
+
+## 2026-09-29 21:23 +02:00 - P6 placement + hook contract hardening
+
+### Policy placement
+
+- added reusable policy-placement.ps1 helper ;
+- per-path backup, installed SHA-256 and conservative restoration ;
+- START now places the hint at PROJECT and workspace watch root ;
+- FINISH and RECOVER support multi-placement and legacy runs ;
+- copied output workspaces are restored only on exact known overlay hash ;
+- unexpected AGENTS.md content is preserved rather than silently removed ;
+- full START -DryRun passes with both placements restored and no residue.
+
+### Hook research
+
+- local Codex 0.158.0-alpha.2.1 reports hooks as stable ;
+- public Codex docs confirm PreToolUse can mediate Bash and nested Code Mode calls ;
+- public contract guarantees tool_input.command ;
+- public contract does not currently guarantee Tokn's needed max_output_tokens field ;
+
+- enforcement status therefore refined to SUPPORTED_UNVERIFIED ;
+- hidden hook-pre-tool-use prototype remains disabled by default ;
+- synthetic handler tests cover compliant, missing-cap, over-cap and non-target commands ;
+- optional JSONL audit stores only IDs/category/caps/decision, never command text ;
+- example hooks.json is documentation-only and is not installed into Codex.
+
+### Validation
+
+- PowerShell syntax START / FINISH / RECOVER / policy-placement: PASS ;
+- synthetic install/restore lifecycle: PASS ;
+- hook example JSON parse: PASS ;
+- dry-run cleanup: PASS, no ACTIVE-RUN/run/trace residue ;
+- E:\BlockBench-Plugin\AGENTS.md absent after dry-run ;
+- source PROJECT\AGENTS.md absent after dry-run ;
+- no real Codex/Astra experiment launched in this pass.
+
+P6 remains IN PROGRESS until one controlled real PreToolUse callback proves the actual payload contract.
+
+### Final validation for this P6 pass
+
+- cargo fmt --check: PASS ;
+- Clippy -D warnings: PASS ;
+- cargo test --workspace: PASS ;
+- cargo build --release -p tokn-observe: PASS ;
+- historical inspect-policy replay: FAIL 58/17 as expected ;
+- historical enforcement classification: SUPPORTED_UNVERIFIED.

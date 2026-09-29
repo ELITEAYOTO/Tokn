@@ -6,7 +6,9 @@ $ExperimentRoot = Join-Path $V0Root "experiments\001-runtime-output-caps"
 $ActivePath = Join-Path $ExperimentRoot "ACTIVE-RUN.json"
 $SnapshotScript = Join-Path $PSScriptRoot "snapshot-project.ps1"
 $InventoryScript = Join-Path $PSScriptRoot "inventory-workspaces.ps1"
+$PolicyPlacementScript = Join-Path $PSScriptRoot "policy-placement.ps1"
 $DiffScript = Join-Path $PSScriptRoot "diff-snapshots.ps1"
+. $PolicyPlacementScript
 $FinishTrace = Join-Path $ToolRoot "scripts\trace\finish-latest-trace.ps1"
 $Observer = Join-Path $ToolRoot "target\release\tokn-observe.exe"
 
@@ -45,26 +47,29 @@ $WorkspaceMaxDepth = $(if ($run.workspace_inventory_max_depth) {
 $BeforeWorkspaceInventory = [string]$run.workspace_before_inventory
 $AgentsPath = Join-Path $ProjectRoot "AGENTS.md"
 Write-Host ""
-Write-Host "Restoring JEM project instructions..." -ForegroundColor Cyan
+Write-Host "Restoring Tokn policy placements..." -ForegroundColor Cyan
 
-if ([bool]$run.original_agents_present) {
+if ($run.policy_placements) {
+    $placementsRestored = Restore-ToknPolicyPlacements -Placements $run.policy_placements -PreserveDirectory $RunRoot -Prefix "finish-policy"
+    if (-not $placementsRestored) {
+        Write-Warning "At least one policy placement could not be restored safely; preserved state remains in the run folder."
+    }
+} elseif ([bool]$run.original_agents_present) {
     if (Test-Path $AgentsPath) {
         Copy-Item -LiteralPath $AgentsPath -Destination (Join-Path $RunRoot "AGENTS-at-finish-experimental.md") -Force
     }
     Copy-Item -LiteralPath $run.original_agents_backup -Destination $AgentsPath -Force
-} else {
-    if (Test-Path $AgentsPath) {
-        $currentHash = (Get-FileHash -LiteralPath $AgentsPath -Algorithm SHA256).Hash.ToLowerInvariant()
-        $policyHash = [string]$run.policy_sha256
-        if ($currentHash -ne $policyHash) {
-            Copy-Item -LiteralPath $AgentsPath -Destination (Join-Path $RunRoot "AGENTS-at-finish-unexpected.md") -Force
-            Write-Warning "AGENTS.md changed during the run. A copy was preserved before restoring the pre-run state."
-        }
+} elseif (Test-Path $AgentsPath) {
+    $currentHash = (Get-FileHash -LiteralPath $AgentsPath -Algorithm SHA256).Hash.ToLowerInvariant()
+    if ($currentHash -eq [string]$run.policy_sha256) {
         Remove-Item -LiteralPath $AgentsPath -Force
+    } else {
+        Copy-Item -LiteralPath $AgentsPath -Destination (Join-Path $RunRoot "AGENTS-at-finish-unexpected.md") -Force
+        Write-Warning "Legacy AGENTS.md changed during the run; preserved and left in place."
     }
 }
 
-Write-Host "JEM AGENTS.md pre-run state restored." -ForegroundColor Green
+Write-Host "Pre-run policy placement state restored where safe." -ForegroundColor Green
 
 if (-not (Test-Path $Observer)) {
     throw "Tokn release binary not found: $Observer"
@@ -141,28 +146,38 @@ if (-not $ResolvedProjectRoot.Equals($ProjectRoot, [System.StringComparison]::Or
     $ResolvedAgentsPath = Join-Path $ResolvedProjectRoot "AGENTS.md"
     if (Test-Path -LiteralPath $ResolvedAgentsPath) {
         $resolvedAgentsHash = (Get-FileHash -LiteralPath $ResolvedAgentsPath -Algorithm SHA256).Hash.ToLowerInvariant()
+        $sourcePlacement = $null
+        if ($run.policy_placements) {
+            $sourcePlacement = @($run.policy_placements) |
+                Where-Object { ([string]$_.path).Equals($AgentsPath, [System.StringComparison]::OrdinalIgnoreCase) } |
+                Select-Object -First 1
+        }
 
-        if ([bool]$run.original_agents_present) {
-            $experimentalAgentsPath = Join-Path $RunRoot "AGENTS-at-finish-experimental.md"
-            if (Test-Path -LiteralPath $experimentalAgentsPath) {
-                $experimentalHash = (Get-FileHash -LiteralPath $experimentalAgentsPath -Algorithm SHA256).Hash.ToLowerInvariant()
-                if ($resolvedAgentsHash -eq $experimentalHash) {
-                    Copy-Item -LiteralPath $run.original_agents_backup -Destination $ResolvedAgentsPath -Force
-                    Write-Host "Resolved workspace AGENTS.md restored from pre-run backup." -ForegroundColor Green
-                } else {
-                    Copy-Item -LiteralPath $ResolvedAgentsPath -Destination (Join-Path $RunRoot "AGENTS-at-resolved-workspace-unexpected.md") -Force
-                    Write-Warning "Resolved workspace AGENTS.md differs from the known Tokn overlay; it was preserved and not overwritten."
-                }
-            }
-        } else {
-            $policyHash = [string]$run.policy_sha256
-            if ($resolvedAgentsHash -eq $policyHash) {
+        if ($sourcePlacement -and $resolvedAgentsHash -eq [string]$sourcePlacement.installed_sha256) {
+            if ([bool]$sourcePlacement.had_original -and (Test-Path -LiteralPath ([string]$sourcePlacement.backup_path))) {
+                Copy-Item -LiteralPath ([string]$sourcePlacement.backup_path) -Destination $ResolvedAgentsPath -Force
+                Write-Host "Resolved workspace AGENTS.md restored from source placement backup." -ForegroundColor Green
+            } elseif (-not [bool]$sourcePlacement.had_original) {
                 Remove-Item -LiteralPath $ResolvedAgentsPath -Force
                 Write-Host "Temporary Tokn AGENTS.md removed from resolved workspace." -ForegroundColor Green
+            }
+        } elseif (-not $run.policy_placements -and [bool]$run.original_agents_present) {
+            $legacyExperimental = Join-Path $RunRoot "AGENTS-at-finish-experimental.md"
+            if ((Test-Path -LiteralPath $legacyExperimental) -and
+                $resolvedAgentsHash -eq (Get-FileHash -LiteralPath $legacyExperimental -Algorithm SHA256).Hash.ToLowerInvariant()) {
+                Copy-Item -LiteralPath $run.original_agents_backup -Destination $ResolvedAgentsPath -Force
+                Write-Host "Legacy resolved workspace AGENTS.md restored from pre-run backup." -ForegroundColor Green
             } else {
                 Copy-Item -LiteralPath $ResolvedAgentsPath -Destination (Join-Path $RunRoot "AGENTS-at-resolved-workspace-unexpected.md") -Force
-                Write-Warning "Resolved workspace AGENTS.md differs from the temporary policy; it was preserved and not removed."
+                Write-Warning "Legacy resolved workspace AGENTS.md could not be matched exactly; preserved and not overwritten."
             }
+        } elseif (-not $run.policy_placements -and -not [bool]$run.original_agents_present -and
+            $resolvedAgentsHash -eq [string]$run.policy_sha256) {
+            Remove-Item -LiteralPath $ResolvedAgentsPath -Force
+            Write-Host "Legacy temporary Tokn AGENTS.md removed from resolved workspace." -ForegroundColor Green
+        } else {
+            Copy-Item -LiteralPath $ResolvedAgentsPath -Destination (Join-Path $RunRoot "AGENTS-at-resolved-workspace-unexpected.md") -Force
+            Write-Warning "Resolved workspace AGENTS.md is not an exact known Tokn placement; it was preserved and not overwritten."
         }
     }
 }
@@ -232,15 +247,17 @@ $policyEvidenceArgs = @(
     "inspect-policy", $bundle,
     "--policy-id", "exp001-runtime-output-caps",
     "--marker", "Tokn Experiment 001 - Runtime Output Policy",
-    "--policy-path", $AgentsPath,
     "--cap", "file_read=$fileReadCap",
     "--cap", "search=$searchCap",
-    "--enforcement", "not-proven",
+    "--enforcement", "supported-unverified",
     "--output-json", $PolicyEvidenceJson
 )
-$ResolvedPolicyPath = Join-Path $ResolvedProjectRoot "AGENTS.md"
-if (-not $ResolvedPolicyPath.Equals($AgentsPath, [System.StringComparison]::OrdinalIgnoreCase)) {
-    $policyEvidenceArgs += @("--policy-path", $ResolvedPolicyPath)
+$policyEvidencePaths = $(if ($run.policy_placements) {
+    @($run.policy_placements) | ForEach-Object { [string]$_.path }
+} else { @($AgentsPath) })
+$policyEvidencePaths += (Join-Path $ResolvedProjectRoot "AGENTS.md")
+foreach ($path in ($policyEvidencePaths | Sort-Object -Unique)) {
+    $policyEvidenceArgs += @("--policy-path", $path)
 }
 $policyEvidenceExit = Save-CommandOutput -Path $PolicyEvidencePath -Command {
     & $Observer @policyEvidenceArgs

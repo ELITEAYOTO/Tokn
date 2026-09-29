@@ -14,7 +14,9 @@ $QualityTemplate = Join-Path $ExperimentRoot "QUALITY_AFTER_RUN.md"
 $ActivePath = Join-Path $ExperimentRoot "ACTIVE-RUN.json"
 $SnapshotScript = Join-Path $PSScriptRoot "snapshot-project.ps1"
 $InventoryScript = Join-Path $PSScriptRoot "inventory-workspaces.ps1"
+$PolicyPlacementScript = Join-Path $PSScriptRoot "policy-placement.ps1"
 $StartTrace = Join-Path $ToolRoot "scripts\trace\start-jem-trace.ps1"
+. $PolicyPlacementScript
 
 if (Test-Path $ActivePath) {
     Write-Host ""
@@ -91,20 +93,22 @@ $BeforeWorkspaceInventory = Join-Path $RunRoot "workspace-before.json"
 & $InventoryScript -WatchRoot $WorkspaceWatchRoot -OutputPath $BeforeWorkspaceInventory -MaxDepth $WorkspaceMaxDepth
 
 $AgentsPath = Join-Path $ProjectRoot "AGENTS.md"
-$OriginalAgentsPath = Join-Path $RunRoot "original-AGENTS.md"
-$HadOriginalAgents = Test-Path $AgentsPath
+$WorkspaceAgentsPath = Join-Path $WorkspaceWatchRoot "AGENTS.md"
+$PlacementTargets = @($AgentsPath, $WorkspaceAgentsPath) | Sort-Object -Unique
+$PolicyPlacements = @()
+$placementIndex = 0
 
-if ($HadOriginalAgents) {
-    Copy-Item -LiteralPath $AgentsPath -Destination $OriginalAgentsPath
-    $original = Get-Content -LiteralPath $AgentsPath -Raw
-    $policy = Get-Content -LiteralPath $PolicyPath -Raw
-    ($original.TrimEnd() + [Environment]::NewLine + [Environment]::NewLine +
-        "# Tokn Temporary Experiment Overlay" + [Environment]::NewLine +
-        $policy) |
-        Set-Content -LiteralPath $AgentsPath -Encoding UTF8
-} else {
-    Copy-Item -LiteralPath $PolicyPath -Destination $AgentsPath
+foreach ($target in $PlacementTargets) {
+    $backup = Join-Path $RunRoot ("original-policy-{0}-AGENTS.md" -f $placementIndex)
+    $PolicyPlacements += Install-ToknPolicyPlacement -TargetPath $target -PolicyPath $PolicyPath -BackupPath $backup
+    $placementIndex++
 }
+
+$ProjectPlacement = $PolicyPlacements |
+    Where-Object { $_.path.Equals($AgentsPath, [System.StringComparison]::OrdinalIgnoreCase) } |
+    Select-Object -First 1
+$HadOriginalAgents = [bool]$ProjectPlacement.had_original
+$OriginalAgentsPath = [string]$ProjectPlacement.backup_path
 
 $taskHash = (Get-FileHash -LiteralPath $TaskPath -Algorithm SHA256).Hash.ToLowerInvariant()
 $policyHash = (Get-FileHash -LiteralPath $PolicyPath -Algorithm SHA256).Hash.ToLowerInvariant()
@@ -130,13 +134,11 @@ try {
 }
 
 if ($traceExit -ne 0) {
-    if ($HadOriginalAgents) {
-        Copy-Item -LiteralPath $OriginalAgentsPath -Destination $AgentsPath -Force
-    } else {
-        Remove-Item -LiteralPath $AgentsPath -Force -ErrorAction SilentlyContinue
+    $restored = Restore-ToknPolicyPlacements -Placements $PolicyPlacements -PreserveDirectory $RunRoot -Prefix "start-failure-policy"
+    if ($restored) {
+        Remove-Item -LiteralPath $RunRoot -Recurse -Force -ErrorAction SilentlyContinue
     }
-    Remove-Item -LiteralPath $RunRoot -Recurse -Force -ErrorAction SilentlyContinue
-    throw "Trace launcher failed with exit code $traceExit. JEM AGENTS.md was restored."
+    throw "Trace launcher failed with exit code $traceExit. Tokn policy placements were restored where safe."
 }
 $TraceRoot = Get-ChildItem (Join-Path $V0Root "traces") -Directory |
     Where-Object { $_.Name -like "*-$label" } |
@@ -144,19 +146,14 @@ $TraceRoot = Get-ChildItem (Join-Path $V0Root "traces") -Directory |
     Select-Object -First 1 -ExpandProperty FullName
 
 if (-not $TraceRoot) {
-    if ($HadOriginalAgents) {
-        Copy-Item -LiteralPath $OriginalAgentsPath -Destination $AgentsPath -Force
-    } else {
-        Remove-Item -LiteralPath $AgentsPath -Force -ErrorAction SilentlyContinue
-    }
+    [void](Restore-ToknPolicyPlacements -Placements $PolicyPlacements -PreserveDirectory $RunRoot -Prefix "trace-missing-policy")
     throw "Could not locate the trace directory created for $label."
 }
 
 if ($DryRun) {
-    if ($HadOriginalAgents) {
-        Copy-Item -LiteralPath $OriginalAgentsPath -Destination $AgentsPath -Force
-    } else {
-        Remove-Item -LiteralPath $AgentsPath -Force -ErrorAction SilentlyContinue
+    $restored = Restore-ToknPolicyPlacements -Placements $PolicyPlacements -PreserveDirectory $RunRoot -Prefix "dryrun-policy"
+    if (-not $restored) {
+        throw "Dry-run could not safely restore every policy placement. Run folder kept: $RunRoot"
     }
     Remove-Item -LiteralPath $RunRoot -Recurse -Force -ErrorAction SilentlyContinue
     Remove-Item -LiteralPath $TraceRoot -Recurse -Force -ErrorAction SilentlyContinue
@@ -198,6 +195,7 @@ $run = [ordered]@{
     policy_marker = "Tokn Experiment 001 - Runtime Output Policy"
     policy_sha256 = $policyHash
     policy_placement_path = $AgentsPath
+    policy_placements = $PolicyPlacements
     before_snapshot = $BeforeSnapshot
     original_agents_present = $HadOriginalAgents
     original_agents_backup = $(if ($HadOriginalAgents) { $OriginalAgentsPath } else { $null })

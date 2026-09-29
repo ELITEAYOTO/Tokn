@@ -1,6 +1,6 @@
 # Tokn Observer - Etat du projet
 
-Derniere mise a jour : **2026-09-29 19:01 +02:00**
+Derniere mise a jour : **2026-09-29 21:23 +02:00**
 
 ## KPI principal
 
@@ -45,8 +45,12 @@ P6 en cours :
 - scanner instructions + lectures explicites AGENTS.md : PASS ;
 - `inspect-policy` texte/JSON : PASS ;
 - integration FINISH Experiment 001 : PASS ;
-- replay reel : hint PRESENT, instructions 0/4, repository reads 4/4 (5 lectures), observed FAIL 58 cibles / 17 violations, enforcement NOT_PROVEN ;
-- placement generique au vrai workspace Codex + recherche hook d'enforcement : RESTENT A FAIRE.
+- placement multi-racine PROJECT + workspace watch root avec restauration par hash : PASS ;
+- START/FINISH/RECOVER multi-placement + retrocompatibilite anciens runs : PASS ;
+- prototype `hook-pre-tool-use` + audit JSONL sans contenu de commande : PASS synthetique, NON ACTIVE ;
+- replay reel : hint PRESENT, instructions 0/4, repository reads 4/4 (5 lectures), observed FAIL 58 cibles / 17 violations ;
+- enforcement : SUPPORTED_UNVERIFIED, car `PreToolUse` est supporte mais l'exposition reelle de `max_output_tokens` au callback n'est pas encore prouvee ;
+- validation controlee d'un vrai callback + Code Mode : RESTE A FAIRE.
 
 ## Ce qui est valide aujourd'hui
 

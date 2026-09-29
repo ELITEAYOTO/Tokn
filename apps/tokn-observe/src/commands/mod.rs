@@ -5,6 +5,7 @@ mod common;
 mod compare;
 mod doctor;
 mod health;
+mod hook_pre_tool_use;
 mod import;
 mod inspect_policy;
 mod inspect_schema;
@@ -65,6 +66,9 @@ pub fn run(cli: Cli) -> anyhow::Result<()> {
         } => compare::run(&baseline, &candidate),
         Command::SimulateCaps { source, caps } => simulate_caps::run(&source, &caps),
         Command::CheckCaps { source, caps } => check_caps::run(&source, &caps),
+        Command::HookPreToolUse { caps, audit_jsonl } => {
+            hook_pre_tool_use::run(&caps, audit_jsonl.as_deref())
+        }
         Command::Report => report::run(),
         Command::DbPath => {
             println!("{}", common::db_path()?.display());

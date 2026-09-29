@@ -1,0 +1,19 @@
+{
+  "description": "Tokn P6 prototype. Example only; not installed automatically.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "^Bash$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "<TOKN_OBSERVER> hook-pre-tool-use --cap file_read=5000 --cap search=3000 --audit-jsonl <TOKN_AUDIT_JSONL>",
+            "commandWindows": "\"<TOKN_OBSERVER_EXE>\" hook-pre-tool-use --cap file_read=5000 --cap search=3000 --audit-jsonl \"<TOKN_AUDIT_JSONL>\"",
+            "timeout": 5,
+            "statusMessage": "Tokn checking output-cap policy"
+          }
+        ]
+      }
+    ]
+  }
+}

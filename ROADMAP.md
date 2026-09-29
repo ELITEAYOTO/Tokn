@@ -1,6 +1,6 @@
 # Tokn Roadmap
 
-Derniere mise a jour : **2026-09-29 19:01 +02:00**
+Derniere mise a jour : **2026-09-29 21:23 +02:00**
 
 ## Vision
 
@@ -85,12 +85,17 @@ Deja implemente :
 - aggregation de la preuve sur toutes les sessions du RunGroup ;
 - commande `inspect-policy` avec sortie texte + JSON ;
 - integration FINISH Experiment 001 ;
-- replay reel : hint PRESENT, 0 instruction threads, 4 repository-read threads, observed FAIL 58/17, enforcement NOT_PROVEN.
+- placement/restauration multi-racine par hash sur PROJECT + workspace watch root ;
+- START/FINISH/RECOVER retrocompatibles avec les anciens runs ;
+- prototype `PreToolUse` privacy-first, non installe, avec audit JSONL compact ;
+- replay reel : hint PRESENT, 0 instruction threads, 4 repository-read threads, observed FAIL 58/17 ;
+- enforcement classe SUPPORTED_UNVERIFIED : hook runtime supporte, exposition de `max_output_tokens` au callback pas encore prouvee.
 
 A terminer :
-- placement/restauration generiques sur chaque racine policy touchee ;
-- preuve du vrai workspace Codex avant execution ;
-- recherche/documentation d'un hook runtime supporte pour l'enforcement.
+- capturer un vrai callback `PreToolUse` controle et verifier son schema exact ;
+- prouver que `max_output_tokens` est visible/rewriteable ou choisir un autre point d'enforcement ;
+- valider Code Mode avec un vrai callback avant toute activation automatique ;
+- ne passer a SUPPORTED_NOT_ACTIVE / ENFORCED qu'avec preuve runtime correspondante.
 
 ### P7 - Experiment validity reducer
 Statut : TODO

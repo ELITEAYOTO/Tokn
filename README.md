@@ -64,7 +64,7 @@ docs/experiments/001-POSTMORTEM.md
 
 Continuer **Tokn V0.1** a partir de **P6 - Policy placement and evidence**.
 
-P0-P5 sont maintenant implementes et valides offline/replay. P6 dispose aussi d'un premier pipeline `inspect-policy` texte/JSON qui separe hint, observation et enforcement.
+P0-P5 sont maintenant implementes et valides offline/replay. P6 dispose du pipeline `inspect-policy` texte/JSON, d'un cycle multi-placement/restauration par hash et d'un prototype PreToolUse non active. Le hook runtime existe, mais l'exposition de `max_output_tokens` au vrai callback reste a prouver avant de parler d'enforcement.
 
 P0-P5 acquis :
 - fixtures sanitisees ;
