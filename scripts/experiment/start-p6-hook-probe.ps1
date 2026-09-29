@@ -121,14 +121,21 @@ if ($DryRun) {
     exit 0
 }
 
-$app = Get-StartApps |
-    Where-Object { $_.AppID -eq "OpenAI.Codex_2p2nqsd0c76g0!App" } |
-    Select-Object -First 1
-if (-not $app) {
-    throw "Codex Windows AppID not found. Run RECOVER-P6-HOOK-PROBE.cmd to restore the hook file."
+$configPath = Join-Path $CodexHome "config.toml"
+$codexCli = $null
+if (Test-Path -LiteralPath $configPath) {
+    $configText = Get-Content -LiteralPath $configPath -Raw
+    $match = [regex]::Match($configText, "(?m)^CODEX_CLI_PATH\s*=\s*'([^']+)'")
+    if ($match.Success) {
+        $codexCli = $match.Groups[1].Value
+    }
+}
+if (-not $codexCli -or -not (Test-Path -LiteralPath $codexCli)) {
+    throw "Codex CLI path not found in ~/.codex/config.toml. Run RECOVER-P6-HOOK-PROBE.cmd to restore the hook file."
 }
 
-Start-Process "explorer.exe" "shell:AppsFolder\$($app.AppID)"
+$cliCommand = '"' + $codexCli + '"'
+Start-Process "cmd.exe" -WorkingDirectory $Workspace -ArgumentList "/k", $cliCommand
 
 Write-Host ""
 Write-Host "TOKN P6 HOOK PROBE READY" -ForegroundColor Green
@@ -136,9 +143,11 @@ Write-Host "Workspace: $Workspace"
 Write-Host "Audit:     $AuditPath"
 Write-Host ""
 Write-Host "The probe prompt is already in your clipboard." -ForegroundColor Cyan
-Write-Host "IMPORTANT - trust the hook before sending the Astra prompt:" -ForegroundColor Yellow
-Write-Host "1. In Codex, open /hooks and trust the temporary Tokn hook."
-Write-Host "2. Close Codex completely, then reopen Codex normally so SessionStart can prove activation."
-Write-Host "3. Open the probe workspace and create ONE new Astra chat."
-Write-Host "4. Paste the clipboard prompt, send it, and wait for completion."
-Write-Host "5. Close Codex completely and run FINISH-P6-HOOK-PROBE.cmd."
+Write-Host "A Codex CLI window has been opened for hook trust." -ForegroundColor Yellow
+Write-Host "1. In that CLI window, type: /hooks"
+Write-Host "2. Review and trust the temporary Tokn hook."
+Write-Host "3. Exit/close the Codex CLI window."
+Write-Host "4. Open Codex Desktop normally."
+Write-Host "5. Open the probe workspace and create ONE new Astra chat."
+Write-Host "6. Paste the clipboard prompt, send it, and wait for completion."
+Write-Host "7. Close Codex completely and run FINISH-P6-HOOK-PROBE.cmd."
