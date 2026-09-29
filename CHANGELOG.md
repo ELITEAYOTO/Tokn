@@ -451,3 +451,16 @@ P6 remains IN PROGRESS until one controlled real PreToolUse callback proves the 
 - synthetic FINISH test: PASS ;
 - probe START dry-run and cleanup: PASS ;
 - no real Codex callback captured yet.
+
+## 2026-09-29 22:00 +02:00 - First real P6 hook probe diagnosis
+
+- first real probe finished with 0 callbacks ;
+- Astra run itself was successfully recovered from standard session rollouts ;
+- root + subagent used Code Mode custom tool `exec` and nested `tools.exec_command` ;
+- nested read calls explicitly requested `max_output_tokens: 5000` ;
+- runtime execution events report source `unified_exec_startup` ;
+- current OpenAI hook docs confirm unified exec / exec_command is covered by PreToolUse and matches `Bash` ;
+- therefore the original matcher was correct ;
+- most likely cause of 0 callbacks: temporary non-managed hook was not reviewed/trusted ;
+- probe now also records SessionStart so activation can be distinguished from tool coverage ;
+- START instructions now require explicit hook trust before the test turn.

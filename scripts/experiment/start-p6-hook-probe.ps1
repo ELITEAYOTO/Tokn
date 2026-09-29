@@ -52,6 +52,20 @@ $hookCommand = '"' + $observerEscaped + '" hook-probe-pre-tool-use --audit-jsonl
 $hookConfig = [ordered]@{
     description = "Temporary Tokn P6 PreToolUse schema probe. Observation only."
     hooks = [ordered]@{
+        SessionStart = @(
+            [ordered]@{
+                matcher = "^startup$"
+                hooks = @(
+                    [ordered]@{
+                        type = "command"
+                        command = $hookCommand
+                        commandWindows = $hookCommand
+                        timeout = 5
+                        statusMessage = "Tokn P6 checking hook activation"
+                    }
+                )
+            }
+        )
         PreToolUse = @(
             [ordered]@{
                 matcher = "^Bash$"
@@ -122,6 +136,9 @@ Write-Host "Workspace: $Workspace"
 Write-Host "Audit:     $AuditPath"
 Write-Host ""
 Write-Host "The probe prompt is already in your clipboard." -ForegroundColor Cyan
-Write-Host "If Codex asks you to review/trust this new hook, approve the Tokn hook."
-Write-Host "Then open the probe workspace, create ONE new Astra chat, paste, send, and wait for completion."
-Write-Host "Finally close Codex completely and run FINISH-P6-HOOK-PROBE.cmd."
+Write-Host "IMPORTANT - trust the hook before sending the Astra prompt:" -ForegroundColor Yellow
+Write-Host "1. In Codex, open /hooks and trust the temporary Tokn hook."
+Write-Host "2. Close Codex completely, then reopen Codex normally so SessionStart can prove activation."
+Write-Host "3. Open the probe workspace and create ONE new Astra chat."
+Write-Host "4. Paste the clipboard prompt, send it, and wait for completion."
+Write-Host "5. Close Codex completely and run FINISH-P6-HOOK-PROBE.cmd."

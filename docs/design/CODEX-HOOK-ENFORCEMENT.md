@@ -102,3 +102,18 @@ Ordre :
 Cette separation preserve la mesure :
 le mecanisme d'enforcement est versionne et auditable,
 mais il n'est pas injecte silencieusement dans les sessions normales.
+
+## First real probe result - 2026-09-29
+
+The first Desktop/Astra probe captured zero hook callbacks.
+The associated rollouts prove Astra did execute Code Mode custom tool `exec` with nested `tools.exec_command` calls, including `max_output_tokens: 5000` on read operations. Runtime execution events identify the path as `unified_exec_startup`.
+
+Current OpenAI documentation explicitly states that unified exec / `exec_command` is covered by PreToolUse and matches canonical tool name `Bash`.
+Therefore the `^Bash$` matcher is not considered the failure.
+
+The remaining likely cause is hook trust: non-managed hooks are skipped until the exact hook definition hash is reviewed and trusted. The next probe adds a SessionStart witness and requires explicit trust before the Astra turn.
+
+Interpretation for the next run:
+- SessionStart = 0 => hook was not active/trusted ;
+- SessionStart > 0 and PreToolUse = 0 => investigate an unexpected runtime coverage issue ;
+- PreToolUse > 0 => inspect the real `tool_input` keys and determine whether `max_output_tokens` survives into the hook payload.

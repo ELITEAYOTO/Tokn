@@ -10,10 +10,16 @@ pub fn run(audit_jsonl: &Path) -> anyhow::Result<()> {
     io::stdin().read_to_string(&mut raw)?;
     let input: Value = serde_json::from_str(&raw)?;
 
-    if input.get("hook_event_name").and_then(Value::as_str) != Some("PreToolUse") {
+    let hook_event_name = input
+        .get("hook_event_name")
+        .and_then(Value::as_str)
+        .unwrap_or("UNKNOWN");
+    if !matches!(hook_event_name, "SessionStart" | "PreToolUse") {
         return Ok(());
     }
-    if input.get("tool_name").and_then(Value::as_str) != Some("Bash") {
+    if hook_event_name == "PreToolUse"
+        && input.get("tool_name").and_then(Value::as_str) != Some("Bash")
+    {
         return Ok(());
     }
 
@@ -30,7 +36,7 @@ pub fn run(audit_jsonl: &Path) -> anyhow::Result<()> {
         .and_then(parse_u64_value);
 
     let entry = json!({
-        "hook_event_name": "PreToolUse",
+        "hook_event_name": hook_event_name,
         "session_id": input.get("session_id").and_then(Value::as_str),
         "turn_id": input.get("turn_id").and_then(Value::as_str),
         "tool_name": input.get("tool_name").and_then(Value::as_str),

@@ -56,6 +56,8 @@ if (Test-Path -LiteralPath $AuditPath) {
 
 $allKeys = @($entries | ForEach-Object { @($_.tool_input_keys) } | ForEach-Object { $_ } | Sort-Object -Unique)
 $withMax = @($entries | Where-Object { [bool]$_.max_output_tokens_present }).Count
+$sessionStartCallbacks = @($entries | Where-Object { $_.hook_event_name -eq "SessionStart" }).Count
+$preToolCallbacks = @($entries | Where-Object { $_.hook_event_name -eq "PreToolUse" }).Count
 $sessions = @($entries | ForEach-Object { $_.session_id } | Where-Object { $_ } | Sort-Object -Unique)
 $categories = @(
     $entries |
@@ -72,6 +74,8 @@ $summary = [ordered]@{
     schema_version = 1
     finished_at = (Get-Date).ToString("o")
     callbacks = $entries.Count
+    session_start_callbacks = $sessionStartCallbacks
+    pre_tool_use_callbacks = $preToolCallbacks
     sessions = $sessions
     tool_input_keys = $allKeys
     max_output_tokens_present_callbacks = $withMax
@@ -87,10 +91,14 @@ Write-Host ""
 Write-Host "TOKN P6 HOOK PROBE FINISHED" -ForegroundColor Green
 Write-Host "Temporary hooks.json restored/removed." -ForegroundColor Green
 Write-Host "Callbacks captured: $($entries.Count)"
+Write-Host "SessionStart callbacks: $sessionStartCallbacks"
+Write-Host "PreToolUse/Bash callbacks: $preToolCallbacks"
 Write-Host "tool_input keys: $($allKeys -join ', ')"
 Write-Host "max_output_tokens observed in callback: $($withMax -gt 0)"
 Write-Host "Summary: $SummaryPath"
 Write-Host "Audit:   $AuditPath"
 if ($entries.Count -eq 0) {
-    Write-Warning "No PreToolUse/Bash callback was captured. The hook may not have been trusted, or Astra used another tool path."
+    Write-Warning "No hook callback was captured. The temporary hook was most likely not trusted/activated."
+} elseif ($sessionStartCallbacks -gt 0 -and $preToolCallbacks -eq 0) {
+    Write-Warning "Hook activation is proven by SessionStart, but no PreToolUse/Bash callback was captured."
 }
