@@ -67,7 +67,8 @@ Capture after session-rollout recovery: usable.
 
 Task: INCOMPLETE_USAGE_LIMIT.
 
-Policy: INCOMPLETE_EVIDENCE / not enforced.
+Policy observation: FAIL on recovered session evidence (58 targets / 17 violations).
+Policy enforcement: SUPPORTED_INSUFFICIENT_INPUT for the historical max_output_tokens rule.
 
 Workspace: original harness target invalid; post-mortem recovery successful.
 

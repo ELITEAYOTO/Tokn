@@ -1,102 +1,117 @@
-# Maintenance du projet Tokn
+# Tokn Documentation and Maintenance
 
-Derniere mise a jour : 2026-09-29 19:01 +02:00
+Derniere mise a jour : **2026-09-29**
 
 ## Objectif
 
-Une nouvelle session de developpement doit pouvoir reprendre Tokn
-sans dependre de la memoire d'une conversation.
+Une nouvelle session doit pouvoir reprendre Tokn sans relire les chats
+et sans reconstruire l'histoire du projet.
+
+## Hierarchie documentaire
+
+`STATUS.md`
+Etat courant uniquement. Pas de plan detaille.
+
+`ROADMAP.md`
+Ordre des milestones uniquement. Pas de journal historique.
+
+`docs/plans/*`
+Execution concrete d'une release ou phase.
+
+`docs/design/*`
+Invariants et architecture. Pas de statut quotidien.
+
+`docs/decisions/*`
+Decisions durables et consequences.
+
+`docs/research/*`
+Recherche, sources, hypotheses et inconnues.
+Une recherche n'est pas automatiquement une decision.
+
+`docs/experiments/*`
+Protocoles et resultats d'experiences.
+
+`CHANGELOG.md`
+Historique date des modifications.
 
 ## Sources de verite
 
-Ordre de lecture :
-1. docs/INDEX.md
-2. STATUS.md
-3. ROADMAP.md
-4. docs/experiments/001-POSTMORTEM.md
-5. docs/plans/V0.1-IMPLEMENTATION-PLAN.md
-6. docs/plans/V0.1-TEST-MATRIX.md
+Point d'entree : `docs/INDEX.md`.
 
-## Documents obligatoires a maintenir
+En cas de conflit :
+1. evidence runtime/golden ;
+2. ADR accepte ;
+3. STATUS pour l'etat ;
+4. ROADMAP pour l'ordre ;
+5. plan de release ;
+6. design ;
+7. research ;
+8. ancien runbook/changelog.
 
-- README.md : usage et priorite actuelle ;
-- STATUS.md : etat reel valide/manquant ;
-- ROADMAP.md : ordre des milestones ;
-- CHANGELOG.md : modifications datees ;
-- docs/INDEX.md : carte documentaire ;
-- docs/architecture.md : architecture implemente/cible ;
-- docs/token-accounting.md : invariants ;
-- docs/diagnostic-trace.md : evidence diagnostic ;
-- docs/attribution-engine.md : attribution ;
-- docs/privacy.md : confidentialite ;
-- docs/compatibility.md : compatibilite Codex.
+Ne jamais laisser un vieux runbook redefinir l'etat courant.
 
-Pour V0.1 maintenir aussi :
-- docs/design/* ;
-- docs/plans/* ;
-- docs/experiments/* ;
-- docs/decisions/*.
+## Discipline apres changement significatif
 
-## Discipline apres modification significative
-
+Code :
 1. formatter ;
-2. Clippy warnings interdits ;
+2. Clippy -D warnings ;
 3. tests workspace ;
-4. fixtures/golden replay si concerne ;
-5. build release si surface CLI change ;
-6. package privacy check ;
-7. CHANGELOG ;
-8. STATUS ;
-9. ROADMAP si phase change ;
-10. doc technique concernee.
+4. golden/fixtures si concernes ;
+5. release build si surface CLI ;
+6. privacy/package check si concernes.
 
-Une fonctionnalite n'est pas DONE parce qu'elle compile.
+Docs :
+1. mettre a jour le document technique directement concerne ;
+2. STATUS si l'etat reel change ;
+3. ROADMAP seulement si l'ordre/statut d'une phase change ;
+4. CHANGELOG pour la trace ;
+5. INDEX si un document durable est ajoute/supprime ;
+6. ADR si une decision produit/architecture durable change.
 
-## Garde-fous de maintenabilite
-
-Architecture :
-- conserver tokn-domain independant de Codex, SQLite et CLI ;
-- ne pas mettre de conclusions d'optimisation dans les adapters ;
-- centraliser une logique partagee avant sa troisieme duplication ;
-- garder les experiment runners comme orchestration, pas comme couche metier permanente.
-
-Seuils de revue :
-- module Rust > ~350 lignes de production : revue des responsabilites ;
-- script PowerShell > ~300 lignes : revue ; > ~400 lignes : extraire avant nouvelle croissance ;
-- tests colocalises autorises si le module reste coherent ;
-- taille totale d'un fichier seule != raison suffisante pour refactorer.
-
-Robustesse :
-- nouveaux unwrap/expect/panic en production seulement si invariant explicite ;
-- toute nouvelle abstraction doit supprimer une duplication reelle ou isoler une responsabilite durable ;
-- pas de micro-crates sans frontiere architecturale claire.
-
-Audit courant :
-docs/MAINTAINABILITY-AUDIT-2026-09-29.md
+Eviter de recopier le meme paragraphe dans cinq documents.
 
 ## Regles de preuve
 
 - UNKNOWN reste UNKNOWN ;
-- NO_EVIDENCE n'est jamais PASS ;
-- source health avant confiance dans les metriques ;
-- parent seul n'est pas le run complet si subagents existent ;
-- terminal status accompagne toujours les tokens ;
-- diagnostic trace partiel declenche fallback ;
-- evidence originale jamais modifiee.
+- NO_EVIDENCE != PASS ;
+- source health avant confiance ;
+- parent + descendants = RunGroup ;
+- terminal status accompagne les tokens ;
+- diagnostic PARTIAL declenche fallback ;
+- evidence originale jamais modifiee ;
+- OBSERVED / DERIVED / INFERRED / UNKNOWN restent distincts ;
+- aucune economie causale sans validity suffisante.
 
-## Regles d'experimentation
+## Regles d'optimisation
 
-Avant tout A/B :
-- task capturee ;
-- workspace de depart connu ;
-- output workspace resolu ;
-- runtime/model versions enregistres ;
-- policy level connu ;
-- quality gate correct ;
-- terminal status connu ;
-- experiment validity calculee.
+KPI :
+travail utile + qualite par token.
 
-Aucune economie n'est declaree si le verdict n'autorise pas une comparaison causale.
+Ne jamais declarer une optimisation uniquement parce que :
+- le run a moins de tokens ;
+- la sortie est plus courte ;
+- le nombre de sous-agents baisse ;
+- le cache ratio monte ;
+- la latence baisse.
+
+Toute intervention sur contexte/memoire/compaction doit definir
+un quality gate avant de comparer les tokens.
+
+Decision :
+`decisions/ADR-003-QUALITY-PRESERVING-EFFICIENCY.md`.
+
+## Maintenabilite code
+
+- tokn-domain reste independant de Codex/SQLite/CLI ;
+- adapters ne produisent pas de conclusions d'optimisation ;
+- partager une logique avant sa troisieme duplication ;
+- experiment runners = orchestration, pas couche metier ;
+- module Rust > ~350 lignes : revue responsabilites ;
+- PowerShell > ~300 lignes : revue ; > ~400 : extraction avant croissance ;
+- pas de micro-crates sans frontiere durable.
+
+Audit :
+`MAINTAINABILITY-AUDIT-2026-09-29.md`.
 
 ## Confidentialite
 
@@ -105,30 +120,18 @@ Par defaut :
 - pas de secrets sandbox ;
 - pas de prompt complet en SQLite ;
 - pas de sortie terminal brute en SQLite ;
-- pas d'appel reseau ;
-- runtime Tokn sous %LOCALAPPDATA%\Tokn\Observer.
+- pas d'appel reseau depuis Tokn Observer ;
+- fixtures reelles sanitisees avant commit.
 
-Les fixtures V0.1 issues de vrais rollouts doivent etre sanitisees
-avant d'entrer dans le repository.
+## Reprise
 
-## Reprise de developpement
+Etat :
+**P0-P6 DONE ; P7 NEXT.**
 
-Etat actuel :
-- V0.1 P0-P5 : DONE ;
-- prochaine action officielle : **V0.1 P6 - Policy placement and evidence**.
+Lire :
+`INDEX.md` -> `../STATUS.md` -> `../ROADMAP.md` ->
+`plans/V0.1-IMPLEMENTATION-PLAN.md` -> `plans/NEXT-SESSION-CHECKLIST.md`.
 
-Ne pas recommencer P0-P5 sauf regression.
-Ne pas commencer par Experiment 002.
-
-Points de reprise importants :
-- diagnostic PARTIAL doit fallback vers sessions ;
-- session discovery couvre sessions + archived_sessions ;
-- fallback historique utilise session_meta.timestamp avant mtime ;
-- RunGroup inclut parent + descendants ;
-- NO_EVIDENCE n'est jamais PASS ;
-- workspace resolver est fail-closed et doit preceder quality gate ;
-- session evidence doit venir du RunGroup exact, pas d'une fenetre `LastWriteTime` ;
-- une policy experimentale copiee dans un nouveau workspace ne doit etre retiree automatiquement que si son identite est prouvee.
-
-Checklist :
-docs/plans/NEXT-SESSION-CHECKLIST.md
+Ne pas reprendre P6 sauf regression ou besoin produit nouveau.
+Ne pas lancer Experiment 002 avant P9.
+Ne pas commencer Context Compiler/Project Memory avant V0.1 et l'Analyzer observation-only.

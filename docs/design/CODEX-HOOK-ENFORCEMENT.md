@@ -1,6 +1,11 @@
 # Codex Hook Enforcement - Tokn P6
 
+Status: **CLOSED RESEARCH / COMPATIBILITY REFERENCE**
 Derniere mise a jour : 2026-09-29
+
+Ce document conserve la conclusion technique P6.
+Il ne definit plus la strategie principale d'optimisation Tokn.
+Voir `../decisions/ADR-003-QUALITY-PRESERVING-EFFICIENCY.md`.
 
 ## Decision
 
@@ -127,4 +132,5 @@ Therefore:
 - nested Code Mode mediation is proven by lifecycle logs ;
 - cap visibility is disproven for this PreToolUse contract ;
 - the Tokn adapter's zero-row bug remains diagnostic debt, not evidence that hooks were inactive ;
-- hard cap enforcement must use another supported mediation point or a future runtime contract.
+- hard cap enforcement would require another supported mediation point or a future runtime contract ;
+- Tokn ne recherche pas ce point en priorite : les output caps restent diagnostic-only sauf nouveau besoin produit prouve.

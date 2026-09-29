@@ -1,79 +1,98 @@
 # Tokn V0.1 - Next Session Checklist
 
-Derniere mise a jour : 2026-09-29 19:01 +02:00
+Derniere mise a jour : **2026-09-29**
 
-## But
+## Etat de depart
 
-Demarrer directement le developpement V0.1 sans refaire l'enquete Experiment 001.
+P0-P6 : DONE
+P7 : NEXT
+P8-P9 : TODO
+Experiment 002 : BLOCKED
 
-## Avant de coder
+Workspace :
+`E:\Tokn\V0-CodexTkn-Consume\tool`
 
-Lire dans cet ordre :
-1. ../INDEX.md
-2. ../../STATUS.md
-3. ../../ROADMAP.md
-4. ../experiments/001-POSTMORTEM.md
-5. V0.1-IMPLEMENTATION-PLAN.md
-6. V0.1-TEST-MATRIX.md
+## Lecture minimale
 
-Verifier :
-- workspace : E:\Tokn\V0-CodexTkn-Consume\tool
-- branche/worktree attendu si Git est ajoute plus tard ;
-- aucun run experimental actif ;
-- aucune trace source n'est modifiee.
+1. `../../STATUS.md`
+2. `../../ROADMAP.md`
+3. `V0.1-IMPLEMENTATION-PLAN.md`
+4. `V0.1-TEST-MATRIX.md`
+5. `../design/EXPERIMENT-VALIDITY.md`
 
-## Premiere action de code
+Ne pas refaire l'enquete P6.
 
-Commencer par **P6 - Policy placement and evidence**.
+## Premiere action
 
-P0-P5 sont deja implementes et valides. Ne pas les refaire sauf regression.
+Implementer **P7 - Experiment validity reducer**.
 
-Ne pas commencer par :
-- Experiment 002 ;
-- RAG ;
-- embeddings ;
-- GUI ;
-- policy enforcement ;
-- optimisation multi-agent.
+Le reducer doit consommer :
+- source health ;
+- RunGroup coverage ;
+- terminal status ;
+- workspace resolution ;
+- policy evidence ;
+- runtime/model/task comparability ;
+- quality gate.
 
-## P6 sequence
+## P7 acceptance
 
-1. Identifier le workspace Codex reel utilise au debut du run.
-2. Definir ou un policy_hint peut etre place sans ambiguite.
-3. Preserver/restaurer chaque AGENTS.md touche independamment.
-4. Capturer si la policy apparait dans les instructions/session evidence.
-5. Capturer si le fichier de policy est explicitement lu.
-6. Separer policy_hint, policy_observed et policy_enforced.
-7. Prober un hook runtime supporte pour enforcement des caps ; sinon documenter hard enforcement = unavailable.
+Experiment 001 doit produire automatiquement :
+`INSTRUMENTATION_ONLY`.
 
-## P6 gate
+Une comparaison non causale doit :
+- conserver les metriques descriptives ;
+- afficher le verdict ;
+- interdire tout wording de winner/savings causal.
 
-Avant P7 :
-- cargo fmt --check ;
-- clippy -D warnings ;
-- cargo test workspace ;
-- aucune policy soft ne doit etre declaree enforcee ;
-- policy_hint / policy_observed / policy_enforced doivent etre distincts ;
-- P0-P5 golden replay doit rester PASS.
+Tests obligatoires :
+- valid causal fixture ;
+- descriptive-only fixture ;
+- incomplete task ;
+- invalid capture ;
+- Experiment 001 golden.
 
-## Ensuite
+## Golden facts a conserver
 
-P7 experiment validity reducer.
-
-Golden facts a conserver :
 - 4 sessions ;
 - 80 usage records ;
 - logical total 5,311,758 ;
 - uncached 226,025 ;
 - terminal INCOMPLETE_USAGE_LIMIT ;
 - diagnostic PARTIAL ;
-- cap policy Experiment 001 = FAIL, jamais PASS ;
-- workspace resolver = B07-C_WORKING\PROJECT ;
-- RunGroup JSON = 1 parent + 3 sous-agents, source_path exacts ;
-- START dry-run + cleanup = PASS ;
-- release build courant = PASS.
+- policy observed FAIL 58/17 ;
+- enforcement SUPPORTED_INSUFFICIENT_INPUT ;
+- workspace B07-C_WORKING\PROJECT ;
+- diff 13/4/0 ;
+- verify:local PASS ;
+- 1 parent + 3 descendants.
 
-## Regle
+## Apres P7
 
-Aucun nouveau run Astra n'est necessaire avant la fin de P0-P9.
-Tout V0.1 doit d'abord etre valide sur preuves existantes et fixtures.
+P8 :
+runner self-contained, aucune reparation forensique manuelle.
+
+P9 :
+fmt + clippy + tests + release + privacy + golden replay.
+
+Puis seulement :
+Experiment 002 instrumentation validation.
+
+## Non-goals
+
+Ne pas commencer :
+- hard output caps ;
+- command rewriting ;
+- context truncation ;
+- RAG/embeddings ;
+- Project Memory active ;
+- Context Compiler ;
+- plugin d'optimisation ;
+- GUI.
+
+Ces sujets restent apres V0.1 et doivent venir d'un finding mesure.
+
+## Regle quota
+
+P7-P9 sont offline/replay.
+Aucun quota Astra n'est requis.

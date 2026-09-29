@@ -1,5 +1,8 @@
 # Tokn Experiment 001 - Real Astra Runbook
 
+Status: **HISTORICAL RUNBOOK - DO NOT USE FOR THE NEXT RUN**
+Current execution plan: `../plans/V0.1-IMPLEMENTATION-PLAN.md`.
+
 Last updated: 2026-09-27
 
 ## Objective

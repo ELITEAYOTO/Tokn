@@ -1,5 +1,9 @@
 # Experiment 001 - Runtime output caps
 
+Status: **HISTORICAL EXPERIMENT DESIGN - NOT CURRENT PRODUCT STRATEGY**
+Superseded for product direction by `../decisions/ADR-003-QUALITY-PRESERVING-EFFICIENCY.md`.
+The measurements remain valid historical evidence.
+
 Derniere mise a jour : 2026-09-27 17:49 +02:00
 
 ## But

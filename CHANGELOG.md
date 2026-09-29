@@ -478,3 +478,18 @@ P6 remains IN PROGRESS until one controlled real PreToolUse callback proves the 
 - probe now logs event/top-level metadata before event-specific assumptions ;
 - FINISH no longer infers inactive/untrusted hooks from an empty Tokn audit alone ;
 - temporary hook/debug artifacts cleaned ; no ~/.codex/hooks.json or active P6 probe remains.
+
+## 2026-09-29 - Documentation reset and context-efficiency strategy
+
+- integrated the deep-research findings as a reviewed research document rather than an unverified source of truth ;
+- accepted ADR-003: optimize context efficiency, not model capability ;
+- hard output caps moved from product strategy to historical/diagnostic evidence ;
+- P6 closed with the documented SUPPORTED_INSUFFICIENT_INPUT runtime limitation ;
+- live zero-row hook audit retained as non-blocking diagnostic debt ;
+- P7 restored as the single next implementation phase: Experiment Validity Reducer ;
+- P8 remains the self-contained V0.1 runner and P9 the golden/release gate ;
+- added Context Efficiency Strategy: Context Ledger, cache analysis, duplication analysis, parent/subagent graph, tool evidence footprint and Project Memory candidates ;
+- Experiment 001 cached/input ratio documented as ~95.72% with explicit limits on interpretation ;
+- README / STATUS / ROADMAP / docs INDEX / maintenance / V0.1 plan / test matrix / next-session checklist synchronized ;
+- historical Experiment 001 cap/runbook/baseline documents explicitly labeled historical ;
+- documentation governance now separates status, roadmap, plans, design, decisions, research and experiments.

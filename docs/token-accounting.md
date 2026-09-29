@@ -1,6 +1,6 @@
 # Token Accounting
 
-Derniere mise a jour : 2026-09-27
+Derniere mise a jour : 2026-09-29
 
 ## Invariants de base
 
@@ -18,6 +18,13 @@ ordinary_uncached = input - cached.
 
 Si cache-write existe, sa semantique est conservee separement
 et n'est jamais additionnee comme un nouveau cout logique.
+
+cached/input est un indicateur de reutilisation reportee, pas un score de qualite.
+Tokn distingue :
+- tokens logiques ;
+- cached vs uncached ;
+- cout API quand un tarif applicable est explicitement choisi ;
+- quota produit Codex/ChatGPT, qui ne doit pas etre deduit du pricing API.
 
 ## Deduplication
 

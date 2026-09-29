@@ -79,6 +79,26 @@ L'Analyzer doit separer au minimum :
 
 L'attribution ne doit pas inventer de causalite.
 Chaque resultat doit porter un niveau de preuve : OBSERVED / DERIVED / INFERRED / UNKNOWN.
+
+## Context efficiency
+
+La premiere direction d'optimisation de l'Analyzer est la qualite du contexte, pas la reduction de la capacite du modele.
+
+Composants cibles :
+- Context Ledger : cached/uncached/input/output/reasoning par agent et tour ;
+- Cache Efficiency Analyzer : evolution du ratio et ruptures observables ;
+- Context Duplication Analyzer : relectures, searches et evidence partagee ;
+- Parent/Subagent Context Graph : cout partage vs contribution unique ;
+- Tool Evidence Footprint : volume/repetition des preuves outils ;
+- Project Memory Candidate Detector : faits stables rediscovered entre runs.
+
+Le ratio de cache seul n'est jamais un score de qualite.
+Une duplication n'est pas automatiquement inutile.
+Un finding doit relier le cout observe au travail produit avant de proposer une experience.
+
+Strategie canonique :
+`../strategy/CONTEXT-EFFICIENCY-STRATEGY.md`.
+
 ## Timeline et phases de travail
 
 Un run doit pouvoir etre segmente en phases heuristiques :

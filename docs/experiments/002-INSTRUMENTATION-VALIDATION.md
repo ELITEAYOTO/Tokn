@@ -1,7 +1,7 @@
 # Experiment 002 - Instrumentation Validation
 
-Status: PLANNED / BLOCKED BY V0.1 P0-P9
-Date: 2026-09-27
+Status: PLANNED / BLOCKED BY V0.1 P7-P9
+Updated: 2026-09-29
 
 ## Purpose
 
@@ -13,7 +13,7 @@ It validates:
 - session/diagnostic fallback;
 - parent/subagent grouping;
 - terminal status;
-- tool/cap evidence;
+- tool/policy evidence;
 - dynamic workspace tracking;
 - correct quality-gate target;
 - experiment-validity reducer.
@@ -56,10 +56,10 @@ Workspace:
 - correct before/after diff;
 - quality gate runs on the actual output.
 
-Policy:
-- exposure evidence recorded;
-- cap observations classified;
-- zero observations cannot pass.
+Policy/evidence:
+- policy level accurately reported when a policy is present;
+- zero observations cannot pass;
+- no hard-cap enforcement is required for this instrumentation run.
 
 Experiment:
 - machine-readable validity verdict generated.
@@ -79,9 +79,11 @@ Repeat Experiment 002 after fixing Tokn if:
 If instrumentation is valid, prepare Experiment 003 as the first controlled optimization A/B.
 
 Experiment 003 requirements:
+- choose one reproducible finding from Historical Analyzer / Context Efficiency analysis;
 - frozen identical starting workspace;
 - identical task;
 - same Codex runtime/model/config;
-- control run without optimization;
-- candidate run with exactly one optimization variable;
-- quality acceptance before token comparison.
+- control run without the candidate intervention;
+- candidate run with exactly one primary optimization variable;
+- quality acceptance before token comparison;
+- no default assumption that the variable is an output cap.

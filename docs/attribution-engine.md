@@ -1,6 +1,6 @@
 # Tokn Attribution Engine
 
-Derniere mise a jour : 2026-09-27
+Derniere mise a jour : 2026-09-29
 
 ## But
 
@@ -84,9 +84,16 @@ V0.1 continue de distinguer :
 
 Ces valeurs ne sont pas interchangeables.
 
-## Prochaine optimisation possible
+## Prochaine couche d'analyse
 
-Apres instrumentation validee seulement :
-mesurer les relectures/search dupliquees entre parent et sous-agents.
+Apres V0.1 et Experiment 002 :
+- cached/uncached par agent/tour ;
+- relectures/search dupliquees ;
+- evidence partagee parent/sous-agents ;
+- repeated discovery inter-run ;
+- tool evidence footprint.
 
-Ne pas reduire automatiquement le nombre d'agents.
+Ce sont d'abord des findings observation-only.
+Ne pas reduire automatiquement le nombre d'agents ni la capacite du modele.
+
+Voir : strategy/CONTEXT-EFFICIENCY-STRATEGY.md

@@ -1,5 +1,8 @@
 # Baseline JEM Ultimate - 2026-09-26
 
+Status: **HISTORICAL BASELINE / GOLDEN REFERENCE**
+Output-cap sections below describe the original investigation, not the current optimization strategy.
+
 ## But
 
 Premiere vraie baseline Tokn sur un run Astra de developpement reel dans JEM Ultimate.

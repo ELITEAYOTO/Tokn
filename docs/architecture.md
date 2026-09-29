@@ -1,6 +1,6 @@
 # Tokn Architecture
 
-Derniere mise a jour : 2026-09-27
+Derniere mise a jour : 2026-09-29
 
 ## V0.0 implemente
 
@@ -62,7 +62,10 @@ Apres V0.1, l'architecture doit pouvoir ajouter sans casser le coeur de mesure :
 - historique local RunGroup/Session ;
 - timeline et phases ;
 - graphe activite fichiers/outils ;
+- Context Ledger cached/uncached par agent/tour ;
 - attribution avancee ;
+- context duplication/cache detectors ;
+- Project Memory candidate detector ;
 - behavior detectors ;
 - Finding Engine.
 

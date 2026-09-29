@@ -1,231 +1,139 @@
-# Tokn Observer - Etat du projet
+# Tokn Observer - Status
 
-Derniere mise a jour : **2026-09-29 21:23 +02:00**
+Derniere mise a jour : **2026-09-29**
+Release de travail : **V0.1 Measurement Hardening**
+Binaire/Cargo : **V0.0 / 0.0.0**
 
-## KPI principal
+## Resume
 
-Tokn ne cherche pas a rendre Astra plus rapide.
+**P0-P6 DONE. P7 est la prochaine phase. P8-P9 restent a faire.**
 
-KPI principal :
-**maximiser le travail utile et la qualite obtenue par token consomme.**
+Le projet est revenu sur une direction unique :
+mesurer l'efficacite du contexte sans reduire la capacite d'Astra.
 
-Un run plus long est acceptable si la qualite est egale ou meilleure
-et si le quota permet davantage de travail utile.
+Hard output caps :
+**depriorises comme strategie d'optimisation**.
+Ils restent une evidence/diagnostic historique.
 
-## Version actuelle
+## Validation technique courante
 
-Binaire actuel :
-Tokn Observer V0.0
-
-Prochaine release de travail :
-**V0.1 Measurement Hardening**
-
-V0.1 est prioritaire avant toute nouvelle optimisation active.
-
-Audit maintenabilite 2026-09-29 :
-**CLEAN / NO MAJOR REFACTOR REQUIRED**.
-
-Nettoyage preventif realise :
-- fallback session-root centralise dans la CLI ;
-- duplication retiree de analyze-run / check-caps / resolve-workspace ;
-- dependance serde_json inutile retiree de tokn-analysis ;
-- replay Experiment 001 conserve les memes resultats apres refactor.
-
-Maintenance baseline :
-- repository Git local initialise dans V0-CodexTkn-Consume/tool ;
-- branche principale locale : main ;
-- aucun remote configure ni push effectue ;
-- le workflow CI est maintenant versionne avec le code.
-
-Progression V0.1 :
-**P0-P5 DONE ; P6 Policy placement/evidence IN PROGRESS.**
-
-P6 en cours :
-- types de domaine + aggregation RunGroup : PASS ;
-- scanner instructions + lectures explicites AGENTS.md : PASS ;
-- `inspect-policy` texte/JSON : PASS ;
-- integration FINISH Experiment 001 : PASS ;
-- placement multi-racine PROJECT + workspace watch root avec restauration par hash : PASS ;
-- START/FINISH/RECOVER multi-placement + retrocompatibilite anciens runs : PASS ;
-- prototype `hook-pre-tool-use` + audit JSONL sans contenu de commande : PASS synthetique ;
-- replay reel : hint PRESENT, instructions 0/4, repository reads 4/4 (5 lectures), observed FAIL 58 cibles / 17 violations ;
-- probe Desktop reel : hooks trusted/active, `feature.hooks=true`, lifecycle `hook/started -> hook/completed` observe pendant les exec Code Mode ;
-- source OpenAI exacte `rust-v0.158.0-alpha.2.1` : unified exec mappe bien vers `Bash`, mais le payload PreToolUse ne contient que `command` ;
-- enforcement : SUPPORTED_INSUFFICIENT_INPUT pour la policy `max_output_tokens` sur ce runtime ;
-- prototype durci : cap runtime absent => UNOBSERVABLE/fail-open, jamais faux DENY ;
-- dette restante : expliquer/corriger l'audit JSONL live a zero ligne et rechercher un autre point d'enforcement si necessaire.
-
-## Ce qui est valide aujourd'hui
-
-Build/tooling :
 - cargo fmt : PASS ;
 - Clippy -D warnings : PASS ;
 - tests workspace : PASS ;
 - build release : PASS ;
-- packaging : PASS.
+- maintainability audit : CLEAN / NO MAJOR REFACTOR REQUIRED ;
+- Git local : main, aucun remote.
 
-Session rollouts :
-- decouverte reelle : PASS ;
-- ingestion JSONL : PASS ;
-- token_usage_record : PASS ;
-- SQLite : PASS ;
-- idempotence : PASS.
+Dernier commit avant cette reorganisation documentaire :
+`416a3d2 fix: classify unavailable hook cap input`.
 
-Diagnostic Rollout Trace :
-- baseline reelle 2026-09-26 : PASS ;
-- totaux Tokn == trace-reduce sur cette baseline ;
-- attribution outils V0 : PASS sur cette baseline.
+## V0.1
 
-Simulation :
-- raw vs cap-adjusted : PASS ;
-- simulate-caps : PASS ;
-- check-caps : implementation presente.
+P0 - sanitized fixtures : DONE
+P1 - source health + fallback : DONE
+P2 - RunGroup + agent graph : DONE
+P3 - terminal task status : DONE
+P4 - session tool adapter : DONE
+P5 - dynamic workspace tracking : DONE
+P6 - policy evidence/runtime capability research : DONE
+P7 - experiment validity reducer : NEXT
+P8 - runner V0.1 : TODO
+P9 - golden replay/release validation : TODO
 
-V0.1 Measurement Hardening :
-- P0 fixtures sanitisees : PASS ;
-- P1 source health + fallback : PASS ;
-- fallback historique base sur session_meta.timestamp, mtime seulement en secours ;
-- sessions et archived_sessions indexes ;
-- P2 RunGroup parent + descendants : PASS ;
-- P3 terminal INCOMPLETE_USAGE_LIMIT : PASS ;
-- P4 session tool adapter : PASS, y compris plusieurs exec_command dans une enveloppe Code Mode ;
-- cap policy : PASS / FAIL / NO_EVIDENCE / INCOMPLETE_EVIDENCE ;
-- Experiment 001 cap replay : 58 outils cibles, 17 violations, 0 unknown, 0 parse failure => FAIL ;
-- P5 dynamic workspace tracking : PASS ;
-- resolver Experiment 001 => B07-C_WORKING\PROJECT SELECTED ;
-- watch-root generique exclu du scoring ;
-- runner START capture workspace-before ; FINISH resout le vrai workspace avant diff/verify ;
-- `verify:local` cible le workspace resolu ;
-- `analyze-run --output-json` : PASS sur Experiment 001, 1 parent + 3 sous-agents ;
-- `session-evidence.json` derive maintenant du RunGroup exact, sans scan `LastWriteTime` ;
-- AGENTS.md temporaire est nettoye automatiquement dans un workspace copie uniquement quand la preuve est exacte ; sinon Tokn preserve et avertit ;
-- START dry-run complet : PASS et cleanup confirme ;
-- build release courant : PASS.
+P6 est ferme avec une limitation connue :
+Codex Desktop 0.158.0-alpha.2.1 ne transmet pas `max_output_tokens`
+au PreToolUse Bash de unified exec.
 
-## Baseline JEM 2026-09-26
+La sonde live JSONL a zero ligne reste une dette diagnostique,
+mais elle ne bloque plus V0.1 car l'enforcement des caps n'est pas un objectif produit.
 
-Diagnostic healthy.
-
-- input : 3,316,765 ;
-- cached : 3,168,896 ;
-- uncached : 147,869 ;
-- output : 16,062 ;
-- reasoning : 3,125 ;
-- logical total : 3,332,827 ;
-- tools : 26 ;
-- raw tool tokens : 64,219 ;
-- cap-adjusted upper : 47,191.
-
-Voir :
-docs/baselines/2026-09-26-jem-ultimate.md
-
-## Experiment 001 - resultat reel
+## Golden Experiment 001
 
 Verdict :
-**INSTRUMENTATION DISCOVERY SUCCESS**
-**OPTIMIZATION EXPERIMENT INVALID**
+**INSTRUMENTATION DISCOVERY SUCCESS / OPTIMIZATION INVALID**
 
-Le run a reellement travaille sur JEM mais a termine par usage_limit_exceeded.
-
-4 sessions liees :
+RunGroup :
 - 1 parent ;
-- 3 sous-agents.
+- 3 sous-agents ;
+- 80 usage records.
 
-Totaux recuperes depuis les session rollouts :
-- usage records : 80 ;
-- input : 5,285,737 ;
-- cached : 5,059,712 ;
-- uncached : 226,025 ;
-- output : 26,021 ;
-- reasoning : 3,018 ;
-- logical total : 5,311,758.
+Tokens :
+- input 5,285,737 ;
+- cached 5,059,712 ;
+- uncached 226,025 ;
+- output 26,021 ;
+- reasoning 3,018 ;
+- logical total 5,311,758.
 
-Parent :
-2,499,523 logical (~47.1 %).
+Attribution :
+- parent 2,499,523 (~47.1 %) ;
+- descendants 2,812,235 (~52.9 %).
 
-Sous-agents :
-2,812,235 logical (~52.9 %).
+Etat :
+- terminal INCOMPLETE_USAGE_LIMIT ;
+- diagnostic PARTIAL ;
+- policy observed FAIL 58/17 ;
+- policy enforcement SUPPORTED_INSUFFICIENT_INPUT ;
+- workspace B07-C_WORKING\PROJECT ;
+- diff 13 added / 4 modified / 0 removed ;
+- verify:local PASS, 814 tests vs 809 au depart ;
+- experiment validity attendue : INSTRUMENTATION_ONLY.
 
-Terminal :
-INCOMPLETE_USAGE_LIMIT.
+## Interpretation cache
 
-## Experiment 001 - problemes Tokn decouverts
+Experiment 001 a ~95.72 % de cached input.
 
-1. Diagnostic trace partiel
-Le bundle candidat ne contenait que 4 evenements de protocole
-et aucun usage/tool exploitable.
+Conclusion autorisee :
+la majorite des input tokens reportes etait classee cached.
 
-2. Faux PASS policy
-0 outil observe a ete interprete comme compliant.
-C'est interdit en V0.1.
+Conclusions interdites :
+- le contexte etait optimal ;
+- les cached tokens etaient gratuits ;
+- ils ne comptaient pas dans le quota produit ;
+- tout le contexte etait utile ;
+- il faut reduire la fenetre ou la sortie d'Astra.
 
-3. Mauvais workspace surveille
-Tokn suivait B07-B_WORKING/PROJECT.
-Astra a correctement cree et travaille dans B07-C_WORKING.
+La prochaine couche d'analyse doit localiser l'uncached growth,
+la duplication et la rediscovery avant de proposer une intervention.
 
-4. Mauvais quality-gate target
-Le finisher historique a verifie le projet B07-B d'origine.
-Le vrai B07-C a ensuite ete verifie manuellement et PASS.
+## Direction produit
 
-5. Policy non enforcee
-Le AGENTS.md temporaire n'etait pas dans base_instructions.
-La plupart des appels exec ne declaraient aucun max_output_tokens.
+Decision :
+`docs/decisions/ADR-003-QUALITY-PRESERVING-EFFICIENCY.md`
 
-6. Sous-agents non agreges automatiquement
-Plus de la moitie du cout logique etait dans les descendants.
+Strategie :
+`docs/strategy/CONTEXT-EFFICIENCY-STRATEGY.md`
 
-## Etat reel B07-C apres quota
+Recherche revue :
+`docs/research/2026-09-29-CONTEXT-CACHE-RESEARCH.md`
 
-Comparaison B07-B_FROZEN -> B07-C_WORKING :
-- 13 fichiers ajoutes ;
-- 4 modifies ;
-- 0 supprimes.
+Axes apres V0.1 :
+- Context Ledger ;
+- Cache Efficiency Analyzer ;
+- Context Duplication Analyzer ;
+- Parent/Subagent Context Graph ;
+- Tool Evidence Footprint ;
+- Project Memory Candidate Detector.
 
-verify:local sur le vrai B07-C :
-PASS.
+Tous commencent observation-only.
 
-Tests :
-814 PASS, contre 809 au depart.
+## Prochaine action
 
-La tache reste incomplete :
-le Quick Fix Framework complet n'a pas ete implemente avant epuisement du quota.
+Implementer **P7 - Experiment validity reducer**.
 
-## Priorite unique actuelle
+Objectif :
+Experiment 001 doit produire automatiquement `INSTRUMENTATION_ONLY`
+et toute comparaison invalide doit interdire le langage causal/savings.
 
-**Continuer Tokn V0.1 a partir de P6 avant de relancer une experience d'optimisation.**
+Ensuite :
+P8 runner self-contained -> P9 golden/release -> Experiment 002.
 
-Termine :
-P0 fixtures ;
-P1 source health/fallback ;
-P2 RunGroup + sous-agents ;
-P3 terminal status ;
-P4 session tools/caps ;
-P5 dynamic workspace.
+Aucun nouveau run Astra n'est necessaire pour P7-P9.
 
-Suite :
-P6 policy evidence ;
-P7 experiment validity ;
-P8 runner V0.1 ;
-P9 validation/golden replay ;
-P10 Experiment 002.
+## Sources de verite
 
-Source de verite :
-docs/plans/V0.1-IMPLEMENTATION-PLAN.md
-
-## Interdictions jusqu'a V0.1
-
-Ne pas :
-- annoncer une economie observee depuis Experiment 001 ;
-- traiter une absence de preuve comme zero ;
-- afficher PASS avec zero cible ;
-- comparer parent seul contre un run multi-agent ;
-- lancer Experiment 002 avant P0-P9 ;
-- ajouter RAG/embeddings/GUI avant stabilisation de la mesure.
-
-## Documents a lire
-
-1. docs/INDEX.md
-2. docs/experiments/001-POSTMORTEM.md
-3. docs/plans/V0.1-IMPLEMENTATION-PLAN.md
-4. docs/plans/V0.1-TEST-MATRIX.md
-5. docs/design/V0.1-MEASUREMENT-ARCHITECTURE.md
+Etat : `STATUS.md`
+Ordre : `ROADMAP.md`
+Implementation V0.1 : `docs/plans/V0.1-IMPLEMENTATION-PLAN.md`
+Tests : `docs/plans/V0.1-TEST-MATRIX.md`
+Documentation map : `docs/INDEX.md`

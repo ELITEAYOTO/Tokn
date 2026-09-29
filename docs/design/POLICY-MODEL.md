@@ -1,46 +1,35 @@
-# Policy Model: Hint, Observation, Enforcement
+# Policy Model - Hint, Observation, Enforcement
 
-## Motivation
+Status: STABLE V0.1 DESIGN
+Updated: 2026-09-29
 
-Experiment 001 placed a temporary AGENTS.md under PROJECT.
-The Codex session cwd was E:\BlockBench-Plugin.
+## Purpose
 
-The policy was not present in session_meta.base_instructions.
-The parent nevertheless found and read PROJECT/AGENTS.md manually.
+Policy evidence answers three different questions:
+1. Was guidance available?
+2. Did observed behavior comply?
+3. Did a runtime mechanism enforce it?
 
-This proves visibility is not enforcement.
+These questions must never be collapsed into one PASS/FAIL flag.
 
-## Three policy levels
+## policy_hint
 
-### policy_hint
+A model-facing instruction exists or was placed.
 
-A model-facing instruction exists.
+Evidence may include:
+- AGENTS.md placement;
+- prompt/instruction marker;
+- session instruction evidence;
+- explicit repository read.
 
-Evidence examples:
-- AGENTS.md exists;
-- prompt contains policy;
-- session instructions include policy.
+A hint can be ignored.
+Presence is not enforcement.
 
-A hint may be ignored or only partially followed.
+## policy_observed
 
-### policy_observed
+Actual observable requests satisfy or violate a rule.
 
-Actual tool requests comply with the requested behavior.
-
-Example:
-file_read classified calls explicitly request max_output_tokens <= 5000.
-
-Observation requires sufficient coverage.
-
-### policy_enforced
-
-A runtime mechanism prevents non-compliant requests from reaching the tool surface.
-
-This requires an actual mediator/hook/proxy/configuration mechanism.
-Tokn V0.1 does NOT claim this capability yet.
-## Compliance states
-
-For each policy rule:
+States:
 - PASS;
 - FAIL;
 - NO_EVIDENCE;
@@ -48,35 +37,77 @@ For each policy rule:
 - NOT_APPLICABLE.
 
 PASS requires:
-- at least one applicable target observation;
+- at least one applicable target;
 - no violation;
-- no unknown field that the rule requires.
+- no unknown required field.
 
-Experiment 001 must evaluate to INCOMPLETE_EVIDENCE or FAIL,
-never PASS.
+Experiment 001:
+58 targets / 17 violations / 0 unknown => FAIL.
 
-## Policy placement
+## policy_enforced
 
-Until hard enforcement exists, Experiment runner should:
-- place scoped policy at the actual Codex workspace root;
-- optionally mirror it into the project root when safe;
-- preserve/restore both independently;
-- record hashes;
-- verify the session saw the intended policy when observable.
+A runtime mechanism prevents non-compliant requests from reaching the protected surface.
 
-A run must record:
-- policy placement paths;
-- base instruction evidence;
-- explicit repository read evidence;
-- observed compliance.
+Capability states:
+- UNAVAILABLE;
+- SUPPORTED_UNVERIFIED;
+- SUPPORTED_INSUFFICIENT_INPUT;
+- SUPPORTED_NOT_ACTIVE;
+- NOT_PROVEN;
+- ENFORCED.
 
-## Hard-enforcement research gate
+ENFORCED requires run-scoped proof, not documentation alone.
 
-Before implementing interception:
-- probe supported Codex hooks/configuration locally;
-- document whether exec_command output caps can be enforced externally;
-- do not patch internal Codex binaries;
-- do not depend on undocumented internals without adapter isolation.
+## P6 result
 
-If no stable enforcement point exists,
-Tokn continues with measurement + soft policy experiments until a safe mechanism exists.
+Codex Desktop 0.158.0-alpha.2.1:
+- hooks are supported;
+- trusted/active hook lifecycle was observed;
+- nested unified exec maps to PreToolUse/Bash;
+- the callback receives command but not max_output_tokens.
+
+Therefore the historical output-cap policy is:
+`SUPPORTED_INSUFFICIENT_INPUT`.
+
+This is a runtime contract limitation, not a reason to patch Codex.
+
+## Product scope
+
+Output-cap policy remains useful for:
+- diagnostics;
+- historical Experiment 001 replay;
+- adapter compatibility tests.
+
+It is NOT the primary Tokn optimization strategy.
+
+ADR-003 moves product optimization toward quality-preserving context efficiency.
+
+## Placement
+
+Experimental policy placement must:
+- touch only declared roots;
+- preserve original content;
+- record exact installed hash;
+- restore independently;
+- fail conservatively on unexpected edits.
+
+A dynamically copied workspace may be cleaned only with exact identity proof.
+
+## Reporting rule
+
+Every relevant experiment report states separately:
+- policy_hint;
+- policy_observed;
+- policy_enforced.
+
+If enforcement is not needed by the experiment,
+the report may record capability status without activating a hook.
+
+## Reopen conditions
+
+Hard-enforcement research is reopened only if:
+- a future experiment genuinely requires it;
+- a supported runtime surface exposes the required policy inputs;
+- the intervention does not conflict with quality-preserving strategy.
+
+Until then P6 is closed.

@@ -34,3 +34,16 @@ Diagnostic trace availability/completeness is capability-like evidence,
 not an assumption.
 
 Standard session rollouts are required as fallback when diagnostic health is PARTIAL.
+
+## P6 runtime note - 2026-09-29
+
+On codex-cli 0.158.0-alpha.2.1:
+- hooks are supported and real Desktop lifecycle execution was observed;
+- unified exec is exposed to PreToolUse as Bash;
+- max_output_tokens is not forwarded to that callback.
+
+Tokn records this as SUPPORTED_INSUFFICIENT_INPUT for the historical cap policy.
+This is capability evidence, not a reason to couple the adapter permanently to version 0.158.
+
+Future context-management/cache capabilities must be detected and recorded per runtime/config
+before Tokn compares runs that depend on them.

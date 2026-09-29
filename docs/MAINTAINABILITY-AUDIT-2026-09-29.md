@@ -1,5 +1,9 @@
 # Tokn Maintainability Audit - 2026-09-29
 
+Status: **HISTORICAL SNAPSHOT**
+Structural verdict remains valid; phase references below reflect the time of the audit.
+Current phase status lives in `../STATUS.md`.
+
 ## Verdict
 
 Status: CLEAN / NO MAJOR REFACTOR REQUIRED.
