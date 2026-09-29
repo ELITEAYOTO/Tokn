@@ -78,16 +78,18 @@ Validation finale : resolver fail-closed, replay historique stable, START/FINISH
 ### P6 - Policy model/evidence
 Statut : IN PROGRESS
 
-Deja present :
-- modeles de domaine PolicyPlacement / SessionPolicyEvidence / PolicyEvidenceReport ;
-- etat d'enforcement explicite UNAVAILABLE / ENFORCED / NOT_PROVEN ;
-- scanner de rollout pour signature de policy dans les instructions ;
-- detection d'une lecture explicite des fichiers de policy.
+Deja implemente :
+- modeles PolicyPlacement / SessionPolicyEvidence / PolicyEvidenceReport ;
+- policy_hint / policy_observed / policy_enforced separes dans le rapport ;
+- scanner rollout pour signature dans les instructions et lectures explicites AGENTS.md ;
+- aggregation de la preuve sur toutes les sessions du RunGroup ;
+- commande `inspect-policy` avec sortie texte + JSON ;
+- integration FINISH Experiment 001 ;
+- replay reel : hint PRESENT, 0 instruction threads, 4 repository-read threads, observed FAIL 58/17, enforcement NOT_PROVEN.
 
 A terminer :
-- aggregation RunGroup de la preuve policy ;
-- CLI + rapport machine-readable ;
-- raccordement runner et restauration multi-placement ;
+- placement/restauration generiques sur chaque racine policy touchee ;
+- preuve du vrai workspace Codex avant execution ;
 - recherche/documentation d'un hook runtime supporte pour l'enforcement.
 
 ### P7 - Experiment validity reducer

@@ -351,3 +351,44 @@ Rewritten for current truth:
 
 - added docs/MAINTAINABILITY-AUDIT-2026-09-29.md ;
 - maintainability thresholds added to docs/MAINTENANCE.md.
+
+## 2026-09-29 - P6 policy evidence pipeline started
+
+### Maintenance baseline
+
+- initialized a local Git repository in tool/ on branch main ;
+- no remote configured and no push performed ;
+- first baseline commit created before further P6 growth ;
+- applied rustfmt cleanup found during the handoff audit.
+
+### P6 implementation
+
+- added PolicyObservationStatus and PolicyObservationSummary to the domain ;
+- added RunGroup-level policy evidence aggregation ;
+- added policy evidence text renderer ;
+- added `inspect-policy` CLI with text + JSON output ;
+- report separates policy_hint, policy_observed and policy_enforced ;
+- Experiment 001 FINISH now emits TOKN_POLICY_EVIDENCE.txt and tokn-policy-evidence.json ;
+- START records the policy marker and initial placement path.
+
+### Real Experiment 001 replay
+
+- policy_hint: PRESENT ;
+- policy marker in session instructions: 0 / 4 threads ;
+- explicit policy-file reads: 4 / 4 threads, 5 reads total ;
+- policy_observed: FAIL ;
+- targeted calls: 58 ;
+- compliant: 41 ;
+- violations: 17 ;
+- unknown: 0 ;
+- policy_enforced: NOT_PROVEN.
+
+### Validation
+
+- PowerShell syntax START/FINISH: PASS ;
+- cargo fmt --check: PASS ;
+- Clippy -D warnings: PASS ;
+- cargo test --workspace: PASS ;
+- release build: PASS.
+
+P6 remains IN PROGRESS: generic multi-placement lifecycle and supported enforcement-hook research are still required.

@@ -19,6 +19,39 @@ impl PolicyEnforcementStatus {
     }
 }
 
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum PolicyObservationStatus {
+    Pass,
+    Fail,
+    NoEvidence,
+    IncompleteEvidence,
+    #[default]
+    NotEvaluated,
+}
+
+impl PolicyObservationStatus {
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::Pass => "PASS",
+            Self::Fail => "FAIL",
+            Self::NoEvidence => "NO_EVIDENCE",
+            Self::IncompleteEvidence => "INCOMPLETE_EVIDENCE",
+            Self::NotEvaluated => "NOT_EVALUATED",
+        }
+    }
+}
+
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct PolicyObservationSummary {
+    pub status: PolicyObservationStatus,
+    pub targeted: u64,
+    pub compliant: u64,
+    pub violations: u64,
+    pub unknown: u64,
+    pub parse_failures: u64,
+}
+
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct PolicyPlacement {
     pub path: String,
@@ -46,5 +79,6 @@ pub struct PolicyEvidenceReport {
     pub repository_read_threads: u64,
     pub repository_read_count: u64,
     pub parse_failures: u64,
+    pub observed: PolicyObservationSummary,
     pub enforcement: PolicyEnforcementStatus,
 }

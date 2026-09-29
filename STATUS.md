@@ -40,10 +40,13 @@ Maintenance baseline :
 Progression V0.1 :
 **P0-P5 DONE ; P6 Policy placement/evidence IN PROGRESS.**
 
-P6 deja amorce :
-- types de domaine de preuve policy presents ;
-- scanner session pour instructions + lectures explicites AGENTS.md present ;
-- aggregation/CLI/reporting et integration runner restent a terminer.
+P6 en cours :
+- types de domaine + aggregation RunGroup : PASS ;
+- scanner instructions + lectures explicites AGENTS.md : PASS ;
+- `inspect-policy` texte/JSON : PASS ;
+- integration FINISH Experiment 001 : PASS ;
+- replay reel : hint PRESENT, instructions 0/4, repository reads 4/4 (5 lectures), observed FAIL 58 cibles / 17 violations, enforcement NOT_PROVEN ;
+- placement generique au vrai workspace Codex + recherche hook d'enforcement : RESTENT A FAIRE.
 
 ## Ce qui est valide aujourd'hui
 

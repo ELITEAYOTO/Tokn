@@ -6,6 +6,7 @@ mod compare;
 mod doctor;
 mod health;
 mod import;
+mod inspect_policy;
 mod inspect_schema;
 mod report;
 mod resolve_workspace;
@@ -26,6 +27,23 @@ pub fn run(cli: Cli) -> anyhow::Result<()> {
             source,
             output_json,
         } => analyze_run::run(&source, output_json.as_deref()),
+        Command::InspectPolicy {
+            source,
+            policy_id,
+            marker,
+            policy_paths,
+            caps,
+            enforcement,
+            output_json,
+        } => inspect_policy::run(
+            &source,
+            &policy_id,
+            &marker,
+            &policy_paths,
+            &caps,
+            &enforcement,
+            output_json.as_deref(),
+        ),
         Command::ResolveWorkspace {
             source,
             inventory,

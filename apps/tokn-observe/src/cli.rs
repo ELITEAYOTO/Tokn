@@ -42,6 +42,25 @@ pub enum Command {
         #[arg(long)]
         output_json: Option<PathBuf>,
     },
+    InspectPolicy {
+        source: String,
+        #[arg(long, default_value = "policy")]
+        policy_id: String,
+        #[arg(long)]
+        marker: String,
+        #[arg(long = "policy-path")]
+        policy_paths: Vec<PathBuf>,
+        #[arg(long = "cap", value_name = "CATEGORY=TOKENS")]
+        caps: Vec<String>,
+        #[arg(
+            long,
+            default_value = "not-proven",
+            value_parser = ["not-proven", "unavailable", "enforced"]
+        )]
+        enforcement: String,
+        #[arg(long)]
+        output_json: Option<PathBuf>,
+    },
     ResolveWorkspace {
         source: String,
         #[arg(long)]

@@ -208,6 +208,8 @@ $AttributionPath = Join-Path $RunRoot "TOKN_ATTRIBUTION.txt"
 $RunGroupPath = Join-Path $RunRoot "TOKN_RUN_GROUP.txt"
 $RunGroupJson = Join-Path $RunRoot "tokn-run-group.json"
 $PolicyCheckPath = Join-Path $RunRoot "TOKN_CAP_POLICY_CHECK.txt"
+$PolicyEvidencePath = Join-Path $RunRoot "TOKN_POLICY_EVIDENCE.txt"
+$PolicyEvidenceJson = Join-Path $RunRoot "tokn-policy-evidence.json"
 $SimulationPath = Join-Path $RunRoot "TOKN_CAP_SIMULATION.txt"
 $ComparePath = Join-Path $RunRoot "TOKN_COMPARE_TO_OLD_BASELINE.txt"
 
@@ -224,6 +226,27 @@ if ($runGroupExit -ne 0 -or -not (Test-Path -LiteralPath $RunGroupJson)) {
 
 $policyExit = Save-CommandOutput -Path $PolicyCheckPath -Command {
     & $Observer check-caps $bundle --cap "file_read=$fileReadCap" --cap "search=$searchCap"
+}
+
+$policyEvidenceArgs = @(
+    "inspect-policy", $bundle,
+    "--policy-id", "exp001-runtime-output-caps",
+    "--marker", "Tokn Experiment 001 - Runtime Output Policy",
+    "--policy-path", $AgentsPath,
+    "--cap", "file_read=$fileReadCap",
+    "--cap", "search=$searchCap",
+    "--enforcement", "not-proven",
+    "--output-json", $PolicyEvidenceJson
+)
+$ResolvedPolicyPath = Join-Path $ResolvedProjectRoot "AGENTS.md"
+if (-not $ResolvedPolicyPath.Equals($AgentsPath, [System.StringComparison]::OrdinalIgnoreCase)) {
+    $policyEvidenceArgs += @("--policy-path", $ResolvedPolicyPath)
+}
+$policyEvidenceExit = Save-CommandOutput -Path $PolicyEvidencePath -Command {
+    & $Observer @policyEvidenceArgs
+}
+if ($policyEvidenceExit -ne 0 -or -not (Test-Path -LiteralPath $PolicyEvidenceJson)) {
+    Write-Warning "Tokn policy evidence analysis is incomplete (exit: $policyEvidenceExit)."
 }
 
 [void](Save-CommandOutput -Path $SimulationPath -Command {
@@ -281,6 +304,9 @@ $run | Add-Member -NotePropertyName after_snapshot -NotePropertyValue $AfterSnap
 $run | Add-Member -NotePropertyName project_diff_json -NotePropertyValue $DiffJson -Force
 $run | Add-Member -NotePropertyName project_diff_markdown -NotePropertyValue $DiffMarkdown -Force
 $run | Add-Member -NotePropertyName policy_check_exit_code -NotePropertyValue $policyExit -Force
+$run | Add-Member -NotePropertyName policy_evidence_exit_code -NotePropertyValue $policyEvidenceExit -Force
+$run | Add-Member -NotePropertyName policy_evidence_output -NotePropertyValue $PolicyEvidencePath -Force
+$run | Add-Member -NotePropertyName policy_evidence_json -NotePropertyValue $PolicyEvidenceJson -Force
 $run | Add-Member -NotePropertyName verify_local_exit_code -NotePropertyValue $verifyExit -Force
 $run | Add-Member -NotePropertyName verify_local_output -NotePropertyValue $VerifyPath -Force
 $run | Add-Member -NotePropertyName run_group_output -NotePropertyValue $RunGroupPath -Force
@@ -303,6 +329,7 @@ $summaryLines = @(
     "- Project files modified: $($diff.modified_count)",
     "- Project files removed: $($diff.removed_count)",
     "- Cap policy check exit code: $policyExit",
+    "- Policy evidence exit code: $policyEvidenceExit",
     "- JEM verify:local exit code: $verifyExit",
     "",
     "## Read next",
@@ -311,11 +338,12 @@ $summaryLines = @(
     "2. TOKN_WORKSPACE_RESOLUTION.txt - why Tokn selected the final workspace.",
     "3. PROJECT_DIFF.md - source-level file changes against the resolved workspace.",
     "4. TOKN_RUN_GROUP.txt - parent/subagent token totals and terminal state.",
-    "5. TOKN_CAP_POLICY_CHECK.txt - whether Astra obeyed the experimental caps.",
-    "6. JEM_VERIFY_LOCAL.txt - automated quality-gate output on the resolved workspace.",
-    "7. TOKN_ATTRIBUTION.txt - diagnostic attribution when available.",
-    "8. TOKN_COMPARE_TO_OLD_BASELINE.txt - descriptive only; tasks differ.",
-    "9. session-evidence.json - local Codex rollout files touched in the run window.",
+    "5. TOKN_POLICY_EVIDENCE.txt - policy hint, observed behavior and enforcement evidence.",
+    "6. TOKN_CAP_POLICY_CHECK.txt - detailed cap compliance evidence.",
+    "7. JEM_VERIFY_LOCAL.txt - automated quality-gate output on the resolved workspace.",
+    "8. TOKN_ATTRIBUTION.txt - diagnostic attribution when available.",
+    "9. TOKN_COMPARE_TO_OLD_BASELINE.txt - descriptive only; tasks differ.",
+    "10. session-evidence.json - local Codex rollout files touched in the run window.",
     "",
     "Do not judge the experiment by speed. Quality and completed work are required."
 )
