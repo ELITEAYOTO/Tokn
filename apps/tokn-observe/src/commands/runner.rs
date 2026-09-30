@@ -2,16 +2,19 @@ use std::fs::File;
 use std::path::{Path, PathBuf};
 
 use tokn_analysis::{
-    WorkspaceInventory, WorkspaceResolutionStatus, build_run_group, resolve_workspace,
+    WorkspaceInventory, WorkspaceResolutionStatus, build_policy_evidence_report, build_run_group,
+    check_cap_policy_tools, resolve_workspace,
 };
 use tokn_codex::diagnostic::{DiagnosticBundle, assess_diagnostic_health};
-use tokn_codex::session::{assess_session_health, collect_session_group};
+use tokn_codex::session::{assess_session_health, collect_session_group, inspect_session_policy};
 use tokn_domain::{
-    RunnerArtifactPaths, RunnerPipelineStatus, RunnerRequest, RunnerResult, RunnerSourceReport,
-    SourceKind,
+    PolicyObservationSummary, PolicyPlacement, RunnerArtifactPaths, RunnerPipelineStatus,
+    RunnerRequest, RunnerResult, RunnerSourceReport, SourceKind,
 };
 
-use super::common::{resolve_session_root_from_source, resolve_source};
+use super::common::{
+    map_policy_observation_status, resolve_session_root_from_source, resolve_source,
+};
 
 pub fn run(request_path: &Path) -> anyhow::Result<()> {
     let request = read_request(request_path)?;
@@ -30,15 +33,23 @@ pub fn run(request_path: &Path) -> anyhow::Result<()> {
     let source_health_path = evidence_dir.join("source-health.json");
     let run_group_path = evidence_dir.join("run-group.json");
     let workspace_resolution_path = evidence_dir.join("workspace-resolution.json");
+    let policy_evidence_path = request
+        .policy
+        .as_ref()
+        .map(|_| evidence_dir.join("policy-evidence.json"));
     let runner_result_path = evidence_dir.join("runner-result.json");
 
-    refuse_overwrite(&[
-        &normalized_request_path,
-        &source_health_path,
-        &run_group_path,
-        &workspace_resolution_path,
-        &runner_result_path,
-    ])?;
+    let mut owned_paths = vec![
+        normalized_request_path.as_path(),
+        source_health_path.as_path(),
+        run_group_path.as_path(),
+        workspace_resolution_path.as_path(),
+        runner_result_path.as_path(),
+    ];
+    if let Some(path) = policy_evidence_path.as_deref() {
+        owned_paths.push(path);
+    }
+    refuse_overwrite(&owned_paths)?;
 
     write_json(&normalized_request_path, &request)?;
 
@@ -72,6 +83,68 @@ pub fn run(request_path: &Path) -> anyhow::Result<()> {
     let group = build_run_group(&grouped.members, &grouped.root_thread_id)
         .ok_or_else(|| anyhow::anyhow!("failed to build run group"))?;
     write_json(&run_group_path, &group)?;
+
+    let policy_report = if let Some(policy) = &request.policy {
+        let placements = policy
+            .policy_paths
+            .iter()
+            .map(|path| PolicyPlacement {
+                path: path.clone(),
+                sha256: None,
+            })
+            .collect::<Vec<_>>();
+
+        let mut session_reports = Vec::new();
+        for member in &grouped.members {
+            session_reports.push(inspect_session_policy(
+                Path::new(&member.source_path),
+                &policy.marker,
+                &policy.policy_paths,
+            )?);
+        }
+
+        let observed = if policy.caps.is_empty() {
+            PolicyObservationSummary::default()
+        } else {
+            let tools = grouped
+                .members
+                .iter()
+                .flat_map(|member| member.tools.iter().cloned())
+                .collect::<Vec<_>>();
+            let parse_failures = grouped
+                .members
+                .iter()
+                .map(|member| member.tool_parse_failures)
+                .sum();
+            let check = check_cap_policy_tools(&tools, parse_failures, &policy.caps);
+            PolicyObservationSummary {
+                status: map_policy_observation_status(check.status),
+                targeted: check.targeted_tools,
+                compliant: check.compliant,
+                violations: check.violations,
+                unknown: check.unknown,
+                parse_failures: check.parse_failures,
+            }
+        };
+
+        let report = build_policy_evidence_report(
+            &policy.policy_id,
+            &policy.marker,
+            placements,
+            session_reports,
+            observed,
+            policy.enforcement,
+        );
+        write_json(
+            policy_evidence_path
+                .as_deref()
+                .expect("policy evidence path exists when policy is configured"),
+            &report,
+        )?;
+        Some(report)
+    } else {
+        None
+    };
 
     let after = read_inventory(Path::new(&request.after_inventory))?;
     let before = request
@@ -107,6 +180,16 @@ pub fn run(request_path: &Path) -> anyhow::Result<()> {
         RunnerPipelineStatus::Blocked
     };
 
+    let mut completed_steps = vec![
+        "SOURCE_HEALTH_REPORT".into(),
+        "SESSION_ROOT_RESOLUTION".into(),
+        "RUN_GROUP".into(),
+        "WORKSPACE_RESOLUTION".into(),
+    ];
+    if policy_report.is_some() {
+        completed_steps.push("POLICY_EVIDENCE".into());
+    }
+
     let result = RunnerResult {
         schema_version: 1,
         run_id: request.run_id.clone(),
@@ -119,14 +202,11 @@ pub fn run(request_path: &Path) -> anyhow::Result<()> {
         selected_workspace: resolution.selected_root.clone(),
         root_terminal: group.root_terminal,
         agent_count: group.agents.len() as u64,
-        completed_steps: vec![
-            "SOURCE_HEALTH_REPORT".into(),
-            "SESSION_ROOT_RESOLUTION".into(),
-            "RUN_GROUP".into(),
-            "WORKSPACE_RESOLUTION".into(),
-        ],
+        policy_required: request.policy.is_some(),
+        policy_observation_status: policy_report.as_ref().map(|report| report.observed.status),
+        policy_enforcement_status: policy_report.as_ref().map(|report| report.enforcement),
+        completed_steps,
         pending_steps: vec![
-            "POLICY_EVIDENCE".into(),
             "QUALITY_GATE".into(),
             "EXPERIMENT_VALIDITY".into(),
             "RECOVERY".into(),
@@ -137,6 +217,9 @@ pub fn run(request_path: &Path) -> anyhow::Result<()> {
             source_health: source_health_path.to_string_lossy().to_string(),
             run_group: run_group_path.to_string_lossy().to_string(),
             workspace_resolution: workspace_resolution_path.to_string_lossy().to_string(),
+            policy_evidence: policy_evidence_path
+                .as_ref()
+                .map(|path| path.to_string_lossy().to_string()),
             runner_result: runner_result_path.to_string_lossy().to_string(),
         },
     };

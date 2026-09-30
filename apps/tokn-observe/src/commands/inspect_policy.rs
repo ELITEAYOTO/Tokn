@@ -1,14 +1,15 @@
 use std::fs::File;
 use std::path::{Path, PathBuf};
 
-use tokn_analysis::{CapPolicyStatus, build_policy_evidence_report, check_cap_policy_tools};
+use tokn_analysis::{build_policy_evidence_report, check_cap_policy_tools};
 use tokn_codex::session::{collect_session_group, inspect_session_policy};
-use tokn_domain::{
-    PolicyEnforcementStatus, PolicyObservationStatus, PolicyObservationSummary, PolicyPlacement,
-};
+use tokn_domain::{PolicyEnforcementStatus, PolicyObservationSummary, PolicyPlacement};
 use tokn_report::render_policy_evidence_text;
 
-use super::common::{parse_cap_overrides, resolve_session_root_from_source, resolve_source};
+use super::common::{
+    map_policy_observation_status, parse_cap_overrides, resolve_session_root_from_source,
+    resolve_source,
+};
 
 pub fn run(
     source: &str,
@@ -61,7 +62,7 @@ pub fn run(
         let check = check_cap_policy_tools(&tools, parse_failures, &policy);
 
         PolicyObservationSummary {
-            status: map_observation_status(check.status),
+            status: map_policy_observation_status(check.status),
             targeted: check.targeted_tools,
             compliant: check.compliant,
             violations: check.violations,
@@ -90,15 +91,6 @@ pub fn run(
     }
 
     Ok(())
-}
-
-fn map_observation_status(status: CapPolicyStatus) -> PolicyObservationStatus {
-    match status {
-        CapPolicyStatus::Pass => PolicyObservationStatus::Pass,
-        CapPolicyStatus::Fail => PolicyObservationStatus::Fail,
-        CapPolicyStatus::NoEvidence => PolicyObservationStatus::NoEvidence,
-        CapPolicyStatus::IncompleteEvidence => PolicyObservationStatus::IncompleteEvidence,
-    }
 }
 
 fn parse_enforcement(value: &str) -> anyhow::Result<PolicyEnforcementStatus> {

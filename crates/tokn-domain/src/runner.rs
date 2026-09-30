@@ -1,6 +1,11 @@
+use std::collections::BTreeMap;
+
 use serde::{Deserialize, Serialize};
 
-use crate::{ExperimentIntent, SourceHealth, SourceHealthStatus, SourceKind, TerminalStatus};
+use crate::{
+    ExperimentIntent, PolicyEnforcementStatus, PolicyObservationStatus, SourceHealth,
+    SourceHealthStatus, SourceKind, TerminalStatus,
+};
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
@@ -32,6 +37,19 @@ pub struct RunnerExperimentRequest {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
+pub struct RunnerPolicyRequest {
+    pub policy_id: String,
+    pub marker: String,
+    #[serde(default)]
+    pub policy_paths: Vec<String>,
+    #[serde(default)]
+    pub caps: BTreeMap<String, u64>,
+    #[serde(default)]
+    pub enforcement: PolicyEnforcementStatus,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct RunnerRequest {
     pub schema_version: u64,
     pub run_id: String,
@@ -45,6 +63,8 @@ pub struct RunnerRequest {
     pub evidence_dir: String,
     #[serde(default)]
     pub experiment: Option<RunnerExperimentRequest>,
+    #[serde(default)]
+    pub policy: Option<RunnerPolicyRequest>,
 }
 
 impl RunnerRequest {
@@ -75,6 +95,18 @@ impl RunnerRequest {
             errors.push("experiment.experiment_id cannot be empty".into());
         }
 
+        if let Some(policy) = &self.policy {
+            if policy.policy_id.trim().is_empty() {
+                errors.push("policy.policy_id cannot be empty".into());
+            }
+            if policy.marker.trim().is_empty() {
+                errors.push("policy.marker cannot be empty".into());
+            }
+            if policy.caps.values().any(|tokens| *tokens == 0) {
+                errors.push("policy caps must be greater than zero".into());
+            }
+        }
+
         errors
     }
 }
@@ -94,6 +126,7 @@ pub struct RunnerArtifactPaths {
     pub source_health: String,
     pub run_group: String,
     pub workspace_resolution: String,
+    pub policy_evidence: Option<String>,
     pub runner_result: String,
 }
 
@@ -110,6 +143,9 @@ pub struct RunnerResult {
     pub selected_workspace: Option<String>,
     pub root_terminal: TerminalStatus,
     pub agent_count: u64,
+    pub policy_required: bool,
+    pub policy_observation_status: Option<PolicyObservationStatus>,
+    pub policy_enforcement_status: Option<PolicyEnforcementStatus>,
     pub completed_steps: Vec<String>,
     pub pending_steps: Vec<String>,
     pub warnings: Vec<String>,
@@ -133,6 +169,13 @@ mod tests {
             experiment: Some(RunnerExperimentRequest {
                 experiment_id: "002-instrumentation".into(),
                 intent: ExperimentIntent::Instrumentation,
+            }),
+            policy: Some(RunnerPolicyRequest {
+                policy_id: "fixture-policy".into(),
+                marker: "fixture marker".into(),
+                policy_paths: vec!["E:/fixture/source/AGENTS.md".into()],
+                caps: BTreeMap::from([("file_read".into(), 5000)]),
+                enforcement: PolicyEnforcementStatus::NotProven,
             }),
         }
     }

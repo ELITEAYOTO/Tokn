@@ -3,8 +3,10 @@ use std::path::{Path, PathBuf};
 use std::time::Duration;
 
 use anyhow::{Context, anyhow};
+use tokn_analysis::CapPolicyStatus;
 use tokn_codex::diagnostic::{DiagnosticBundle, FallbackStatus, discover_session_fallback};
 use tokn_codex::session::{SessionFile, list_sessions, resolve_root_session};
+use tokn_domain::PolicyObservationStatus;
 use tokn_platform::observer_data_root;
 use tokn_storage::Database;
 
@@ -58,6 +60,15 @@ pub fn db_path() -> anyhow::Result<PathBuf> {
 pub fn open_db() -> anyhow::Result<Database> {
     let path = db_path()?;
     Database::open(Path::new(&path)).map_err(Into::into)
+}
+
+pub fn map_policy_observation_status(status: CapPolicyStatus) -> PolicyObservationStatus {
+    match status {
+        CapPolicyStatus::Pass => PolicyObservationStatus::Pass,
+        CapPolicyStatus::Fail => PolicyObservationStatus::Fail,
+        CapPolicyStatus::NoEvidence => PolicyObservationStatus::NoEvidence,
+        CapPolicyStatus::IncompleteEvidence => PolicyObservationStatus::IncompleteEvidence,
+    }
 }
 
 pub fn parse_cap_overrides(values: &[String]) -> anyhow::Result<BTreeMap<String, u64>> {

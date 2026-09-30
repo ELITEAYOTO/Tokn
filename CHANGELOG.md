@@ -586,3 +586,12 @@ P6 remains IN PROGRESS until one controlled real PreToolUse callback proves the 
 - source kind, source health, fallback recovery state and root session are recorded ;
 - RunnerResult exposes source_health_status and fallback_recovered ;
 - offline fixture validation PASS.
+
+## 2026-09-30 - P8 policy evidence orchestration
+
+- Runner now accepts optional typed policy evidence configuration ;
+- reuses P6 session policy inspection and P4 cap-policy observation across the RunGroup ;
+- persists policy-evidence.json without inferring enforcement from observed compliance ;
+- RunnerResult exposes policy observation/enforcement status separately ;
+- shared policy status mapping was deduplicated between inspect-policy and Runner ;
+- offline policy smoke test PASS.
