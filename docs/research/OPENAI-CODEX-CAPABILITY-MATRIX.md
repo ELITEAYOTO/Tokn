@@ -1,38 +1,75 @@
 # OpenAI / Codex Capability Matrix
 
-Status: RESEARCH
+Status: ACTIVE RESEARCH REFERENCE
 Last reviewed: 2026-09-30
-
-This file separates project observations from external capabilities that still
-require current official verification.
 
 Status vocabulary:
 ACCEPTED / VERIFIED / OBSERVED / RESEARCH / HYPOTHESIS / UNKNOWN / SUPERSEDED.
 
 | Capability | Status | Scope | Evidence / note |
 | --- | --- | --- | --- |
-| Codex hook lifecycle executed on the tested Desktop runtime | OBSERVED | Codex Desktop 0.158.0-alpha.2.1 | Local lifecycle logs showed hook/started and hook/completed |
-| PreToolUse for unified exec is mapped to Bash | OBSERVED | Tagged/local P6 investigation | Runtime/source investigation used by P6 |
+| Current local Codex CLI version | OBSERVED | Development PC | codex-cli 0.161.0-alpha.2 |
+| Current local Codex app version | OBSERVED | Development PC | OpenAI.Codex 26.928.1915.0 |
+| Standard session token_usage_record exists | OBSERVED | Recent local sessions | Direct JSONL inspection |
+| Local usage exposes input/cached/cache-write/output/reasoning/total | OBSERVED | Recent local sessions | Direct JSONL inspection |
+| Local per-turn and per-thread usage exists | OBSERVED | Recent local sessions | turn_token_usage + thread_token_usage |
+| Local context_window metadata exists | OBSERVED | Recent local sessions | session_meta.context_window |
+| Local model + effort metadata exists | OBSERVED | Recent local sessions | turn_context.model / effort |
+| Parent/fork agent relationship metadata exists | OBSERVED | Recent local sessions | parent_thread_id / forked_from_id / inter-agent metadata |
+| Top-level compacted record exists in compatible session shape | OBSERVED | Local session history | Seen in 2026-09-09 session |
+| Agents API usage may be null/unknown | VERIFIED | Agents API | Official observability docs |
+| Cached tokens are included in input tokens | VERIFIED | Agents API/API usage semantics | Official observability docs |
+| Reasoning tokens are included in output tokens | VERIFIED | Agents API/API usage semantics | Official observability docs |
+| Agents API turn usage can identify subagents | VERIFIED | Agents API | subagent_id documented |
+| Portable plugin root plugin.json | VERIFIED | Current plugin system | Official plugin packaging docs |
+| Portable skills/ directory | VERIFIED | Current plugin system | Official plugin packaging/skills docs |
+| Portable root mcp.json | VERIFIED | Current plugin system | Official plugin packaging docs |
+| .codex-plugin/plugin.json compatibility fallback | VERIFIED | Current plugin system | Official plugin packaging docs |
+| Local/repo plugin marketplaces | VERIFIED | Codex local clients | Official docs + local CLI |
+| codex plugin add/list/remove | OBSERVED | codex-cli 0.161.0-alpha.2 | Local CLI help |
+| codex plugin marketplace add/list/upgrade/remove | VERIFIED + OBSERVED | Current docs/local CLI | Official docs + local CLI help |
+| Codex /plugins plugin-browser flow | VERIFIED | Codex | Official OpenAI Developers plugin docs |
+| Skills can activate from ordinary task wording | VERIFIED | Current plugin skills | Official skill testing docs |
+| $skill-creator invocation | VERIFIED | Codex | Official skill docs |
+| Arbitrary /tokn command namespace | UNKNOWN | Future Tokn UX | Do not assume support |
+| Custom Tokn skill explicit syntax | RESEARCH | Future Tokn UX | Minimal installed-skill test still needed |
+| Plugin hooks supported | VERIFIED | Current plugin system | Official plugin architecture/docs |
+| hooks/hooks.json default discovery | VERIFIED | Current plugin system | Official packaging docs |
+| Plugin hooks require review/trust | VERIFIED | Codex | Non-managed hooks are skipped until trusted |
+| PLUGIN_ROOT / PLUGIN_DATA available | VERIFIED | Plugin hook runtime | Official packaging docs |
+| PreCompact hook exists in current docs | VERIFIED | Current hook docs | Supersedes older no-PreCompact assumption |
 | PreToolUse Bash exposes nested max_output_tokens | OBSERVED: NO | Codex Desktop 0.158.0-alpha.2.1 | P6 found command but not max_output_tokens |
-| Remaining product quota/budget is programmatically exposed | UNKNOWN | Codex/ChatGPT product | Do not infer from API pricing/rate-limit docs |
-| Cache-write telemetry is available to current Codex Desktop | UNKNOWN | Current target runtime | Requires current official/runtime verification |
-| Compaction/context-management events are directly observable | UNKNOWN | Current target runtime | Requires current official/runtime verification |
-| Exact custom skill invocation syntax | UNKNOWN | Current Codex Desktop/CLI | Do not freeze $skill or /tokn syntax yet |
-| Plugin bundle/manifest contract | RESEARCH | Current Codex plugin system | Needs fresh official verification before implementation |
-| Plugin-installed hooks and trust/approval behavior | RESEARCH | Current Codex plugin system | Needs fresh official verification before implementation |
-| MCP can call Tokn Engine directly without a service wrapper | UNKNOWN | Future integration | Requires prototype and official transport review |
-| Runtime/model version can be captured reliably per run | PARTIAL / OBSERVED | Existing Tokn evidence | Runtime/model metadata already exists, capability completeness not frozen |
-| Parent/subagent identity can be reconstructed | OBSERVED | V0.1 P2 | Golden Experiment 001: 1 parent + 3 descendants |
+| Remaining product quota visible to user via /status/dashboard | VERIFIED | Codex product | OpenAI Help Center |
+| Remaining product quota programmatically exposed | UNKNOWN | Codex/ChatGPT product | No stable Tokn contract verified |
+| Streamable HTTP MCP supported | VERIFIED | Plugin/MCP surfaces | Official plugin MCP docs |
+| Stdio MCP supported in OpenAI agent execution environments | VERIFIED | Agents/plugin API surfaces | Official MCP docs |
+| Best Tokn Plugin-to-Engine transport | RESEARCH | Future integration | Needs local prototype |
+| Parent/subagent identity can be reconstructed by Tokn | OBSERVED | V0.1 P2 | Golden Experiment 001 |
 | Token usage can be attributed across RunGroup | OBSERVED | V0.1 | Golden replay and reducers |
-| Actual output workspace can be resolved dynamically | OBSERVED | V0.1 P5 | Golden Experiment 001 selects B07-C |
-| Experiment causal validity is machine-reduced | ACCEPTED / OBSERVED | Tokn P7 | ADR-004 + passing fixtures/golden replay |
+| Actual output workspace can be resolved dynamically | OBSERVED | V0.1 P5 | Golden Experiment 001 |
+| Experiment causal validity is machine-reduced | ACCEPTED / OBSERVED | Tokn P7 | ADR-004 + fixtures/golden replay |
+
+## Source anchors
+
+Official OpenAI:
+- https://developers.openai.com/plugins/build/plugins
+- https://developers.openai.com/plugins/build/skills
+- https://developers.openai.com/plugins/concepts/plugins
+- https://developers.openai.com/docs/hooks
+- https://developers.openai.com/api/docs/guides/agents-api/observability
+- https://developers.openai.com/api/docs/guides/agents-api/tools/mcp
+- https://help.openai.com/en/articles/11369540-using-codex-with-your-chatgpt-plan
+
+Local evidence:
+development PC standard session JSONL + local codex CLI help on 2026-09-30.
 
 ## Interpretation rule
 
-A capability marked OBSERVED is limited to the stated runtime/evidence.
-It must not be generalized to later Codex versions or other models.
+VERIFIED is scoped to the named official surface.
+OBSERVED is scoped to the named runtime/evidence.
+Neither may be generalized silently to another runtime, model or product surface.
 
-A capability marked UNKNOWN must stay UNKNOWN until a source or test resolves it.
+UNKNOWN must stay UNKNOWN until a source or test resolves it.
 
-API token economics, cached-token pricing and ChatGPT/Codex product quota
-are separate concerns and must not be conflated.
+API token economics, cached-token pricing, context occupancy and
+ChatGPT/Codex product allowance are separate metrics.

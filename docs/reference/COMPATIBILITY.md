@@ -47,3 +47,12 @@ This is capability evidence, not a reason to couple the adapter permanently to v
 
 Future context-management/cache capabilities must be detected and recorded per runtime/config
 before Tokn compares runs that depend on them.
+
+## Current development runtime - 2026-09-30
+
+Observed on the Tokn development PC:
+- OpenAI.Codex app 26.928.1915.0 ;
+- codex-cli 0.161.0-alpha.2.
+
+This does not supersede the historical P6 evidence captured on 0.158.0-alpha.2.1.
+Capability decisions remain versioned and evidence-based rather than inferred from version strings alone.

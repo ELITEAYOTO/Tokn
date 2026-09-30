@@ -52,8 +52,11 @@ Its schema should follow the stable Runner boundary rather than precede it.
 ### Codex integration
 
 Codex integration is a thin activation/observation/presentation layer.
-Its exact primitives and transport remain RESEARCH until officially verified
-for the target runtime/version.
+
+Current OpenAI documentation verifies the core packaging surfaces:
+portable plugins, skills, MCP configuration and lifecycle hooks.
+Tokn's exact composition, explicit invocation UX and Plugin-to-Engine transport
+remain RESEARCH until a minimal local integration prototype is measured.
 
 ### Future Desktop UI
 

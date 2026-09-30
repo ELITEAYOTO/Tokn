@@ -539,3 +539,14 @@ P6 remains IN PROGRESS until one controlled real PreToolUse callback proves the 
 - canonical Context Packs now require a clean worktree and are emitted under outer context-packs/ ;
 - pack manifest records source branch/commit and per-file SHA-256 inventory ;
 - maintenance and manifest template now point to the reproducible generator.
+
+## 2026-09-30 - Codex plugin and telemetry research pass
+
+- verified current portable plugin packaging and compatibility fallback from official OpenAI docs ;
+- verified local/repo marketplace model and current Codex plugin CLI commands ;
+- verified plugin hook loading/trust model and current PreCompact hook documentation ;
+- observed current local runtime: codex-cli 0.161.0-alpha.2 / OpenAI.Codex 26.928.1915.0 ;
+- observed direct session JSONL token, cache-write, context-window, model/effort and agent-link metadata ;
+- verified user-facing Codex /status allowance visibility while keeping programmatic remaining budget UNKNOWN ;
+- updated research roadmap, capability matrix, open questions and target architecture ;
+- no research result blocks P8/P9.

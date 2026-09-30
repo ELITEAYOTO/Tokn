@@ -90,6 +90,8 @@ Il n'est plus la direction principale d'optimisation.
 
 - `research/2026-09-29-CONTEXT-CACHE-RESEARCH.md`
   Synthese revue : cache, contexte, Astra, Experiment 001, backlog de mesure.
+- `research/2026-09-30-CODEX-PLUGIN-TELEMETRY-RESEARCH.md`
+  Verification ciblee des surfaces telemetry, plugins, skills, hooks, MCP et quota.
 - `research/OPENAI-CODEX-CAPABILITY-MATRIX.md`
   Capacites OBSERVED / RESEARCH / UNKNOWN par runtime.
 - `research/OPEN-QUESTIONS.md`
