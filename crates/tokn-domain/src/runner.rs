@@ -134,6 +134,22 @@ pub struct RunnerQualityReport {
     pub error: Option<String>,
 }
 
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum RunnerRecoveryStatus {
+    #[default]
+    NotRequired,
+    RecoveredPartial,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct RunnerRecoveryReport {
+    pub status: RunnerRecoveryStatus,
+    pub removed_artifacts: Vec<String>,
+    pub policy_placements_mutated: bool,
+    pub message: String,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct RunnerRequest {
@@ -144,6 +160,10 @@ pub struct RunnerRequest {
     pub after_inventory: String,
     #[serde(default)]
     pub before_inventory: Option<String>,
+    #[serde(default)]
+    pub before_snapshot: Option<String>,
+    #[serde(default)]
+    pub after_snapshot: Option<String>,
     #[serde(default)]
     pub expected_outputs: Vec<String>,
     pub evidence_dir: String,
@@ -175,6 +195,13 @@ impl RunnerRequest {
             if value.trim().is_empty() {
                 errors.push(format!("{name} cannot be empty"));
             }
+        }
+
+        if self.before_snapshot.is_some() != self.after_snapshot.is_some() {
+            errors.push(
+                "before_snapshot and after_snapshot must either both be provided or both omitted"
+                    .into(),
+            );
         }
 
         if let Some(experiment) = &self.experiment
@@ -225,12 +252,17 @@ pub struct RunnerSourceReport {
 pub struct RunnerArtifactPaths {
     pub normalized_request: String,
     pub source_health: String,
+    pub session_evidence: String,
     pub run_group: String,
     pub workspace_resolution: String,
+    pub workspace_before_snapshot: Option<String>,
+    pub workspace_after_snapshot: Option<String>,
+    pub workspace_diff: Option<String>,
     pub policy_evidence: Option<String>,
     pub quality_gate: Option<String>,
     pub validity_input: Option<String>,
     pub validity_report: Option<String>,
+    pub recovery_report: String,
     pub runner_result: String,
 }
 
@@ -245,6 +277,10 @@ pub struct RunnerResult {
     pub root_session: String,
     pub evidence_dir: String,
     pub selected_workspace: Option<String>,
+    pub workspace_diff_added_count: Option<u64>,
+    pub workspace_diff_modified_count: Option<u64>,
+    pub workspace_diff_removed_count: Option<u64>,
+    pub workspace_diff_targets_selected_workspace: Option<bool>,
     pub root_terminal: TerminalStatus,
     pub agent_count: u64,
     pub policy_required: bool,
@@ -255,6 +291,7 @@ pub struct RunnerResult {
     pub validity_verdict: Option<ExperimentValidityVerdict>,
     pub causal_claims_allowed: Option<bool>,
     pub descriptive_metrics_allowed: Option<bool>,
+    pub recovery_status: RunnerRecoveryStatus,
     pub completed_steps: Vec<String>,
     pub pending_steps: Vec<String>,
     pub warnings: Vec<String>,
@@ -273,6 +310,8 @@ mod tests {
             source_root: "E:/fixture/source".into(),
             after_inventory: "after.json".into(),
             before_inventory: Some("before.json".into()),
+            before_snapshot: Some("before-snapshot.json".into()),
+            after_snapshot: Some("after-snapshot.json".into()),
             expected_outputs: vec![],
             evidence_dir: "evidence".into(),
             experiment: Some(RunnerExperimentRequest {

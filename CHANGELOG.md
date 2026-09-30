@@ -611,3 +611,14 @@ P6 remains IN PROGRESS until one controlled real PreToolUse callback proves the 
 - exposes verdict and claim gates in RunnerResult ;
 - runtime version is derived from AgentEvidence rather than AgentNode ;
 - offline instrumentation smoke test produces INSTRUMENTATION_ONLY with causal claims blocked.
+
+## 2026-09-30 - P8 Runner evidence lifecycle completed
+
+- added historical-compatible Rust workspace snapshot diff support ;
+- Runner imports before/after snapshots and validates the after snapshot against the resolved workspace ;
+- added normalized self-contained session-evidence.json without raw prompt copying ;
+- added recovery-report.json and safe cleanup of partial Runner-owned artifacts ;
+- completed evidence remains immutable and refuses overwrite ;
+- full synthetic pipeline now reaches COMPLETE with no pending steps ;
+- mismatch and interruption recovery cases validated ;
+- P8 remains IN PROGRESS pending the historical Experiment 001 golden replay.

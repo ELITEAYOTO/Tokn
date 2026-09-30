@@ -168,5 +168,21 @@ First Runner slice implemented:
 - no overwrite of Runner-owned evidence artifacts ;
 - offline fixture smoke test PASS.
 
-Still required before P8 DONE:
-self-contained session evidence/import, workspace diff evidence and recovery/interruption handling.
+Implementation P8 est maintenant feature-complete cote Runner.
+
+Avant P8 DONE :
+rejouer Experiment 001 avec le nouveau Runner et verifier automatiquement les faits golden.
+
+## P8 final implementation slice - 2026-09-30
+
+Delivered:
+- normalized self-contained session-evidence.json from exact RunGroup members ;
+- historical-compatible SHA-256 project snapshot diff reducer in Rust ;
+- imported before/after snapshots plus workspace-diff.json ;
+- after snapshot root must match the P5-selected workspace or the pipeline is BLOCKED ;
+- partial Runner artifacts are recoverable when runner-result.json is absent ;
+- completed evidence is immutable by default and overwrite is refused ;
+- Runner V0.1 does not install temporary policy files, so recovery records policy_placements_mutated=false ;
+- complete fixture pipeline now reports COMPLETE with no pending steps.
+
+P8 remains IN PROGRESS only until the new Runner passes the historical Experiment 001 golden replay.

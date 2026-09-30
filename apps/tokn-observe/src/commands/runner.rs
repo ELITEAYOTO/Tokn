@@ -3,8 +3,9 @@ use std::path::{Path, PathBuf};
 use std::process::Command as ProcessCommand;
 
 use tokn_analysis::{
-    WorkspaceInventory, WorkspaceResolutionStatus, build_policy_evidence_report, build_run_group,
-    check_cap_policy_tools, reduce_experiment_validity, resolve_workspace,
+    ProjectSnapshot, WorkspaceInventory, WorkspaceResolutionStatus, build_policy_evidence_report,
+    build_run_group, check_cap_policy_tools, diff_project_snapshots, reduce_experiment_validity,
+    resolve_workspace,
 };
 use tokn_codex::diagnostic::{DiagnosticBundle, assess_diagnostic_health};
 use tokn_codex::session::{assess_session_health, collect_session_group, inspect_session_policy};
@@ -12,9 +13,9 @@ use tokn_domain::{
     CaptureValidityInput, CausalControlsInput, ExperimentValidityInput, PolicyEvidenceReport,
     PolicyObservationStatus, PolicyObservationSummary, PolicyPlacement, PolicyValidityInput,
     QualityValidityInput, RunnerArtifactPaths, RunnerPipelineStatus, RunnerQualityReport,
-    RunnerQualityRequest, RunnerQualityStatus, RunnerRequest, RunnerResult, RunnerSourceReport,
-    RuntimeValidityInput, SourceKind, TaskValidityInput, ValidityCheckStatus,
-    WorkspaceValidityInput,
+    RunnerQualityRequest, RunnerQualityStatus, RunnerRecoveryReport, RunnerRecoveryStatus,
+    RunnerRequest, RunnerResult, RunnerSourceReport, RuntimeValidityInput, SourceKind,
+    TaskValidityInput, ValidityCheckStatus, WorkspaceValidityInput,
 };
 
 use super::common::{
@@ -36,8 +37,21 @@ pub fn run(request_path: &Path) -> anyhow::Result<()> {
 
     let normalized_request_path = evidence_dir.join("runner-request.json");
     let source_health_path = evidence_dir.join("source-health.json");
+    let session_evidence_path = evidence_dir.join("session-evidence.json");
     let run_group_path = evidence_dir.join("run-group.json");
     let workspace_resolution_path = evidence_dir.join("workspace-resolution.json");
+    let workspace_before_snapshot_path = request
+        .before_snapshot
+        .as_ref()
+        .map(|_| evidence_dir.join("workspace-before-snapshot.json"));
+    let workspace_after_snapshot_path = request
+        .after_snapshot
+        .as_ref()
+        .map(|_| evidence_dir.join("workspace-after-snapshot.json"));
+    let workspace_diff_path = request
+        .before_snapshot
+        .as_ref()
+        .map(|_| evidence_dir.join("workspace-diff.json"));
     let policy_evidence_path = request
         .policy
         .as_ref()
@@ -54,15 +68,27 @@ pub fn run(request_path: &Path) -> anyhow::Result<()> {
         .experiment
         .as_ref()
         .map(|_| evidence_dir.join("validity-report.json"));
+    let recovery_report_path = evidence_dir.join("recovery-report.json");
     let runner_result_path = evidence_dir.join("runner-result.json");
 
     let mut owned_paths = vec![
         normalized_request_path.as_path(),
         source_health_path.as_path(),
+        session_evidence_path.as_path(),
         run_group_path.as_path(),
         workspace_resolution_path.as_path(),
+        recovery_report_path.as_path(),
         runner_result_path.as_path(),
     ];
+    if let Some(path) = workspace_before_snapshot_path.as_deref() {
+        owned_paths.push(path);
+    }
+    if let Some(path) = workspace_after_snapshot_path.as_deref() {
+        owned_paths.push(path);
+    }
+    if let Some(path) = workspace_diff_path.as_deref() {
+        owned_paths.push(path);
+    }
     if let Some(path) = policy_evidence_path.as_deref() {
         owned_paths.push(path);
     }
@@ -75,9 +101,10 @@ pub fn run(request_path: &Path) -> anyhow::Result<()> {
     if let Some(path) = validity_report_path.as_deref() {
         owned_paths.push(path);
     }
-    refuse_overwrite(&owned_paths)?;
+    let recovery_report = prepare_owned_artifacts(&owned_paths, &runner_result_path)?;
 
     write_json(&normalized_request_path, &request)?;
+    write_json(&recovery_report_path, &recovery_report)?;
 
     let source_path = resolve_source(&request.source)?;
     let (requested_kind, requested_health) = if source_path.is_dir() {
@@ -106,6 +133,7 @@ pub fn run(request_path: &Path) -> anyhow::Result<()> {
     write_json(&source_health_path, &source_report)?;
 
     let grouped = collect_session_group(&root_session)?;
+    write_json(&session_evidence_path, &grouped.members)?;
     let group = build_run_group(&grouped.members, &grouped.root_thread_id)
         .ok_or_else(|| anyhow::anyhow!("failed to build run group"))?;
     write_json(&run_group_path, &group)?;
@@ -189,6 +217,41 @@ pub fn run(request_path: &Path) -> anyhow::Result<()> {
     );
     write_json(&workspace_resolution_path, &resolution)?;
 
+    let workspace_diff = if let (Some(before_source), Some(after_source)) =
+        (&request.before_snapshot, &request.after_snapshot)
+    {
+        let before_snapshot = read_project_snapshot(Path::new(before_source))?;
+        let after_snapshot = read_project_snapshot(Path::new(after_source))?;
+        let before_copy = workspace_before_snapshot_path
+            .as_deref()
+            .expect("before snapshot artifact path exists");
+        let after_copy = workspace_after_snapshot_path
+            .as_deref()
+            .expect("after snapshot artifact path exists");
+        write_json(before_copy, &before_snapshot)?;
+        write_json(after_copy, &after_snapshot)?;
+
+        let report = diff_project_snapshots(
+            &before_snapshot,
+            &after_snapshot,
+            before_copy.to_string_lossy().to_string(),
+            after_copy.to_string_lossy().to_string(),
+        );
+        write_json(
+            workspace_diff_path
+                .as_deref()
+                .expect("workspace diff path exists when snapshots are configured"),
+            &report,
+        )?;
+        let targets_selected_workspace = resolution
+            .selected_root
+            .as_deref()
+            .is_some_and(|selected| same_path(selected, &after_snapshot.project_root));
+        Some((report, targets_selected_workspace))
+    } else {
+        None
+    };
+
     let quality_report = if let Some(quality) = &request.quality {
         let report = run_quality_gate(quality, resolution.selected_root.as_deref());
         write_json(
@@ -241,12 +304,16 @@ pub fn run(request_path: &Path) -> anyhow::Result<()> {
                 } else {
                     ValidityCheckStatus::Fail
                 },
-                before_state_captured: if request.before_inventory.is_some() {
+                before_state_captured: if workspace_diff.is_some() {
                     ValidityCheckStatus::Pass
                 } else {
                     ValidityCheckStatus::Unknown
                 },
-                after_state_captured: ValidityCheckStatus::Pass,
+                after_state_captured: if workspace_diff.is_some() {
+                    ValidityCheckStatus::Pass
+                } else {
+                    ValidityCheckStatus::Unknown
+                },
                 quality_gate_on_output: quality_execution_validity(quality_report.as_ref()),
             },
             policy: PolicyValidityInput {
@@ -322,6 +389,12 @@ pub fn run(request_path: &Path) -> anyhow::Result<()> {
             resolution.status.as_str()
         ));
         RunnerPipelineStatus::Blocked
+    } else if workspace_diff
+        .as_ref()
+        .is_some_and(|(_, targets_selected)| !targets_selected)
+    {
+        warnings.push("after snapshot does not target the selected workspace".into());
+        RunnerPipelineStatus::Blocked
     } else if quality_report
         .as_ref()
         .is_some_and(|report| report.required && report.status == RunnerQualityStatus::Unavailable)
@@ -333,11 +406,16 @@ pub fn run(request_path: &Path) -> anyhow::Result<()> {
     };
 
     let mut completed_steps = vec![
+        "RECOVERY".into(),
         "SOURCE_HEALTH_REPORT".into(),
         "SESSION_ROOT_RESOLUTION".into(),
+        "SESSION_EVIDENCE".into(),
         "RUN_GROUP".into(),
         "WORKSPACE_RESOLUTION".into(),
     ];
+    if workspace_diff.is_some() {
+        completed_steps.push("WORKSPACE_DIFF".into());
+    }
     if policy_report.is_some() {
         completed_steps.push("POLICY_EVIDENCE".into());
     }
@@ -348,10 +426,20 @@ pub fn run(request_path: &Path) -> anyhow::Result<()> {
         completed_steps.push("EXPERIMENT_VALIDITY".into());
     }
 
-    let mut pending_steps = vec!["RECOVERY".into()];
-    if quality_report.is_none() {
-        pending_steps.insert(0, "QUALITY_GATE".into());
+    let mut pending_steps = Vec::new();
+    if workspace_diff.is_none() {
+        pending_steps.push("WORKSPACE_DIFF".into());
     }
+    if quality_report.is_none() {
+        pending_steps.push("QUALITY_GATE".into());
+    }
+
+    let pipeline_status =
+        if pipeline_status == RunnerPipelineStatus::CoreEvidenceReady && pending_steps.is_empty() {
+            RunnerPipelineStatus::Complete
+        } else {
+            pipeline_status
+        };
 
     let result = RunnerResult {
         schema_version: 1,
@@ -363,6 +451,18 @@ pub fn run(request_path: &Path) -> anyhow::Result<()> {
         root_session: root_session.to_string_lossy().to_string(),
         evidence_dir: evidence_dir.to_string_lossy().to_string(),
         selected_workspace: resolution.selected_root.clone(),
+        workspace_diff_added_count: workspace_diff
+            .as_ref()
+            .map(|(report, _)| report.added_count),
+        workspace_diff_modified_count: workspace_diff
+            .as_ref()
+            .map(|(report, _)| report.modified_count),
+        workspace_diff_removed_count: workspace_diff
+            .as_ref()
+            .map(|(report, _)| report.removed_count),
+        workspace_diff_targets_selected_workspace: workspace_diff
+            .as_ref()
+            .map(|(_, targets_selected)| *targets_selected),
         root_terminal: group.root_terminal,
         agent_count: group.agents.len() as u64,
         policy_required: request.policy.is_some(),
@@ -377,14 +477,25 @@ pub fn run(request_path: &Path) -> anyhow::Result<()> {
         descriptive_metrics_allowed: validity_report
             .as_ref()
             .map(|report| report.descriptive_metrics_allowed),
+        recovery_status: recovery_report.status,
         completed_steps,
         pending_steps,
         warnings,
         artifacts: RunnerArtifactPaths {
             normalized_request: normalized_request_path.to_string_lossy().to_string(),
             source_health: source_health_path.to_string_lossy().to_string(),
+            session_evidence: session_evidence_path.to_string_lossy().to_string(),
             run_group: run_group_path.to_string_lossy().to_string(),
             workspace_resolution: workspace_resolution_path.to_string_lossy().to_string(),
+            workspace_before_snapshot: workspace_before_snapshot_path
+                .as_ref()
+                .map(|path| path.to_string_lossy().to_string()),
+            workspace_after_snapshot: workspace_after_snapshot_path
+                .as_ref()
+                .map(|path| path.to_string_lossy().to_string()),
+            workspace_diff: workspace_diff_path
+                .as_ref()
+                .map(|path| path.to_string_lossy().to_string()),
             policy_evidence: policy_evidence_path
                 .as_ref()
                 .map(|path| path.to_string_lossy().to_string()),
@@ -397,6 +508,7 @@ pub fn run(request_path: &Path) -> anyhow::Result<()> {
             validity_report: validity_report_path
                 .as_ref()
                 .map(|path| path.to_string_lossy().to_string()),
+            recovery_report: recovery_report_path.to_string_lossy().to_string(),
             runner_result: runner_result_path.to_string_lossy().to_string(),
         },
     };
@@ -551,6 +663,22 @@ fn read_inventory(path: &Path) -> anyhow::Result<WorkspaceInventory> {
     Ok(serde_json::from_slice(bytes)?)
 }
 
+fn read_project_snapshot(path: &Path) -> anyhow::Result<ProjectSnapshot> {
+    let bytes = std::fs::read(path)?;
+    let bytes = bytes.strip_prefix(&[0xEF, 0xBB, 0xBF]).unwrap_or(&bytes);
+    Ok(serde_json::from_slice(bytes)?)
+}
+
+fn same_path(left: &str, right: &str) -> bool {
+    normalize_path(left) == normalize_path(right)
+}
+
+fn normalize_path(path: &str) -> String {
+    path.replace('/', "\\")
+        .trim_end_matches('\\')
+        .to_ascii_lowercase()
+}
+
 fn write_json(path: &Path, value: &impl serde::Serialize) -> anyhow::Result<()> {
     if let Some(parent) = path.parent() {
         std::fs::create_dir_all(parent)?;
@@ -559,19 +687,55 @@ fn write_json(path: &Path, value: &impl serde::Serialize) -> anyhow::Result<()> 
     Ok(())
 }
 
-fn refuse_overwrite(paths: &[&Path]) -> anyhow::Result<()> {
+fn prepare_owned_artifacts(
+    paths: &[&Path],
+    runner_result_path: &Path,
+) -> anyhow::Result<RunnerRecoveryReport> {
+    if runner_result_path.exists() {
+        anyhow::bail!(
+            "runner refuses to overwrite completed evidence: {}",
+            runner_result_path.display()
+        );
+    }
+
     let existing = paths
         .iter()
         .filter(|path| path.exists())
-        .map(|path| path.display().to_string())
+        .filter(|path| **path != runner_result_path)
+        .map(|path| (*path).to_path_buf())
         .collect::<Vec<_>>();
 
-    if existing.is_empty() {
-        Ok(())
-    } else {
-        anyhow::bail!(
-            "runner refuses to overwrite existing owned artifact(s): {}",
-            existing.join(", ")
-        )
+    let mut removed_artifacts = Vec::new();
+    for path in existing {
+        if !path.is_file() {
+            anyhow::bail!(
+                "runner owned artifact path is not a file: {}",
+                path.display()
+            );
+        }
+        std::fs::remove_file(&path)?;
+        removed_artifacts.push(path.to_string_lossy().to_string());
     }
+
+    let status = if removed_artifacts.is_empty() {
+        RunnerRecoveryStatus::NotRequired
+    } else {
+        RunnerRecoveryStatus::RecoveredPartial
+    };
+    let message = if removed_artifacts.is_empty() {
+        "no partial Runner artifacts required recovery; Runner V0.1 does not install temporary policy files"
+            .into()
+    } else {
+        format!(
+            "recovered {} partial Runner artifact(s); Runner V0.1 does not install temporary policy files",
+            removed_artifacts.len()
+        )
+    };
+
+    Ok(RunnerRecoveryReport {
+        status,
+        removed_artifacts,
+        policy_placements_mutated: false,
+        message,
+    })
 }
