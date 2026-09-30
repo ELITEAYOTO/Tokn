@@ -4,14 +4,17 @@ use std::process::Command as ProcessCommand;
 
 use tokn_analysis::{
     WorkspaceInventory, WorkspaceResolutionStatus, build_policy_evidence_report, build_run_group,
-    check_cap_policy_tools, resolve_workspace,
+    check_cap_policy_tools, reduce_experiment_validity, resolve_workspace,
 };
 use tokn_codex::diagnostic::{DiagnosticBundle, assess_diagnostic_health};
 use tokn_codex::session::{assess_session_health, collect_session_group, inspect_session_policy};
 use tokn_domain::{
-    PolicyObservationSummary, PolicyPlacement, RunnerArtifactPaths, RunnerPipelineStatus,
-    RunnerQualityReport, RunnerQualityRequest, RunnerQualityStatus, RunnerRequest, RunnerResult,
-    RunnerSourceReport, SourceKind,
+    CaptureValidityInput, CausalControlsInput, ExperimentValidityInput, PolicyEvidenceReport,
+    PolicyObservationStatus, PolicyObservationSummary, PolicyPlacement, PolicyValidityInput,
+    QualityValidityInput, RunnerArtifactPaths, RunnerPipelineStatus, RunnerQualityReport,
+    RunnerQualityRequest, RunnerQualityStatus, RunnerRequest, RunnerResult, RunnerSourceReport,
+    RuntimeValidityInput, SourceKind, TaskValidityInput, ValidityCheckStatus,
+    WorkspaceValidityInput,
 };
 
 use super::common::{
@@ -43,6 +46,14 @@ pub fn run(request_path: &Path) -> anyhow::Result<()> {
         .quality
         .as_ref()
         .map(|_| evidence_dir.join("quality-gate.json"));
+    let validity_input_path = request
+        .experiment
+        .as_ref()
+        .map(|_| evidence_dir.join("validity-input.json"));
+    let validity_report_path = request
+        .experiment
+        .as_ref()
+        .map(|_| evidence_dir.join("validity-report.json"));
     let runner_result_path = evidence_dir.join("runner-result.json");
 
     let mut owned_paths = vec![
@@ -56,6 +67,12 @@ pub fn run(request_path: &Path) -> anyhow::Result<()> {
         owned_paths.push(path);
     }
     if let Some(path) = quality_gate_path.as_deref() {
+        owned_paths.push(path);
+    }
+    if let Some(path) = validity_input_path.as_deref() {
+        owned_paths.push(path);
+    }
+    if let Some(path) = validity_report_path.as_deref() {
         owned_paths.push(path);
     }
     refuse_overwrite(&owned_paths)?;
@@ -185,6 +202,113 @@ pub fn run(request_path: &Path) -> anyhow::Result<()> {
         None
     };
 
+    let validity_report = if let Some(experiment) = &request.experiment {
+        let hints = &experiment.validity;
+        let input = ExperimentValidityInput {
+            experiment_id: experiment.experiment_id.clone(),
+            intent: experiment.intent,
+            capture: CaptureValidityInput {
+                model_usage: if group.totals.usage_records > 0 {
+                    ValidityCheckStatus::Pass
+                } else {
+                    ValidityCheckStatus::Unknown
+                },
+                tool_evidence: if grouped
+                    .members
+                    .iter()
+                    .any(|member| !member.tools.is_empty())
+                {
+                    ValidityCheckStatus::Pass
+                } else if hints.tool_evidence_required {
+                    ValidityCheckStatus::Unknown
+                } else {
+                    ValidityCheckStatus::NotRequired
+                },
+                source_health: requested_health.status,
+                fallback_recovered,
+                run_group_resolved: ValidityCheckStatus::Pass,
+            },
+            task: TaskValidityInput {
+                exact_task_captured: hints.exact_task_captured,
+                terminal_status: group.root_terminal,
+                completion_required: hints.completion_required,
+            },
+            workspace: WorkspaceValidityInput {
+                output_workspace_resolved: if resolution.status
+                    == WorkspaceResolutionStatus::Selected
+                {
+                    ValidityCheckStatus::Pass
+                } else {
+                    ValidityCheckStatus::Fail
+                },
+                before_state_captured: if request.before_inventory.is_some() {
+                    ValidityCheckStatus::Pass
+                } else {
+                    ValidityCheckStatus::Unknown
+                },
+                after_state_captured: ValidityCheckStatus::Pass,
+                quality_gate_on_output: quality_execution_validity(quality_report.as_ref()),
+            },
+            policy: PolicyValidityInput {
+                required: request.policy.is_some(),
+                identity_captured: if policy_report.is_some() {
+                    ValidityCheckStatus::Pass
+                } else {
+                    ValidityCheckStatus::NotRequired
+                },
+                exposure_known: policy_exposure_validity(policy_report.as_ref()),
+                compliance_evidence: policy_compliance_validity(policy_report.as_ref()),
+                enforcement_accurately_labeled: if policy_report.is_some() {
+                    hints.policy_enforcement_accurately_labeled
+                } else {
+                    ValidityCheckStatus::NotRequired
+                },
+            },
+            runtime: RuntimeValidityInput {
+                model_recorded: hints.model_recorded,
+                runtime_recorded: if grouped.members.iter().any(|member| {
+                    member
+                        .cli_version
+                        .as_deref()
+                        .is_some_and(|value| !value.trim().is_empty())
+                }) {
+                    ValidityCheckStatus::Pass
+                } else {
+                    ValidityCheckStatus::Unknown
+                },
+                configuration_recorded: hints.configuration_recorded,
+                comparable_to_baseline: hints.comparable_to_baseline,
+            },
+            quality: QualityValidityInput {
+                automated_gates: quality_acceptance_validity(quality_report.as_ref()),
+                human_or_host_gates: hints.human_or_host_gates,
+            },
+            causal: CausalControlsInput {
+                baseline_available: hints.baseline_available,
+                same_task: hints.same_task,
+                same_starting_workspace: hints.same_starting_workspace,
+                same_runtime_model_config: hints.same_runtime_model_config,
+                single_primary_variable: hints.single_primary_variable,
+            },
+        };
+        write_json(
+            validity_input_path
+                .as_deref()
+                .expect("validity input path exists when experiment is configured"),
+            &input,
+        )?;
+        let report = reduce_experiment_validity(&input);
+        write_json(
+            validity_report_path
+                .as_deref()
+                .expect("validity report path exists when experiment is configured"),
+            &report,
+        )?;
+        Some(report)
+    } else {
+        None
+    };
+
     let mut warnings = Vec::new();
     if requested_health.status != tokn_domain::SourceHealthStatus::Healthy {
         warnings.push(format!(
@@ -220,8 +344,11 @@ pub fn run(request_path: &Path) -> anyhow::Result<()> {
     if quality_report.is_some() {
         completed_steps.push("QUALITY_GATE".into());
     }
+    if validity_report.is_some() {
+        completed_steps.push("EXPERIMENT_VALIDITY".into());
+    }
 
-    let mut pending_steps = vec!["EXPERIMENT_VALIDITY".into(), "RECOVERY".into()];
+    let mut pending_steps = vec!["RECOVERY".into()];
     if quality_report.is_none() {
         pending_steps.insert(0, "QUALITY_GATE".into());
     }
@@ -243,6 +370,13 @@ pub fn run(request_path: &Path) -> anyhow::Result<()> {
         policy_enforcement_status: policy_report.as_ref().map(|report| report.enforcement),
         quality_required: request.quality.as_ref().map(|quality| quality.required),
         quality_status: quality_report.as_ref().map(|report| report.status),
+        validity_verdict: validity_report.as_ref().map(|report| report.verdict),
+        causal_claims_allowed: validity_report
+            .as_ref()
+            .map(|report| report.causal_claims_allowed),
+        descriptive_metrics_allowed: validity_report
+            .as_ref()
+            .map(|report| report.descriptive_metrics_allowed),
         completed_steps,
         pending_steps,
         warnings,
@@ -255,6 +389,12 @@ pub fn run(request_path: &Path) -> anyhow::Result<()> {
                 .as_ref()
                 .map(|path| path.to_string_lossy().to_string()),
             quality_gate: quality_gate_path
+                .as_ref()
+                .map(|path| path.to_string_lossy().to_string()),
+            validity_input: validity_input_path
+                .as_ref()
+                .map(|path| path.to_string_lossy().to_string()),
+            validity_report: validity_report_path
                 .as_ref()
                 .map(|path| path.to_string_lossy().to_string()),
             runner_result: runner_result_path.to_string_lossy().to_string(),
@@ -274,6 +414,49 @@ pub fn run(request_path: &Path) -> anyhow::Result<()> {
     println!("  evidence_dir: {}", result.evidence_dir);
 
     Ok(())
+}
+
+fn policy_exposure_validity(report: Option<&PolicyEvidenceReport>) -> ValidityCheckStatus {
+    match report {
+        Some(report) if report.parse_failures == 0 => ValidityCheckStatus::Pass,
+        Some(_) => ValidityCheckStatus::Unknown,
+        None => ValidityCheckStatus::NotRequired,
+    }
+}
+
+fn policy_compliance_validity(report: Option<&PolicyEvidenceReport>) -> ValidityCheckStatus {
+    match report.map(|report| report.observed.status) {
+        Some(PolicyObservationStatus::Pass | PolicyObservationStatus::Fail) => {
+            ValidityCheckStatus::Pass
+        }
+        Some(
+            PolicyObservationStatus::NoEvidence
+            | PolicyObservationStatus::IncompleteEvidence
+            | PolicyObservationStatus::NotEvaluated,
+        ) => ValidityCheckStatus::Unknown,
+        None => ValidityCheckStatus::NotRequired,
+    }
+}
+
+fn quality_execution_validity(report: Option<&RunnerQualityReport>) -> ValidityCheckStatus {
+    match report.map(|report| report.status) {
+        Some(RunnerQualityStatus::Pass | RunnerQualityStatus::Fail) => ValidityCheckStatus::Pass,
+        Some(RunnerQualityStatus::NotRequired) => ValidityCheckStatus::NotRequired,
+        Some(RunnerQualityStatus::Unavailable | RunnerQualityStatus::Unknown) | None => {
+            ValidityCheckStatus::Unknown
+        }
+    }
+}
+
+fn quality_acceptance_validity(report: Option<&RunnerQualityReport>) -> ValidityCheckStatus {
+    match report.map(|report| report.status) {
+        Some(RunnerQualityStatus::Pass) => ValidityCheckStatus::Pass,
+        Some(RunnerQualityStatus::Fail) => ValidityCheckStatus::Fail,
+        Some(RunnerQualityStatus::NotRequired) => ValidityCheckStatus::NotRequired,
+        Some(RunnerQualityStatus::Unavailable | RunnerQualityStatus::Unknown) | None => {
+            ValidityCheckStatus::Unknown
+        }
+    }
 }
 
 fn run_quality_gate(

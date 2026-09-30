@@ -603,3 +603,11 @@ P6 remains IN PROGRESS until one controlled real PreToolUse callback proves the 
 - persists quality-gate.json with PASS/FAIL/UNAVAILABLE/NOT_REQUIRED distinction ;
 - required unavailable gates block the pipeline without erasing evidence ;
 - offline PASS/FAIL/UNAVAILABLE smoke tests PASS.
+
+## 2026-09-30 - P8 validity reducer orchestration
+
+- Runner now builds and persists validity-input.json from measured evidence plus explicit non-inferable hints ;
+- calls the P7 validity reducer directly and persists validity-report.json ;
+- exposes verdict and claim gates in RunnerResult ;
+- runtime version is derived from AgentEvidence rather than AgentNode ;
+- offline instrumentation smoke test produces INSTRUMENTATION_ONLY with causal claims blocked.

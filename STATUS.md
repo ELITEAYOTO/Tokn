@@ -169,4 +169,4 @@ First Runner slice implemented:
 - offline fixture smoke test PASS.
 
 Still required before P8 DONE:
-validity reduction, self-contained session evidence/import and recovery/interruption handling.
+self-contained session evidence/import, workspace diff evidence and recovery/interruption handling.

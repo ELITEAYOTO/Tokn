@@ -3,8 +3,8 @@ use std::collections::BTreeMap;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    ExperimentIntent, PolicyEnforcementStatus, PolicyObservationStatus, SourceHealth,
-    SourceHealthStatus, SourceKind, TerminalStatus,
+    ExperimentIntent, ExperimentValidityVerdict, PolicyEnforcementStatus, PolicyObservationStatus,
+    SourceHealth, SourceHealthStatus, SourceKind, TerminalStatus, ValidityCheckStatus,
 };
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
@@ -33,6 +33,46 @@ impl RunnerPipelineStatus {
 pub struct RunnerExperimentRequest {
     pub experiment_id: String,
     pub intent: ExperimentIntent,
+    #[serde(default)]
+    pub validity: RunnerValidityHints,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct RunnerValidityHints {
+    pub exact_task_captured: ValidityCheckStatus,
+    pub completion_required: bool,
+    pub tool_evidence_required: bool,
+    pub policy_enforcement_accurately_labeled: ValidityCheckStatus,
+    pub model_recorded: ValidityCheckStatus,
+    pub configuration_recorded: ValidityCheckStatus,
+    pub comparable_to_baseline: ValidityCheckStatus,
+    pub human_or_host_gates: ValidityCheckStatus,
+    pub baseline_available: ValidityCheckStatus,
+    pub same_task: ValidityCheckStatus,
+    pub same_starting_workspace: ValidityCheckStatus,
+    pub same_runtime_model_config: ValidityCheckStatus,
+    pub single_primary_variable: ValidityCheckStatus,
+}
+
+impl Default for RunnerValidityHints {
+    fn default() -> Self {
+        Self {
+            exact_task_captured: ValidityCheckStatus::Unknown,
+            completion_required: true,
+            tool_evidence_required: true,
+            policy_enforcement_accurately_labeled: ValidityCheckStatus::Unknown,
+            model_recorded: ValidityCheckStatus::Unknown,
+            configuration_recorded: ValidityCheckStatus::Unknown,
+            comparable_to_baseline: ValidityCheckStatus::Unknown,
+            human_or_host_gates: ValidityCheckStatus::Unknown,
+            baseline_available: ValidityCheckStatus::Unknown,
+            same_task: ValidityCheckStatus::Unknown,
+            same_starting_workspace: ValidityCheckStatus::Unknown,
+            same_runtime_model_config: ValidityCheckStatus::Unknown,
+            single_primary_variable: ValidityCheckStatus::Unknown,
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -189,6 +229,8 @@ pub struct RunnerArtifactPaths {
     pub workspace_resolution: String,
     pub policy_evidence: Option<String>,
     pub quality_gate: Option<String>,
+    pub validity_input: Option<String>,
+    pub validity_report: Option<String>,
     pub runner_result: String,
 }
 
@@ -210,6 +252,9 @@ pub struct RunnerResult {
     pub policy_enforcement_status: Option<PolicyEnforcementStatus>,
     pub quality_required: Option<bool>,
     pub quality_status: Option<RunnerQualityStatus>,
+    pub validity_verdict: Option<ExperimentValidityVerdict>,
+    pub causal_claims_allowed: Option<bool>,
+    pub descriptive_metrics_allowed: Option<bool>,
     pub completed_steps: Vec<String>,
     pub pending_steps: Vec<String>,
     pub warnings: Vec<String>,
@@ -233,6 +278,7 @@ mod tests {
             experiment: Some(RunnerExperimentRequest {
                 experiment_id: "002-instrumentation".into(),
                 intent: ExperimentIntent::Instrumentation,
+                validity: RunnerValidityHints::default(),
             }),
             policy: Some(RunnerPolicyRequest {
                 policy_id: "fixture-policy".into(),
