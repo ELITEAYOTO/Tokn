@@ -2,7 +2,7 @@
 
 Status: ACTIVE EXECUTION PLAN
 Date: 2026-09-30
-Current state: P0-P7 DONE / P8 NEXT
+Current state: P0-P8 DONE / P9 IN PROGRESS
 
 ## Purpose
 
@@ -36,7 +36,7 @@ P8 Runner
 
 ## Phase A - P8 Runner V0.1
 
-Status: NEXT
+Status: DONE
 Priority: BLOCKER
 
 Goal:
@@ -138,7 +138,7 @@ without manual timestamp heuristics or forensic repair.
 
 ## Phase B - P9 V0.1 release validation
 
-Status: AFTER P8
+Status: IN PROGRESS
 Priority: BLOCKER
 
 Run:
@@ -338,7 +338,7 @@ but they are not a reason to skip measurement hardening.
 
 ## Current decision
 
-Immediate engineering work is P8 only.
+Immediate engineering work is P9 release validation only.
 
 Within P8, start with:
 1. inspect current Experiment 001 START/FINISH/RECOVER orchestration;

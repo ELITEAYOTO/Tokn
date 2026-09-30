@@ -42,8 +42,8 @@ P4 session tool adapter : DONE
 P5 dynamic workspace : DONE
 P6 policy evidence/runtime capability : DONE
 P7 experiment validity reducer : DONE
-P8 runner V0.1 : IN PROGRESS
-P9 golden replay/release validation : TODO
+P8 runner V0.1 : DONE
+P9 golden replay/release validation : IN PROGRESS
 
 ### P6 closure
 

@@ -622,3 +622,11 @@ P6 remains IN PROGRESS until one controlled real PreToolUse callback proves the 
 - full synthetic pipeline now reaches COMPLETE with no pending steps ;
 - mismatch and interruption recovery cases validated ;
 - P8 remains IN PROGRESS pending the historical Experiment 001 golden replay.
+
+## 2026-09-30 - P8 closed, P9 deterministic replay started
+
+- P8 Runner V0.1 is now DONE from implementation and offline acceptance evidence.
+- Historical Experiment 001 whole-run replay is owned by P9 release validation.
+- RunnerRequest now accepts optional `session_candidates` for deterministic offline RunGroup reconstruction.
+- Normal execution still uses the Codex session index when `session_candidates` is empty.
+- Current live B07-C workspace no longer reproduces the historical 13/4/0 snapshot diff (current observation: 11/8/0), so P9 will use a repo-contained immutable golden fixture rather than mutable external workspace state.

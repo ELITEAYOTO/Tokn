@@ -6,7 +6,7 @@ Binaire/Cargo : **V0.0 / 0.0.0**
 
 ## Resume
 
-**P0-P7 DONE. P8 est IN PROGRESS. P9 reste a faire.**
+**P0-P8 DONE. P9 est IN PROGRESS.**
 
 Le projet est revenu sur une direction unique :
 mesurer l'efficacite du contexte sans reduire la capacite d'Astra.
@@ -45,8 +45,8 @@ P4 - session tool adapter : DONE
 P5 - dynamic workspace tracking : DONE
 P6 - policy evidence/runtime capability research : DONE
 P7 - experiment validity reducer : DONE
-P8 - runner V0.1 : IN PROGRESS
-P9 - golden replay/release validation : TODO
+P8 - runner V0.1 : DONE
+P9 - golden replay/release validation : IN PROGRESS
 
 P6 est ferme avec une limitation connue :
 Codex Desktop 0.158.0-alpha.2.1 ne transmet pas `max_output_tokens`
@@ -127,7 +127,7 @@ Tous commencent observation-only.
 
 ## Prochaine action
 
-Implementer **P8 - Runner V0.1 self-contained**.
+Executer **P9 - golden replay et release validation V0.1**.
 
 Chemin d'execution detaille :
 `docs/plans/IMPLEMENTATION-PATH.md`.
@@ -185,4 +185,4 @@ Delivered:
 - Runner V0.1 does not install temporary policy files, so recovery records policy_placements_mutated=false ;
 - complete fixture pipeline now reports COMPLETE with no pending steps.
 
-P8 remains IN PROGRESS only until the new Runner passes the historical Experiment 001 golden replay.
+P8 is DONE: the Runner contract, complete evidence lifecycle, fail-closed behavior and recovery acceptance tests pass. The historical Experiment 001 golden replay is a P9 release-validation gate.

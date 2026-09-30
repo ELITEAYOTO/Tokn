@@ -156,6 +156,8 @@ pub struct RunnerRequest {
     pub schema_version: u64,
     pub run_id: String,
     pub source: String,
+    #[serde(default)]
+    pub session_candidates: Vec<String>,
     pub source_root: String,
     pub after_inventory: String,
     #[serde(default)]
@@ -195,6 +197,14 @@ impl RunnerRequest {
             if value.trim().is_empty() {
                 errors.push(format!("{name} cannot be empty"));
             }
+        }
+
+        if self
+            .session_candidates
+            .iter()
+            .any(|path| path.trim().is_empty())
+        {
+            errors.push("session_candidates cannot contain empty paths".into());
         }
 
         if self.before_snapshot.is_some() != self.after_snapshot.is_some() {
@@ -307,6 +317,7 @@ mod tests {
             schema_version: 1,
             run_id: "fixture-run".into(),
             source: "fixture.jsonl".into(),
+            session_candidates: vec!["child-a.jsonl".into(), "child-b.jsonl".into()],
             source_root: "E:/fixture/source".into(),
             after_inventory: "after.json".into(),
             before_inventory: Some("before.json".into()),

@@ -8,7 +8,10 @@ use tokn_analysis::{
     resolve_workspace,
 };
 use tokn_codex::diagnostic::{DiagnosticBundle, assess_diagnostic_health};
-use tokn_codex::session::{assess_session_health, collect_session_group, inspect_session_policy};
+use tokn_codex::session::{
+    assess_session_health, collect_session_group, collect_session_group_from_files,
+    inspect_session_policy,
+};
 use tokn_domain::{
     CaptureValidityInput, CausalControlsInput, ExperimentValidityInput, PolicyEvidenceReport,
     PolicyObservationStatus, PolicyObservationSummary, PolicyPlacement, PolicyValidityInput,
@@ -132,7 +135,16 @@ pub fn run(request_path: &Path) -> anyhow::Result<()> {
     };
     write_json(&source_health_path, &source_report)?;
 
-    let grouped = collect_session_group(&root_session)?;
+    let grouped = if request.session_candidates.is_empty() {
+        collect_session_group(&root_session)?
+    } else {
+        let candidates = request
+            .session_candidates
+            .iter()
+            .map(PathBuf::from)
+            .collect::<Vec<_>>();
+        collect_session_group_from_files(&root_session, &candidates)?
+    };
     write_json(&session_evidence_path, &grouped.members)?;
     let group = build_run_group(&grouped.members, &grouped.root_thread_id)
         .ok_or_else(|| anyhow::anyhow!("failed to build run group"))?;
