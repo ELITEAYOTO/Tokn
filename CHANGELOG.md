@@ -510,3 +510,14 @@ P6 remains IN PROGRESS until one controlled real PreToolUse callback proves the 
 - full workspace tests PASS, workspace Clippy -D warnings PASS, release tokn-observe build PASS ;
 - real release CLI fixture matrix PASS: causal, descriptive-only, incomplete-task, invalid-capture, plus Experiment 001 golden ;
 - P7 closed DONE ; P8 is NEXT.
+
+## 2026-09-30 - Hybrid architecture and Context Pack groundwork
+
+- accepted ADR-005: Rust Engine remains the analytical source of truth; integrations stay thin ;
+- added target architecture for Engine / Store / runtime adapters / future Desktop / future Optimizer ;
+- added external research roadmap that does not block P8/P9 by default ;
+- added Codex capability matrix separating OBSERVED, RESEARCH and UNKNOWN ;
+- added compact OPEN-QUESTIONS registry ;
+- added Context Pack manifest template with Git-as-source-of-truth and integrity rules ;
+- corrected Experiment 002 dependency wording from P7-P9 to P8-P9 now that P7 is DONE ;
+- documentation index updated for the new durable references.

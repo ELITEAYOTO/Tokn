@@ -60,7 +60,7 @@ La dette JSONL live du probe est non bloquante et reste au backlog.
 
 ## M3 - Experiment 002
 
-Statut : BLOCKED BY P7-P9
+Statut : BLOCKED BY P8-P9
 
 But :
 valider V0.1 end-to-end sur une petite tache reelle.

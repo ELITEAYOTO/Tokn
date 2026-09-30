@@ -1,6 +1,6 @@
 # Tokn Documentation Index
 
-Derniere mise a jour : **2026-09-29**
+Derniere mise a jour : **2026-09-30**
 
 Ce fichier est le point d'entree documentaire unique.
 
@@ -39,6 +39,8 @@ Un document historique ne doit pas remplacer une source de verite courante.
   Optimiser le contexte inutile, pas la capacite du modele.
 - `decisions/ADR-004-EXPERIMENT-VALIDITY.md`
   Seule une preuve experimentale suffisante autorise une conclusion causale.
+- `decisions/ADR-005-HYBRID-TOKN-ARCHITECTURE.md`
+  Le moteur Rust reste la source de verite analytique ; les integrations restent des couches minces.
 
 ## Design - mesure
 
@@ -63,12 +65,20 @@ Il n'est plus la direction principale d'optimisation.
 ## Design - produit futur
 
 - `design/FIRST-TOOL-ANALYZER-VISION.md`
+- `design/TARGET-ARCHITECTURE.md`
+  Architecture cible Engine / Store / adapters / integrations.
 - `strategy/CONTEXT-EFFICIENCY-STRATEGY.md`
 
 ## Research
 
 - `research/2026-09-29-CONTEXT-CACHE-RESEARCH.md`
   Synthese revue : cache, contexte, Astra, Experiment 001, backlog de mesure.
+- `research/OPENAI-CODEX-CAPABILITY-MATRIX.md`
+  Capacites OBSERVED / RESEARCH / UNKNOWN par runtime.
+- `research/OPEN-QUESTIONS.md`
+  Registre compact des inconnues ayant un impact architectural/analytique.
+- `plans/RESEARCH-ROADMAP.md`
+  Ordre des recherches externes sans bloquer P8/P9.
 
 Les research docs peuvent contenir des hypotheses.
 Elles ne deviennent des decisions qu'apres ADR/ROADMAP.
