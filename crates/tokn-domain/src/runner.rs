@@ -48,6 +48,52 @@ pub struct RunnerPolicyRequest {
     pub enforcement: PolicyEnforcementStatus,
 }
 
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum RunnerQualityStatus {
+    Pass,
+    Fail,
+    Unavailable,
+    NotRequired,
+    #[default]
+    Unknown,
+}
+
+impl RunnerQualityStatus {
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::Pass => "PASS",
+            Self::Fail => "FAIL",
+            Self::Unavailable => "UNAVAILABLE",
+            Self::NotRequired => "NOT_REQUIRED",
+            Self::Unknown => "UNKNOWN",
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct RunnerQualityRequest {
+    pub required: bool,
+    #[serde(default)]
+    pub program: Option<String>,
+    #[serde(default)]
+    pub args: Vec<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct RunnerQualityReport {
+    pub required: bool,
+    pub status: RunnerQualityStatus,
+    pub workspace: Option<String>,
+    pub program: Option<String>,
+    pub args: Vec<String>,
+    pub exit_code: Option<i32>,
+    pub stdout: String,
+    pub stderr: String,
+    pub error: Option<String>,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct RunnerRequest {
@@ -65,6 +111,8 @@ pub struct RunnerRequest {
     pub experiment: Option<RunnerExperimentRequest>,
     #[serde(default)]
     pub policy: Option<RunnerPolicyRequest>,
+    #[serde(default)]
+    pub quality: Option<RunnerQualityRequest>,
 }
 
 impl RunnerRequest {
@@ -107,6 +155,19 @@ impl RunnerRequest {
             }
         }
 
+        if let Some(quality) = &self.quality {
+            if quality
+                .program
+                .as_deref()
+                .is_some_and(|program| program.trim().is_empty())
+            {
+                errors.push("quality.program cannot be empty when provided".into());
+            }
+            if quality.required && quality.program.is_none() {
+                errors.push("quality.program is required when quality.required=true".into());
+            }
+        }
+
         errors
     }
 }
@@ -127,6 +188,7 @@ pub struct RunnerArtifactPaths {
     pub run_group: String,
     pub workspace_resolution: String,
     pub policy_evidence: Option<String>,
+    pub quality_gate: Option<String>,
     pub runner_result: String,
 }
 
@@ -146,6 +208,8 @@ pub struct RunnerResult {
     pub policy_required: bool,
     pub policy_observation_status: Option<PolicyObservationStatus>,
     pub policy_enforcement_status: Option<PolicyEnforcementStatus>,
+    pub quality_required: Option<bool>,
+    pub quality_status: Option<RunnerQualityStatus>,
     pub completed_steps: Vec<String>,
     pub pending_steps: Vec<String>,
     pub warnings: Vec<String>,
@@ -176,6 +240,11 @@ mod tests {
                 policy_paths: vec!["E:/fixture/source/AGENTS.md".into()],
                 caps: BTreeMap::from([("file_read".into(), 5000)]),
                 enforcement: PolicyEnforcementStatus::NotProven,
+            }),
+            quality: Some(RunnerQualityRequest {
+                required: true,
+                program: Some("fixture-quality".into()),
+                args: vec!["--check".into()],
             }),
         }
     }

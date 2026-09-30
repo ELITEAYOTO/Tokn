@@ -1,5 +1,6 @@
 use std::fs::File;
 use std::path::{Path, PathBuf};
+use std::process::Command as ProcessCommand;
 
 use tokn_analysis::{
     WorkspaceInventory, WorkspaceResolutionStatus, build_policy_evidence_report, build_run_group,
@@ -9,7 +10,8 @@ use tokn_codex::diagnostic::{DiagnosticBundle, assess_diagnostic_health};
 use tokn_codex::session::{assess_session_health, collect_session_group, inspect_session_policy};
 use tokn_domain::{
     PolicyObservationSummary, PolicyPlacement, RunnerArtifactPaths, RunnerPipelineStatus,
-    RunnerRequest, RunnerResult, RunnerSourceReport, SourceKind,
+    RunnerQualityReport, RunnerQualityRequest, RunnerQualityStatus, RunnerRequest, RunnerResult,
+    RunnerSourceReport, SourceKind,
 };
 
 use super::common::{
@@ -37,6 +39,10 @@ pub fn run(request_path: &Path) -> anyhow::Result<()> {
         .policy
         .as_ref()
         .map(|_| evidence_dir.join("policy-evidence.json"));
+    let quality_gate_path = request
+        .quality
+        .as_ref()
+        .map(|_| evidence_dir.join("quality-gate.json"));
     let runner_result_path = evidence_dir.join("runner-result.json");
 
     let mut owned_paths = vec![
@@ -47,6 +53,9 @@ pub fn run(request_path: &Path) -> anyhow::Result<()> {
         runner_result_path.as_path(),
     ];
     if let Some(path) = policy_evidence_path.as_deref() {
+        owned_paths.push(path);
+    }
+    if let Some(path) = quality_gate_path.as_deref() {
         owned_paths.push(path);
     }
     refuse_overwrite(&owned_paths)?;
@@ -163,6 +172,19 @@ pub fn run(request_path: &Path) -> anyhow::Result<()> {
     );
     write_json(&workspace_resolution_path, &resolution)?;
 
+    let quality_report = if let Some(quality) = &request.quality {
+        let report = run_quality_gate(quality, resolution.selected_root.as_deref());
+        write_json(
+            quality_gate_path
+                .as_deref()
+                .expect("quality gate path exists when quality is configured"),
+            &report,
+        )?;
+        Some(report)
+    } else {
+        None
+    };
+
     let mut warnings = Vec::new();
     if requested_health.status != tokn_domain::SourceHealthStatus::Healthy {
         warnings.push(format!(
@@ -170,14 +192,20 @@ pub fn run(request_path: &Path) -> anyhow::Result<()> {
             requested_health.status.as_str()
         ));
     }
-    let pipeline_status = if resolution.status == WorkspaceResolutionStatus::Selected {
-        RunnerPipelineStatus::CoreEvidenceReady
-    } else {
+    let pipeline_status = if resolution.status != WorkspaceResolutionStatus::Selected {
         warnings.push(format!(
             "workspace resolution is {}; downstream P8 steps are blocked",
             resolution.status.as_str()
         ));
         RunnerPipelineStatus::Blocked
+    } else if quality_report
+        .as_ref()
+        .is_some_and(|report| report.required && report.status == RunnerQualityStatus::Unavailable)
+    {
+        warnings.push("required quality gate is unavailable".into());
+        RunnerPipelineStatus::Blocked
+    } else {
+        RunnerPipelineStatus::CoreEvidenceReady
     };
 
     let mut completed_steps = vec![
@@ -188,6 +216,14 @@ pub fn run(request_path: &Path) -> anyhow::Result<()> {
     ];
     if policy_report.is_some() {
         completed_steps.push("POLICY_EVIDENCE".into());
+    }
+    if quality_report.is_some() {
+        completed_steps.push("QUALITY_GATE".into());
+    }
+
+    let mut pending_steps = vec!["EXPERIMENT_VALIDITY".into(), "RECOVERY".into()];
+    if quality_report.is_none() {
+        pending_steps.insert(0, "QUALITY_GATE".into());
     }
 
     let result = RunnerResult {
@@ -205,12 +241,10 @@ pub fn run(request_path: &Path) -> anyhow::Result<()> {
         policy_required: request.policy.is_some(),
         policy_observation_status: policy_report.as_ref().map(|report| report.observed.status),
         policy_enforcement_status: policy_report.as_ref().map(|report| report.enforcement),
+        quality_required: request.quality.as_ref().map(|quality| quality.required),
+        quality_status: quality_report.as_ref().map(|report| report.status),
         completed_steps,
-        pending_steps: vec![
-            "QUALITY_GATE".into(),
-            "EXPERIMENT_VALIDITY".into(),
-            "RECOVERY".into(),
-        ],
+        pending_steps,
         warnings,
         artifacts: RunnerArtifactPaths {
             normalized_request: normalized_request_path.to_string_lossy().to_string(),
@@ -218,6 +252,9 @@ pub fn run(request_path: &Path) -> anyhow::Result<()> {
             run_group: run_group_path.to_string_lossy().to_string(),
             workspace_resolution: workspace_resolution_path.to_string_lossy().to_string(),
             policy_evidence: policy_evidence_path
+                .as_ref()
+                .map(|path| path.to_string_lossy().to_string()),
+            quality_gate: quality_gate_path
                 .as_ref()
                 .map(|path| path.to_string_lossy().to_string()),
             runner_result: runner_result_path.to_string_lossy().to_string(),
@@ -237,6 +274,86 @@ pub fn run(request_path: &Path) -> anyhow::Result<()> {
     println!("  evidence_dir: {}", result.evidence_dir);
 
     Ok(())
+}
+
+fn run_quality_gate(
+    request: &RunnerQualityRequest,
+    workspace: Option<&str>,
+) -> RunnerQualityReport {
+    if !request.required && request.program.is_none() {
+        return RunnerQualityReport {
+            required: false,
+            status: RunnerQualityStatus::NotRequired,
+            workspace: workspace.map(str::to_string),
+            program: None,
+            args: request.args.clone(),
+            exit_code: None,
+            stdout: String::new(),
+            stderr: String::new(),
+            error: None,
+        };
+    }
+
+    let Some(workspace) = workspace else {
+        return RunnerQualityReport {
+            required: request.required,
+            status: RunnerQualityStatus::Unavailable,
+            workspace: None,
+            program: request.program.clone(),
+            args: request.args.clone(),
+            exit_code: None,
+            stdout: String::new(),
+            stderr: String::new(),
+            error: Some("quality gate cannot run without a selected workspace".into()),
+        };
+    };
+
+    let Some(program) = request.program.as_deref() else {
+        return RunnerQualityReport {
+            required: request.required,
+            status: RunnerQualityStatus::Unavailable,
+            workspace: Some(workspace.to_string()),
+            program: None,
+            args: request.args.clone(),
+            exit_code: None,
+            stdout: String::new(),
+            stderr: String::new(),
+            error: Some("quality gate program is unavailable".into()),
+        };
+    };
+
+    match ProcessCommand::new(program)
+        .args(&request.args)
+        .current_dir(workspace)
+        .output()
+    {
+        Ok(output) => RunnerQualityReport {
+            required: request.required,
+            status: if output.status.success() {
+                RunnerQualityStatus::Pass
+            } else {
+                RunnerQualityStatus::Fail
+            },
+            workspace: Some(workspace.to_string()),
+            program: Some(program.to_string()),
+            args: request.args.clone(),
+            exit_code: output.status.code(),
+            stdout: String::from_utf8_lossy(&output.stdout).into_owned(),
+            stderr: String::from_utf8_lossy(&output.stderr).into_owned(),
+            error: None,
+        },
+        Err(error) => RunnerQualityReport {
+            required: request.required,
+            status: RunnerQualityStatus::Unavailable,
+            workspace: Some(workspace.to_string()),
+            program: Some(program.to_string()),
+            args: request.args.clone(),
+            exit_code: None,
+            stdout: String::new(),
+            stderr: String::new(),
+            error: Some(error.to_string()),
+        },
+    }
 }
 
 fn read_request(path: &Path) -> anyhow::Result<RunnerRequest> {

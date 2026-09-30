@@ -595,3 +595,11 @@ P6 remains IN PROGRESS until one controlled real PreToolUse callback proves the 
 - RunnerResult exposes policy observation/enforcement status separately ;
 - shared policy status mapping was deduplicated between inspect-policy and Runner ;
 - offline policy smoke test PASS.
+
+## 2026-09-30 - P8 quality gate orchestration
+
+- added typed Runner quality request/report contract ;
+- executes quality commands directly in the resolved output workspace ;
+- persists quality-gate.json with PASS/FAIL/UNAVAILABLE/NOT_REQUIRED distinction ;
+- required unavailable gates block the pipeline without erasing evidence ;
+- offline PASS/FAIL/UNAVAILABLE smoke tests PASS.
