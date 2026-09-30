@@ -5,7 +5,7 @@ Derniere mise a jour : **2026-09-30**
 ## Etat de depart
 
 P0-P7 : DONE
-P8 : NEXT
+P8 : IN PROGRESS
 P9 : TODO
 Experiment 002 : BLOCKED
 

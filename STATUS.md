@@ -6,7 +6,7 @@ Binaire/Cargo : **V0.0 / 0.0.0**
 
 ## Resume
 
-**P0-P7 DONE. P8 est NEXT. P9 reste a faire.**
+**P0-P7 DONE. P8 est IN PROGRESS. P9 reste a faire.**
 
 Le projet est revenu sur une direction unique :
 mesurer l'efficacite du contexte sans reduire la capacite d'Astra.
@@ -45,7 +45,7 @@ P4 - session tool adapter : DONE
 P5 - dynamic workspace tracking : DONE
 P6 - policy evidence/runtime capability research : DONE
 P7 - experiment validity reducer : DONE
-P8 - runner V0.1 : NEXT
+P8 - runner V0.1 : IN PROGRESS
 P9 - golden replay/release validation : TODO
 
 P6 est ferme avec une limitation connue :
@@ -155,3 +155,18 @@ Ordre : `ROADMAP.md`
 Implementation V0.1 : `docs/plans/V0.1-IMPLEMENTATION-PLAN.md`
 Tests : `docs/plans/V0.1-TEST-MATRIX.md`
 Documentation map : `docs/INDEX.md`
+
+## P8 implementation progress - 2026-09-30
+
+First Runner slice implemented:
+- shared RunnerRequest / RunnerResult contract ;
+- `tokn-observe runner <request.json>` CLI ;
+- session root resolution + RunGroup reconstruction ;
+- workspace resolution from before/after inventory ;
+- deterministic evidence artifacts: runner-request.json, run-group.json, workspace-resolution.json, runner-result.json ;
+- explicit CORE_EVIDENCE_READY / BLOCKED pipeline state ;
+- no overwrite of Runner-owned evidence artifacts ;
+- offline fixture smoke test PASS.
+
+Still required before P8 DONE:
+source-health report persistence, policy evidence, quality gate execution, validity reduction, self-contained session evidence/import and recovery/interruption handling.

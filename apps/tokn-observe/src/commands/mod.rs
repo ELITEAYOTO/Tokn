@@ -13,6 +13,7 @@ mod inspect_policy;
 mod inspect_schema;
 mod report;
 mod resolve_workspace;
+mod runner;
 mod sessions;
 mod simulate_caps;
 
@@ -30,6 +31,7 @@ pub fn run(cli: Cli) -> anyhow::Result<()> {
             source,
             output_json,
         } => analyze_run::run(&source, output_json.as_deref()),
+        Command::Runner { request } => runner::run(&request),
         Command::EvaluateValidity { input, output_json } => {
             evaluate_validity::run(&input, output_json.as_deref())
         }

@@ -42,6 +42,9 @@ pub enum Command {
         #[arg(long)]
         output_json: Option<PathBuf>,
     },
+    Runner {
+        request: PathBuf,
+    },
     InspectPolicy {
         source: String,
         #[arg(long, default_value = "policy")]

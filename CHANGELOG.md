@@ -569,3 +569,13 @@ P6 remains IN PROGRESS until one controlled real PreToolUse callback proves the 
 - updated target architecture with the preferred process-bound local MCP prototype after P8/P9 ;
 - kept Store/plugin/GUI/active optimization explicitly out of P8 ;
 - immediate engineering work is now P8 Runner V0.1 only.
+
+## 2026-09-30 - P8 Runner core evidence slice
+
+- added shared RunnerRequest / RunnerResult domain contract ;
+- added `tokn-observe runner <request.json>` ;
+- runner now orchestrates root-session resolution, RunGroup reconstruction and workspace resolution ;
+- writes normalized request, run-group, workspace-resolution and runner-result evidence artifacts ;
+- adds explicit CORE_EVIDENCE_READY / BLOCKED states so partial P8 progress cannot be mistaken for completion ;
+- offline sanitized fixture smoke test PASS ;
+- P8 remains IN PROGRESS until source health, policy, quality, validity and recovery are integrated.
