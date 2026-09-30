@@ -101,7 +101,9 @@ Il n'est plus la direction principale d'optimisation.
 - `research/OPEN-QUESTIONS.md`
   Registre compact des inconnues ayant un impact architectural/analytique.
 - `plans/RESEARCH-ROADMAP.md`
-  Ordre des recherches externes sans bloquer P8/P9.
+  Ordre et statut des recherches externes.
+- `plans/IMPLEMENTATION-PATH.md`
+  Chemin d'execution de P8 jusqu'aux couches Store, MCP, analyzers et experiments causaux.
 
 Les research docs peuvent contenir des hypotheses.
 Elles ne deviennent des decisions qu'apres ADR/ROADMAP.

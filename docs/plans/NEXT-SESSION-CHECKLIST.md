@@ -1,6 +1,6 @@
 # Tokn V0.1 - Next Session Checklist
 
-Derniere mise a jour : **2026-09-29**
+Derniere mise a jour : **2026-09-30**
 
 ## Etat de depart
 
@@ -19,8 +19,9 @@ Workspace :
 3. `V0.1-IMPLEMENTATION-PLAN.md`
 4. `V0.1-TEST-MATRIX.md`
 5. `../design/EXPERIMENT-VALIDITY.md`
+6. `IMPLEMENTATION-PATH.md`
 
-Ne pas refaire l'enquete P6.
+Ne pas refaire l'enquete P6 ni la recherche plugin/telemetry R1-R8 avant qu'un besoin concret de P8/P9 ne le justifie.
 
 ## Premiere action
 

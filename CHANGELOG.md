@@ -561,3 +561,11 @@ P6 remains IN PROGRESS until one controlled real PreToolUse callback proves the 
 - documented the local-first plugin/MCP privacy boundary from official OpenAI guidance ;
 - kept current context occupancy and Tokn-specific explicit skill invocation as open research questions ;
 - P8/P9 remain unblocked and are again the next product work.
+
+## 2026-09-30 - Implementation path frozen
+
+- added docs/plans/IMPLEMENTATION-PATH.md as the operational path from P8 through post-V0.1 layers ;
+- synchronized STATUS, ROADMAP, NEXT-SESSION-CHECKLIST and docs/INDEX ;
+- updated target architecture with the preferred process-bound local MCP prototype after P8/P9 ;
+- kept Store/plugin/GUI/active optimization explicitly out of P8 ;
+- immediate engineering work is now P8 Runner V0.1 only.

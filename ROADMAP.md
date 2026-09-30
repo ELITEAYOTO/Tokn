@@ -1,6 +1,6 @@
 # Tokn Roadmap
 
-Derniere mise a jour : **2026-09-29**
+Derniere mise a jour : **2026-09-30**
 
 ## North Star
 
@@ -57,6 +57,9 @@ P6 a etabli :
 Decision produit :
 ne pas poursuivre les hard output caps comme axe principal.
 La dette JSONL live du probe est non bloquante et reste au backlog.
+
+Plan d'execution detaille depuis P8 jusqu'aux couches post-V0.1 :
+`docs/plans/IMPLEMENTATION-PATH.md`.
 
 ## M3 - Experiment 002
 

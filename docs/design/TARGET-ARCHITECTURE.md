@@ -82,12 +82,16 @@ Future integrations should call this boundary instead of rebuilding analysis.
 
 ## Transport decision
 
-Plugin-to-Engine transport is RESEARCH.
+For the future local Codex integration, the preferred prototype is now:
+Codex plugin -> command-launched local MCP adapter -> shared Rust Engine/Store.
 
-Candidates may include MCP, stdio/process invocation, IPC or a local service.
-No permanent localhost service is required unless a measured need justifies it.
+This direction is research-backed and locally observed, but not yet an irreversible ADR.
+The prototype happens only after P8/P9 and must preserve the standalone Runner.
 
-Selection criteria:
+No permanent localhost service is required unless a measured need later justifies it.
+Public/remote plugin distribution remains a separate deployment concern.
+
+Selection criteria remain:
 simplicity, local-first behavior, security, observability, portability,
 versionability and low operational cost.
 

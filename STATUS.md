@@ -1,6 +1,6 @@
 # Tokn Observer - Status
 
-Derniere mise a jour : **2026-09-29**
+Derniere mise a jour : **2026-09-30**
 Release de travail : **V0.1 Measurement Hardening**
 Binaire/Cargo : **V0.0 / 0.0.0**
 
@@ -128,6 +128,9 @@ Tous commencent observation-only.
 ## Prochaine action
 
 Implementer **P8 - Runner V0.1 self-contained**.
+
+Chemin d'execution detaille :
+`docs/plans/IMPLEMENTATION-PATH.md`.
 
 P7 fournit maintenant le contrat de validite que le runner doit appeler :
 - input machine-readable ;
