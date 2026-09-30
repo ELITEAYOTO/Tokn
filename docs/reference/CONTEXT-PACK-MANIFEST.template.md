@@ -69,6 +69,13 @@ per-file SHA-256 when practical, and final ZIP SHA-256.
 7. Commit only after consistency is confirmed.
 8. Regenerate a new pack from the resulting canonical commit.
 
+## Generator
+
+Canonical packs are generated with:
+`scripts/context/build-context-pack.ps1 -PackNumber <N>`
+
+The generator refuses a dirty worktree and writes packs under the outer `context-packs/` directory.
+
 ## First canonical pack
 
 TOKN-CONTEXT-PACK-001 is generated only from the real Tokn repository

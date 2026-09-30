@@ -84,7 +84,8 @@ Docs :
 3. ROADMAP seulement si l'ordre/statut d'une phase change ;
 4. CHANGELOG pour la trace ;
 5. INDEX si un document durable est ajoute/supprime ;
-6. ADR si une decision produit/architecture durable change.
+6. ADR si une decision produit/architecture durable change ;
+7. regenerer un Context Pack apres un jalon documentaire/produit significatif via `scripts/context/build-context-pack.ps1`.
 
 Eviter de recopier le meme paragraphe dans cinq documents.
 

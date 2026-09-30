@@ -532,3 +532,10 @@ P6 remains IN PROGRESS until one controlled real PreToolUse callback proves the 
 - moved Context Pack snapshots under the project-level context-packs/ directory ;
 - preserved experiments/, traces/ and artifacts/ as non-canonical runtime/evidence areas ;
 - no runtime evidence or experiment data was deleted.
+
+## 2026-09-30 - Reproducible Context Pack generator
+
+- added scripts/context/build-context-pack.ps1 ;
+- canonical Context Packs now require a clean worktree and are emitted under outer context-packs/ ;
+- pack manifest records source branch/commit and per-file SHA-256 inventory ;
+- maintenance and manifest template now point to the reproducible generator.
