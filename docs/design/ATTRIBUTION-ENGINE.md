@@ -96,4 +96,4 @@ Apres V0.1 et Experiment 002 :
 Ce sont d'abord des findings observation-only.
 Ne pas reduire automatiquement le nombre d'agents ni la capacite du modele.
 
-Voir : strategy/CONTEXT-EFFICIENCY-STRATEGY.md
+Voir : `../strategy/CONTEXT-EFFICIENCY-STRATEGY.md`

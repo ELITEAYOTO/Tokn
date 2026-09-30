@@ -15,7 +15,7 @@ $runningCodex = Get-Process codex -ErrorAction SilentlyContinue |
 if ($runningDesktop -or $runningCodex) {
     Write-Host ""
     Write-Host "TOKN P6 PROBE: Codex Desktop is still running." -ForegroundColor Yellow
-    Write-Host "Close Codex completely, then run FINISH-P6-HOOK-PROBE.cmd again."
+    Write-Host "Close Codex completely, then run launchers\FINISH-P6-HOOK-PROBE.cmd again."
     exit 61
 }
 
@@ -31,7 +31,7 @@ if (Test-Path -LiteralPath $HooksPath) {
         $unexpected = Join-Path $RunRoot "hooks-at-finish-unexpected.json"
         Copy-Item -LiteralPath $HooksPath -Destination $unexpected -Force
         Write-Warning "hooks.json changed during the probe. Current file preserved at $unexpected and was NOT overwritten."
-        Write-Warning "Run RECOVER-P6-HOOK-PROBE.cmd after reviewing it."
+        Write-Warning "Run launchers\RECOVER-P6-HOOK-PROBE.cmd after reviewing it."
         exit 62
     }
 }

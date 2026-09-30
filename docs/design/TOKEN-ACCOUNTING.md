@@ -103,6 +103,6 @@ Reimporter exactement la meme preuve doit produire le meme run/source logique.
 ## Reference
 
 Voir :
-docs/design/V0.1-MEASUREMENT-ARCHITECTURE.md
-docs/design/EVIDENCE-AND-COVERAGE.md
-docs/design/AGENT-COST-ATTRIBUTION.md
+`V0.1-MEASUREMENT-ARCHITECTURE.md`
+`EVIDENCE-AND-COVERAGE.md`
+`AGENT-COST-ATTRIBUTION.md`

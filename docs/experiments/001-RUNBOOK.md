@@ -33,9 +33,9 @@ Therefore:
 User entry points:
 
 - E:\Tokn\V0-CodexTkn-Consume\EDIT-EXP001-TASK.cmd
-- E:\Tokn\V0-CodexTkn-Consume\START-EXP001-CANDIDATE.cmd
-- E:\Tokn\V0-CodexTkn-Consume\FINISH-EXP001-CANDIDATE.cmd
-- E:\Tokn\V0-CodexTkn-Consume\RECOVER-EXP001.cmd
+- E:\Tokn\V0-CodexTkn-Consume\launchers\START-EXP001-CANDIDATE.cmd
+- E:\Tokn\V0-CodexTkn-Consume\launchers\FINISH-EXP001-CANDIDATE.cmd
+- E:\Tokn\V0-CodexTkn-Consume\launchers\RECOVER-EXP001.cmd
 
 Experiment root:
 

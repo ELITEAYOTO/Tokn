@@ -22,6 +22,7 @@ New-Item -ItemType Directory -Force -Path $BinDir | Out-Null
 Copy-Item -LiteralPath $ReleaseBinary -Destination (Join-Path $BinDir "tokn-observe.exe") -Force
 
 $V0Root = Split-Path $Root -Parent
+$LauncherRoot = Join-Path $V0Root "launchers"
 $KitRoot = Join-Path $Stage "experiment-kit"
 New-Item -ItemType Directory -Force -Path $KitRoot | Out-Null
 
@@ -32,7 +33,7 @@ $wrappers = @(
     "EDIT-EXP001-TASK.cmd"
 )
 foreach ($wrapper in $wrappers) {
-    $source = Join-Path $V0Root $wrapper
+    $source = Join-Path $LauncherRoot $wrapper
     if (Test-Path $source) {
         Copy-Item -LiteralPath $source -Destination $KitRoot -Force
     }

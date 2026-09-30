@@ -26,7 +26,7 @@ $runningCodex = Get-Process codex -ErrorAction SilentlyContinue |
 if (-not $DryRun -and ($runningDesktop -or $runningCodex)) {
     Write-Host ""
     Write-Host "TOKN P6 PROBE: Codex Desktop is still running." -ForegroundColor Yellow
-    Write-Host "Close Codex completely, then run START-P6-HOOK-PROBE.cmd again."
+    Write-Host "Close Codex completely, then run launchers\START-P6-HOOK-PROBE.cmd again."
     exit 60
 }
 
@@ -145,4 +145,4 @@ Write-Host "3. Exit/close the Codex CLI window."
 Write-Host "4. Open Codex Desktop normally."
 Write-Host "5. Open the probe workspace and create ONE new Astra chat."
 Write-Host "6. Paste the clipboard prompt, send it, and wait for completion."
-Write-Host "7. Close Codex completely and run FINISH-P6-HOOK-PROBE.cmd."
+Write-Host "7. Close Codex completely and run launchers\FINISH-P6-HOOK-PROBE.cmd."

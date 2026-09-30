@@ -2,7 +2,7 @@
 
 Status: **HISTORICAL SNAPSHOT**
 Structural verdict remains valid; phase references below reflect the time of the audit.
-Current phase status lives in `../STATUS.md`.
+Current phase status lives in `../../STATUS.md`.
 
 ## Verdict
 

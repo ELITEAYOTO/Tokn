@@ -16,6 +16,22 @@ Lire seulement :
 Etat actuel :
 **P0-P7 DONE ; P8 NEXT.**
 
+## Organisation documentaire
+
+- `decisions/` - decisions durables (ADR) ;
+- `design/` - architecture, contrats et invariants techniques ;
+- `plans/` - execution concrete des phases/releases ;
+- `strategy/` - direction produit et principes d'optimisation ;
+- `research/` - recherches, sources, hypotheses et inconnues ;
+- `experiments/` - protocoles, runbooks et resultats ;
+- `baselines/` - snapshots de reference ;
+- `reference/` - compatibilite, confidentialite et reference stable ;
+- `operations/` - workflows operatoires reproductibles ;
+- `audits/` - audits dates et historiques ;
+- `examples/` - exemples non canoniques.
+
+Seuls `INDEX.md` et `MAINTENANCE.md` restent directement dans `docs/`.
+
 ## Sources de verite par sujet
 
 Etat courant -> `../STATUS.md`
@@ -44,15 +60,16 @@ Un document historique ne doit pas remplacer une source de verite courante.
 
 ## Design - mesure
 
+- `design/ARCHITECTURE-OVERVIEW.md`
 - `design/V0.1-MEASUREMENT-ARCHITECTURE.md`
 - `design/SESSION-ROLLOUT-ADAPTER.md`
 - `design/AGENT-COST-ATTRIBUTION.md`
 - `design/WORKSPACE-TRACKING.md`
 - `design/EVIDENCE-AND-COVERAGE.md`
 - `design/EXPERIMENT-VALIDITY.md`
-- `token-accounting.md`
-- `diagnostic-trace.md`
-- `attribution-engine.md`
+- `design/TOKEN-ACCOUNTING.md`
+- `design/DIAGNOSTIC-TRACE.md`
+- `design/ATTRIBUTION-ENGINE.md`
 
 ## Design - policy/runtime
 
@@ -97,14 +114,17 @@ Prochaine :
 Le document `001-runtime-output-caps.md` est historique.
 Il ne represente plus la strategie produit.
 
-## Maintenance / reference
+## Maintenance / reference / operations
 
 - `MAINTENANCE.md`
-- `MAINTAINABILITY-AUDIT-2026-09-29.md`
-- `compatibility.md`
-- `privacy.md`
-- `architecture.md`
-- `jem-trace-workflow.md`
+- `reference/COMPATIBILITY.md`
+- `reference/PRIVACY.md`
+- `reference/CONTEXT-PACK-MANIFEST.template.md`
+  Template de generation des snapshots documentaires portables.
+- `reference/WORKSPACE-LAYOUT.md`
+  Separation entre repo canonique, preuves runtime, artefacts, launchers et archives.
+- `operations/JEM-TRACE-WORKFLOW.md` (historique)
+- `audits/2026-09-29-MAINTAINABILITY.md` (snapshot historique)
 
 ## Regle anti-dispersion
 

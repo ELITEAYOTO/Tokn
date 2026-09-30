@@ -1,5 +1,10 @@
 # JEM Ultimate — premier run réel tracé avec Tokn
 
+Status: **HISTORICAL WORKFLOW**
+
+Ce document conserve le workflow de la premiere baseline reelle.
+Il ne definit pas le runner V0.1 actuel ni la prochaine action du projet.
+
 ## Objectif
 
 Tokn ne cherche pas à rendre Astra plus rapide.
@@ -30,7 +35,7 @@ Cette baseline est plus utile qu'un micro-benchmark artificiel.
 1. Fermer complètement Codex Desktop.
 2. Double-cliquer :
 
-`E:\Tokn\V0-CodexTkn-Consume\START-JEM-TRACE.cmd`
+`E:\Tokn\V0-CodexTkn-Consume\launchers\START-JEM-TRACE.cmd`
 
 3. Codex Desktop démarre en mode diagnostic.
 4. Ouvrir JEM Ultimate et lancer le vrai prompt Astra.
@@ -50,7 +55,7 @@ Quand Astra a terminé :
 1. fermer complètement Codex Desktop ;
 2. double-cliquer :
 
-`E:\Tokn\V0-CodexTkn-Consume\FINISH-JEM-TRACE.cmd`
+`E:\Tokn\V0-CodexTkn-Consume\launchers\FINISH-JEM-TRACE.cmd`
 
 Tokn cherchera le bundle, l'importera, affichera un rapport puis lancera le reducer officiel vers un cache séparé.
 

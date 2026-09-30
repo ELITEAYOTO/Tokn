@@ -26,7 +26,7 @@ $runningCodex = Get-Process codex -ErrorAction SilentlyContinue |
 if ($runningDesktop -or $runningCodex) {
     Write-Host ""
     Write-Host "TOKN: Codex Desktop is still running." -ForegroundColor Yellow
-    Write-Host "Close Codex Desktop completely, then run FINISH-EXP001-CANDIDATE.cmd again."
+    Write-Host "Close Codex Desktop completely, then run launchers\FINISH-EXP001-CANDIDATE.cmd again."
     exit 41
 }
 

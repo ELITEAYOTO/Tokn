@@ -1,6 +1,6 @@
 # Tokn Documentation and Maintenance
 
-Derniere mise a jour : **2026-09-29**
+Derniere mise a jour : **2026-09-30**
 
 ## Objectif
 
@@ -30,6 +30,24 @@ Une recherche n'est pas automatiquement une decision.
 
 `docs/experiments/*`
 Protocoles et resultats d'experiences.
+
+`docs/baselines/*`
+Snapshots de reference lies aux experiences.
+
+`docs/reference/*`
+Compatibilite, confidentialite et reference stable.
+
+`docs/operations/*`
+Workflows operatoires reproductibles, y compris historiques.
+
+`docs/audits/*`
+Audits dates. Ils ne redefinissent jamais l'etat courant.
+
+`docs/examples/*`
+Exemples non canoniques.
+
+La racine `docs/` reste volontairement minimale :
+`INDEX.md` et `MAINTENANCE.md` seulement, sauf exception documentee.
 
 `CHANGELOG.md`
 Historique date des modifications.
@@ -111,7 +129,7 @@ Decision :
 - pas de micro-crates sans frontiere durable.
 
 Audit :
-`MAINTAINABILITY-AUDIT-2026-09-29.md`.
+`audits/2026-09-29-MAINTAINABILITY.md`.
 
 ## Confidentialite
 

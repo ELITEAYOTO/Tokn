@@ -21,7 +21,7 @@ $StartTrace = Join-Path $ToolRoot "scripts\trace\start-jem-trace.ps1"
 if (Test-Path $ActivePath) {
     Write-Host ""
     Write-Host "TOKN: an experiment run is already marked active." -ForegroundColor Yellow
-    Write-Host "Finish it or run RECOVER-EXP001.cmd before starting another."
+    Write-Host "Finish it or run launchers\RECOVER-EXP001.cmd before starting another."
     Write-Host "Active file: $ActivePath"
     exit 30
 }
@@ -223,6 +223,6 @@ Write-Host "2. Paste the clipboard contents as ONE new Astra prompt."
 Write-Host "3. Let Astra work normally."
 Write-Host "4. Avoid extra messages unless they are genuinely required."
 Write-Host "5. When Astra is completely finished, close Codex Desktop."
-Write-Host "6. Double-click FINISH-EXP001-CANDIDATE.cmd"
+Write-Host "6. Double-click launchers\FINISH-EXP001-CANDIDATE.cmd"
 Write-Host ""
 Write-Host "Quality is the invariant. The policy only bounds read/search tool output."

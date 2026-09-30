@@ -54,5 +54,5 @@ Tokn conserve :
 - coverage.
 
 Voir :
-docs/design/EVIDENCE-AND-COVERAGE.md
-docs/decisions/ADR-001-V0.1-EVIDENCE-FALLBACK.md
+`EVIDENCE-AND-COVERAGE.md`
+`../decisions/ADR-001-V0.1-EVIDENCE-FALLBACK.md`

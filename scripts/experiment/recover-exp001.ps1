@@ -14,7 +14,7 @@ $runningCodex = Get-Process codex -ErrorAction SilentlyContinue |
 if ($runningDesktop -or $runningCodex) {
     Write-Host ""
     Write-Host "TOKN RECOVERY: Codex Desktop is still running." -ForegroundColor Yellow
-    Write-Host "Close it completely, then run RECOVER-EXP001.cmd again."
+    Write-Host "Close it completely, then run launchers\RECOVER-EXP001.cmd again."
     exit 50
 }
 

@@ -15,7 +15,7 @@ $runningCodex = Get-Process codex -ErrorAction SilentlyContinue |
 if (-not $DryRun -and ($runningDesktop -or $runningCodex)) {
     Write-Host ""
     Write-Host "TOKN: Codex Desktop is still running." -ForegroundColor Yellow
-    Write-Host "Close Codex Desktop completely, then launch START-JEM-TRACE.cmd again."
+    Write-Host "Close Codex Desktop completely, then launch launchers\START-JEM-TRACE.cmd again."
     exit 20
 }
 
@@ -94,5 +94,5 @@ Write-Host ""
 Write-Host "Now use Astra normally on JEM Ultimate."
 Write-Host "When Astra finishes:"
 Write-Host "1. Close Codex Desktop completely."
-Write-Host "2. Double-click FINISH-JEM-TRACE.cmd"
+Write-Host "2. Double-click launchers\FINISH-JEM-TRACE.cmd"
 Write-Host ""

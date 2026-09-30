@@ -1,6 +1,11 @@
-# Tokn Architecture
+# Tokn Architecture Overview
 
-Derniere mise a jour : 2026-09-29
+Status: REFERENCE OVERVIEW
+Derniere mise a jour : 2026-09-30
+
+Ce document donne une vue d'ensemble et oriente vers les contrats canoniques.
+Architecture cible long terme : `TARGET-ARCHITECTURE.md`.
+Architecture de mesure V0.1 : `V0.1-MEASUREMENT-ARCHITECTURE.md`.
 
 ## V0.0 implemente
 
@@ -52,7 +57,7 @@ La source est choisie par famille de metriques.
 Une trace partielle ne doit jamais ecraser une session saine.
 
 Details :
-docs/design/V0.1-MEASUREMENT-ARCHITECTURE.md
+`V0.1-MEASUREMENT-ARCHITECTURE.md`
 
 ## Evolution long terme du premier outil
 
@@ -70,7 +75,7 @@ Apres V0.1, l'architecture doit pouvoir ajouter sans casser le coeur de mesure :
 - Finding Engine.
 
 Reference :
-docs/design/FIRST-TOOL-ANALYZER-VISION.md
+`FIRST-TOOL-ANALYZER-VISION.md`
 
 L'Analyzer reste passif par defaut. L'Optimizer actif reste une couche separee.
 

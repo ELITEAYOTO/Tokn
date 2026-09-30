@@ -521,3 +521,14 @@ P6 remains IN PROGRESS until one controlled real PreToolUse callback proves the 
 - added Context Pack manifest template with Git-as-source-of-truth and integrity rules ;
 - corrected Experiment 002 dependency wording from P7-P9 to P8-P9 now that P7 is DONE ;
 - documentation index updated for the new durable references.
+
+## 2026-09-30 - Documentation and workspace reorganization
+
+- kept the Git repository root minimal and moved the Context Pack template under docs/reference ;
+- moved flat technical docs into design/, reference/, operations/ and audits/ ;
+- documented the canonical outer workspace layout ;
+- moved historical raw research inputs and pre-Tokn scripts into archive/ ;
+- moved manual .cmd wrappers into launchers/ and updated tracked references/package lookup ;
+- moved Context Pack snapshots under the project-level context-packs/ directory ;
+- preserved experiments/, traces/ and artifacts/ as non-canonical runtime/evidence areas ;
+- no runtime evidence or experiment data was deleted.
