@@ -163,10 +163,10 @@ First Runner slice implemented:
 - `tokn-observe runner <request.json>` CLI ;
 - session root resolution + RunGroup reconstruction ;
 - workspace resolution from before/after inventory ;
-- deterministic evidence artifacts: runner-request.json, run-group.json, workspace-resolution.json, runner-result.json ;
+- deterministic evidence artifacts: runner-request.json, source-health.json, run-group.json, workspace-resolution.json, runner-result.json ;
 - explicit CORE_EVIDENCE_READY / BLOCKED pipeline state ;
 - no overwrite of Runner-owned evidence artifacts ;
 - offline fixture smoke test PASS.
 
 Still required before P8 DONE:
-source-health report persistence, policy evidence, quality gate execution, validity reduction, self-contained session evidence/import and recovery/interruption handling.
+policy evidence, quality gate execution, validity reduction, self-contained session evidence/import and recovery/interruption handling.

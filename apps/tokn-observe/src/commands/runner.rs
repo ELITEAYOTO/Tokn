@@ -4,8 +4,12 @@ use std::path::{Path, PathBuf};
 use tokn_analysis::{
     WorkspaceInventory, WorkspaceResolutionStatus, build_run_group, resolve_workspace,
 };
-use tokn_codex::session::collect_session_group;
-use tokn_domain::{RunnerArtifactPaths, RunnerPipelineStatus, RunnerRequest, RunnerResult};
+use tokn_codex::diagnostic::{DiagnosticBundle, assess_diagnostic_health};
+use tokn_codex::session::{assess_session_health, collect_session_group};
+use tokn_domain::{
+    RunnerArtifactPaths, RunnerPipelineStatus, RunnerRequest, RunnerResult, RunnerSourceReport,
+    SourceKind,
+};
 
 use super::common::{resolve_session_root_from_source, resolve_source};
 
@@ -23,12 +27,14 @@ pub fn run(request_path: &Path) -> anyhow::Result<()> {
     std::fs::create_dir_all(&evidence_dir)?;
 
     let normalized_request_path = evidence_dir.join("runner-request.json");
+    let source_health_path = evidence_dir.join("source-health.json");
     let run_group_path = evidence_dir.join("run-group.json");
     let workspace_resolution_path = evidence_dir.join("workspace-resolution.json");
     let runner_result_path = evidence_dir.join("runner-result.json");
 
     refuse_overwrite(&[
         &normalized_request_path,
+        &source_health_path,
         &run_group_path,
         &workspace_resolution_path,
         &runner_result_path,
@@ -37,7 +43,31 @@ pub fn run(request_path: &Path) -> anyhow::Result<()> {
     write_json(&normalized_request_path, &request)?;
 
     let source_path = resolve_source(&request.source)?;
+    let (requested_kind, requested_health) = if source_path.is_dir() {
+        let bundle = DiagnosticBundle::detect(&source_path)
+            .ok_or_else(|| anyhow::anyhow!("not a valid diagnostic trace bundle"))?;
+        (
+            SourceKind::CodexDiagnosticTrace,
+            assess_diagnostic_health(&bundle)?,
+        )
+    } else {
+        (
+            SourceKind::CodexSession,
+            assess_session_health(&source_path)?,
+        )
+    };
+
     let root_session = resolve_session_root_from_source(&source_path)?;
+    let fallback_recovered = source_path.is_dir();
+    let source_report = RunnerSourceReport {
+        requested_source: source_path.to_string_lossy().to_string(),
+        requested_kind,
+        requested_health: requested_health.clone(),
+        fallback_recovered,
+        root_session: root_session.to_string_lossy().to_string(),
+    };
+    write_json(&source_health_path, &source_report)?;
+
     let grouped = collect_session_group(&root_session)?;
     let group = build_run_group(&grouped.members, &grouped.root_thread_id)
         .ok_or_else(|| anyhow::anyhow!("failed to build run group"))?;
@@ -61,6 +91,12 @@ pub fn run(request_path: &Path) -> anyhow::Result<()> {
     write_json(&workspace_resolution_path, &resolution)?;
 
     let mut warnings = Vec::new();
+    if requested_health.status != tokn_domain::SourceHealthStatus::Healthy {
+        warnings.push(format!(
+            "requested source health is {}",
+            requested_health.status.as_str()
+        ));
+    }
     let pipeline_status = if resolution.status == WorkspaceResolutionStatus::Selected {
         RunnerPipelineStatus::CoreEvidenceReady
     } else {
@@ -76,18 +112,20 @@ pub fn run(request_path: &Path) -> anyhow::Result<()> {
         run_id: request.run_id.clone(),
         pipeline_status,
         source_requested: request.source.clone(),
+        source_health_status: requested_health.status,
+        fallback_recovered,
         root_session: root_session.to_string_lossy().to_string(),
         evidence_dir: evidence_dir.to_string_lossy().to_string(),
         selected_workspace: resolution.selected_root.clone(),
         root_terminal: group.root_terminal,
         agent_count: group.agents.len() as u64,
         completed_steps: vec![
+            "SOURCE_HEALTH_REPORT".into(),
             "SESSION_ROOT_RESOLUTION".into(),
             "RUN_GROUP".into(),
             "WORKSPACE_RESOLUTION".into(),
         ],
         pending_steps: vec![
-            "SOURCE_HEALTH_REPORT".into(),
             "POLICY_EVIDENCE".into(),
             "QUALITY_GATE".into(),
             "EXPERIMENT_VALIDITY".into(),
@@ -96,6 +134,7 @@ pub fn run(request_path: &Path) -> anyhow::Result<()> {
         warnings,
         artifacts: RunnerArtifactPaths {
             normalized_request: normalized_request_path.to_string_lossy().to_string(),
+            source_health: source_health_path.to_string_lossy().to_string(),
             run_group: run_group_path.to_string_lossy().to_string(),
             workspace_resolution: workspace_resolution_path.to_string_lossy().to_string(),
             runner_result: runner_result_path.to_string_lossy().to_string(),

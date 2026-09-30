@@ -579,3 +579,10 @@ P6 remains IN PROGRESS until one controlled real PreToolUse callback proves the 
 - adds explicit CORE_EVIDENCE_READY / BLOCKED states so partial P8 progress cannot be mistaken for completion ;
 - offline sanitized fixture smoke test PASS ;
 - P8 remains IN PROGRESS until source health, policy, quality, validity and recovery are integrated.
+
+## 2026-09-30 - P8 source-health persistence
+
+- Runner now persists source-health.json before RunGroup analysis ;
+- source kind, source health, fallback recovery state and root session are recorded ;
+- RunnerResult exposes source_health_status and fallback_recovered ;
+- offline fixture validation PASS.

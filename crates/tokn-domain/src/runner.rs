@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::{ExperimentIntent, TerminalStatus};
+use crate::{ExperimentIntent, SourceHealth, SourceHealthStatus, SourceKind, TerminalStatus};
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
@@ -79,9 +79,19 @@ impl RunnerRequest {
     }
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct RunnerSourceReport {
+    pub requested_source: String,
+    pub requested_kind: SourceKind,
+    pub requested_health: SourceHealth,
+    pub fallback_recovered: bool,
+    pub root_session: String,
+}
+
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct RunnerArtifactPaths {
     pub normalized_request: String,
+    pub source_health: String,
     pub run_group: String,
     pub workspace_resolution: String,
     pub runner_result: String,
@@ -93,6 +103,8 @@ pub struct RunnerResult {
     pub run_id: String,
     pub pipeline_status: RunnerPipelineStatus,
     pub source_requested: String,
+    pub source_health_status: SourceHealthStatus,
+    pub fallback_recovered: bool,
     pub root_session: String,
     pub evidence_dir: String,
     pub selected_workspace: Option<String>,
