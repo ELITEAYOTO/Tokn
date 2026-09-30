@@ -5,21 +5,30 @@ Date: 2026-09-30
 
 Only unresolved questions with architectural or analytical impact belong here.
 
-## OQ-001 - Remaining product budget API
+## OQ-001 - Rate-limit telemetry semantics
 
-Can Tokn retrieve remaining ChatGPT/Codex allowance, credits or reset horizon
-programmatically with a stable supported contract?
+How should Tokn interpret multiple Codex rate-limit windows without collapsing
+them into a false single "budget remaining" metric?
 
-Status: UNKNOWN
+Status: OBSERVED LOCAL / SEMANTICS VERSIONED
 
 Known:
 - /status is officially documented for active Codex CLI sessions;
-- Settings/usage dashboard may expose allowance, credits and reset time.
+- local session token_count events expose structured rate_limits;
+- primary/secondary windows expose used_percent, window_minutes and resets_at;
+- current openai/codex source defines these as rate-limit snapshots/windows;
+- credits and spend-control shapes may also be present.
 
 Unknown:
-- stable machine-readable interface suitable for Tokn.
+- stable meaning of every limit_id across runtime/product versions;
+- whether a given profile exposes all possible windows/credits;
+- whether a single product-level allowance metric is meaningful at all.
 
-Impact: consumption-rate diagnostics only.
+Rule:
+store each limit/window with identity, provenance and runtime version.
+Do not derive one universal Astra budget unless evidence later supports it.
+
+Impact: consumption-rate and exhaustion-risk diagnostics.
 Blocks P8/P9: no.
 
 ## OQ-003 - Tokn invocation UX
@@ -43,23 +52,27 @@ do not design around /tokn unless officially supported and locally verified.
 Impact: UX only.
 Blocks P8/P9: no.
 
-## OQ-004 - Engine transport
+## OQ-004 - Engine transport prototype
 
-What is the smallest reliable local boundary between Codex integration and Tokn?
+Can the preferred process-bound MCP adapter satisfy Tokn integration needs
+without introducing a permanent local service?
 
-Status: RESEARCH
-
-Candidates:
-- direct child process / stdio;
-- MCP stdio;
-- streamable HTTP/local service only if justified.
+Status: PREFERRED PROTOTYPE / NOT YET VALIDATED
 
 Known:
-OpenAI surfaces support stdio and streamable HTTP MCP in appropriate environments.
+- OpenAI surfaces support stdio and streamable HTTP MCP in appropriate environments;
+- current local Codex compatibility plugins launch MCP processes with
+  command/args/cwd declarations;
+- installed OpenAI plugin manifests reference those .mcp.json files;
+- P8 remains a standalone Runner/Engine boundary.
+
+Preferred prototype:
+Codex plugin -> local command-launched Tokn MCP adapter -> shared Rust Engine.
 
 Unknown:
-which option produces the smallest, most reliable Tokn integration on the
-target Codex Desktop/CLI runtime.
+- actual startup/shutdown behavior of a Tokn adapter;
+- error/approval ergonomics;
+- whether a later Desktop UI creates a real need for a long-lived service.
 
 Impact: integration complexity, lifecycle and security.
 Blocks P8/P9: no.
@@ -83,19 +96,6 @@ Unknown:
 - whether this field is consistent across models/runtime versions.
 
 Impact: future Context Ledger and compaction findings.
-Blocks P8/P9: no.
-
-## OQ-006 - ModelRuntimeProfile minimum schema
-
-Which identifiers and capability flags should be persisted versus derived?
-
-Status: RESEARCH
-
-Observed candidates:
-cli_version, model_provider, context_window, model, effort, workspace roots,
-permission/config context, parent/fork identity and telemetry capability flags.
-
-Impact: cross-version/multi-model analysis.
 Blocks P8/P9: no.
 
 ## OQ-007 - Hook payload/version drift
@@ -124,6 +124,15 @@ Closed: VERIFIED on 2026-09-30.
 Current official packaging supports root plugin.json, skills/, root mcp.json,
 optional hooks/assets, extensions.com.openai, and optional
 .codex-plugin/plugin.json compatibility fallback.
+
+### OQ-006 - ModelRuntimeProfile minimum schema
+
+Closed: ACCEPTED DESIGN on 2026-09-30.
+
+Minimum identity/configuration/capability fields and privacy exclusions are
+defined in ../design/MODEL-RUNTIME-PROFILE.md.
+
+Implementation remains future work after the V0.1 measurement gate.
 
 See:
 2026-09-30-CODEX-PLUGIN-TELEMETRY-RESEARCH.md.

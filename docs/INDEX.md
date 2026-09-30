@@ -84,6 +84,10 @@ Il n'est plus la direction principale d'optimisation.
 - `design/FIRST-TOOL-ANALYZER-VISION.md`
 - `design/TARGET-ARCHITECTURE.md`
   Architecture cible Engine / Store / adapters / integrations.
+- `design/PLUGIN-ENGINE-INTEGRATION.md`
+  Direction de prototype locale : adapter MCP process-bound apres P8/P9, sans daemon impose.
+- `design/MODEL-RUNTIME-PROFILE.md`
+  Identite runtime/modele, capacites observees et telemetry de rate limits versionnee.
 - `strategy/CONTEXT-EFFICIENCY-STRATEGY.md`
 
 ## Research

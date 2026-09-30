@@ -182,3 +182,87 @@ The accepted architecture remains:
 Rust Engine = source of truth;
 plugin/skills/MCP/hooks = integration surfaces;
 Optimizer = later, after causal evidence.
+
+## R5-R8 second pass - local integration and limits
+
+### R5 - local MCP process evidence
+
+OBSERVED on codex-cli 0.161.0-alpha.2:
+
+OpenAI-installed compatibility plugins reference `./.mcp.json` from
+`.codex-plugin/plugin.json`.
+
+Observed `.mcp.json` entries launch local MCP servers with fields including:
+- command;
+- args;
+- cwd when needed;
+- enabled/tool-policy controls;
+- startup/tool timeouts;
+- selected environment-variable names.
+
+Examples inspected:
+- codex-app-tools;
+- unified-computer-use;
+- openai-developers.
+
+This is direct evidence that current local Codex can lifecycle-manage a
+command-launched local MCP process.
+
+VERIFIED official distinction:
+portable/public plugin packaging uses root `mcp.json` with typed transports,
+and public distribution expects reachable HTTPS MCP endpoints.
+OpenAI agent environments separately document stdio MCP.
+
+Tokn conclusion:
+prefer a process-bound local MCP adapter prototype after P8/P9.
+Do not introduce a permanent localhost daemon before a measured need exists.
+Do not claim that this local deployment shape is automatically portable
+to public ChatGPT plugin distribution.
+
+### R6 - rate-limit telemetry
+
+OBSERVED in current local standard session JSONL:
+`event_msg -> token_count -> rate_limits`.
+
+Shape includes:
+- limit_id / optional limit_name;
+- primary.used_percent / window_minutes / resets_at;
+- secondary equivalents;
+- credits.unlimited;
+- optional individual_limit;
+- rate_limit_reached_type.
+
+No personal rate-limit values are stored in this research document.
+
+Current OpenAI/codex source defines these as rate-limit snapshots/windows and
+documents window duration plus reset timestamps. Backend mappings also include
+credits and spend-control state.
+
+Tokn may therefore ingest rate-limit telemetry as a versioned observation.
+
+Remaining limitation:
+rate-limit telemetry is not equivalent to one universal "Astra budget remaining".
+Different limits/windows may coexist, and Tokn must preserve limit identity
+and provenance rather than collapse them prematurely.
+
+### R7 - ModelRuntimeProfile
+
+The minimum profile is now defined in:
+`../design/MODEL-RUNTIME-PROFILE.md`.
+
+It separates identity/configuration from capability observations and excludes
+account/user IDs and unnecessary personal paths from durable profile identity.
+
+Implementation remains after the V0.1 measurement gate.
+
+### R8 - privacy boundary
+
+Official OpenAI plugin guidance reinforces:
+least privilege, explicit consent, input validation, secret exclusion,
+minimal tool results, and careful retention/logging.
+
+Tokn local policy is stricter by default:
+the Engine and initial MCP adapter remain local-first and require no network.
+
+A future public/remote plugin is treated as a separate deployment mode with
+its own privacy policy/authentication/retention requirements.

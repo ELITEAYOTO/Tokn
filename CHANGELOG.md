@@ -550,3 +550,14 @@ P6 remains IN PROGRESS until one controlled real PreToolUse callback proves the 
 - verified user-facing Codex /status allowance visibility while keeping programmatic remaining budget UNKNOWN ;
 - updated research roadmap, capability matrix, open questions and target architecture ;
 - no research result blocks P8/P9.
+
+## 2026-09-30 - R5-R8 integration research closure
+
+- observed OpenAI-installed Codex plugins launching local MCP processes through command/args/cwd compatibility manifests ;
+- selected a process-bound MCP adapter as the preferred Tokn local integration prototype after P8/P9, without committing to a daemon ;
+- observed machine-readable rate_limits in local token_count events without persisting personal quota values ;
+- matched those fields to current openai/codex RateLimitSnapshot source semantics ;
+- defined the accepted ModelRuntimeProfile minimum schema and privacy exclusions ;
+- documented the local-first plugin/MCP privacy boundary from official OpenAI guidance ;
+- kept current context occupancy and Tokn-specific explicit skill invocation as open research questions ;
+- P8/P9 remain unblocked and are again the next product work.

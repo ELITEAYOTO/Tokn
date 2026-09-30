@@ -16,10 +16,10 @@ is unavailable through current evidence sources.
 | R2 | Plugin packaging | VERIFIED | Portable + compatibility packaging contract documented | No |
 | R3 | Skill/invocation UX | PARTIAL / VERIFIED | Minimal custom-skill invocation test on target runtime | No |
 | R4 | Hooks/trust | VERIFIED CORE / PAYLOADS VERSIONED | Hook/trust model documented; payload gaps remain capability-gated | No |
-| R5 | MCP/Engine transport | RESEARCH | Prototype direct process/stdio vs MCP before choosing | No |
-| R6 | Product quota | PARTIAL / UNKNOWN PROGRAMMATIC | Verified programmatic method or explicit UNKNOWN | No |
-| R7 | Model/runtime profiles | PARTIAL / OBSERVED | Minimal profile schema backed by current evidence | No |
-| R8 | Privacy/threat model | TODO | Document local-only boundary and plugin/adapter risks | No |
+| R5 | MCP/Engine transport | PREFERRED LOCAL PROTOTYPE / UNVALIDATED | Process-bound MCP adapter test after P8/P9 | No |
+| R6 | Rate limits / product allowance | OBSERVED LOCAL / SEMANTICS VERSIONED | Preserve limit identities/windows; avoid single-budget assumption | No |
+| R7 | Model/runtime profiles | DESIGN DEFINED / IMPLEMENTATION PENDING | Implement accepted minimum schema after V0.1 | No |
+| R8 | Privacy/threat model | LOCAL BOUNDARY DOCUMENTED | Revisit only for public/remote deployment | No |
 
 ## R1 telemetry - current result
 
@@ -71,48 +71,63 @@ Verified current docs:
 
 Payload fields remain versioned evidence rather than universal guarantees.
 
-## R5 transport - next research task
+## R5 transport - preferred local prototype
 
 Official OpenAI surfaces support streamable HTTP MCP and stdio MCP in
 appropriate execution environments.
 
-Tokn still needs a small prototype to compare:
-1. direct child-process/stdio call to Runner;
-2. MCP stdio adapter;
-3. persistent local service only if the first two are insufficient.
+Local Codex 0.161.0-alpha.2 also provides direct evidence:
+OpenAI-installed compatibility plugins launch MCP servers with
+command/args/cwd declarations from .mcp.json.
 
-No permanent localhost daemon should be introduced by default.
+Preferred Tokn prototype after P8/P9:
+Codex plugin -> process-bound Tokn MCP adapter -> shared Rust Engine.
 
-## R6 quota - partial
+A persistent local service is deferred unless multi-client/background
+requirements later justify it.
 
-Verified human-facing access:
-Codex CLI /status and usage dashboards can expose allowance/credits/reset
-information when applicable.
+## R6 rate limits - observed local telemetry
 
-Programmatic contract for Tokn:
-UNKNOWN.
+Verified/observed:
+- Codex CLI /status and usage dashboards can expose allowance/reset information;
+- local token_count events expose structured rate_limits;
+- primary/secondary windows carry used_percent, window_minutes and resets_at;
+- current openai/codex source defines the corresponding rate-limit snapshot;
+- credits/spend-control fields may also exist.
 
-Do not derive product allowance from API pricing or API rate-limit fields.
+Tokn can ingest these fields programmatically from local evidence.
 
-## R7 profiles - partial
+Remaining rule:
+do not collapse multiple limit identities/windows into one universal
+"Astra budget remaining" value unless later evidence supports that mapping.
 
-Current session evidence can capture:
-- cli_version;
-- model_provider;
-- context_window;
-- model;
-- effort;
-- workspace roots;
-- parent/fork relationships;
-- permission/config context.
+Do not derive product allowance from API pricing.
 
-Next step:
-define the minimal ModelRuntimeProfile schema only from fields Tokn can
-actually source with provenance.
+## R7 profiles - design defined
 
-## R8 privacy - pending
+The accepted minimum schema now lives in:
+`../design/MODEL-RUNTIME-PROFILE.md`.
 
-Review plugin/MCP/hooks data boundaries after R5 chooses the integration shape.
+It covers:
+- runtime/model identity;
+- material configuration;
+- versioned capability observations;
+- rate-limit snapshots;
+- provenance;
+- privacy exclusions.
+
+Implementation waits until after the V0.1 measurement gate.
+
+## R8 privacy - local boundary documented
+
+Tokn remains local-first.
+
+The privacy reference now defines plugin/MCP constraints:
+least privilege, secret exclusion, minimal structured results,
+no unnecessary account/user IDs, path minimization and explicit separation
+between local Tokn integration and future public/remote distribution.
+
+Reopen this topic when a public/remote plugin becomes a concrete goal.
 
 ## Research rules
 
@@ -126,10 +141,15 @@ Review plugin/MCP/hooks data boundaries after R5 chooses the integration shape.
 
 ## Immediate order
 
-R5 transport prototype
--> R6 quota programmatic check
--> R7 ModelRuntimeProfile schema
--> R8 privacy/threat model
--> revisit R1 only where those tasks expose a concrete telemetry gap.
+The current blocking research pass is sufficiently complete for V0.1.
 
-Research may run in parallel with P8/P9, but must not distract from them.
+Next product work remains P8 -> P9.
+
+Research after that:
+- prototype the process-bound MCP adapter;
+- validate ModelRuntimeProfile ingestion on real V0.1 evidence;
+- refine rate-limit semantics per runtime/limit_id;
+- run the Tokn-specific skill invocation test;
+- revisit public/remote privacy only if distribution requires it.
+
+Research remains non-blocking for P8/P9.
