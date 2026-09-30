@@ -14,7 +14,7 @@ Lire seulement :
 5. `plans/NEXT-SESSION-CHECKLIST.md` - prochaine action concrete.
 
 Etat actuel :
-**P0-P7 DONE ; P8 NEXT.**
+**P0-P9 DONE ; Experiment 002 NEXT.**
 
 ## Organisation documentaire
 

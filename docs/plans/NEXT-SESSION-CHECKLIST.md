@@ -4,10 +4,8 @@ Derniere mise a jour : **2026-09-30**
 
 ## Etat de depart
 
-P0-P7 : DONE
-P8 : IN PROGRESS
-P9 : TODO
-Experiment 002 : BLOCKED
+P0-P9 : DONE
+Experiment 002 : NEXT
 
 Workspace :
 `E:\Tokn\V0-CodexTkn-Consume\tool`
@@ -25,19 +23,16 @@ Ne pas refaire l'enquete P6 ni la recherche plugin/telemetry R1-R8 avant qu'un b
 
 ## Premiere action
 
-Implementer **P8 - Runner V0.1 self-contained**.
+Preparer puis executer **Experiment 002 - Instrumentation Validation**.
 
-Le runner doit reutiliser P0-P7 sans dupliquer leurs reducers :
-- root session identity ;
-- descendants RunGroup ;
-- source health + fallback ;
-- terminal status ;
-- dynamic workspace resolution ;
-- quality gate on resolved output ;
-- policy evidence ;
-- experiment validity reducer ;
-- self-contained evidence folder ;
-- safe recovery of temporary placements.
+Preflight :
+- choisir une petite tache reelle et bornee ;
+- partir d'un workspace connu et snapshotte ;
+- utiliser le Runner V0.1 de bout en bout ;
+- enregistrer runtime/model/config disponibles ;
+- definir un quality gate clair ;
+- ne pas introduire d'optimisation active ;
+- ne pas consommer de quota Astra tant que le preflight n'est pas valide.
 
 Build/test environment valide :
 Visual Studio Build Tools 2022 via `vcvars64.bat`.
@@ -74,16 +69,17 @@ Tests obligatoires :
 - verify:local PASS ;
 - 1 parent + 3 descendants.
 
-## Apres P7
+## Apres V0.1
 
-P8 :
-runner self-contained, aucune reparation forensique manuelle.
-
-P9 :
-fmt + clippy + tests + release + privacy + golden replay.
-
-Puis seulement :
+NEXT :
 Experiment 002 instrumentation validation.
+
+Si Experiment 002 valide l'instrumentation :
+- freeze du Measurement Contract ;
+- Tokn Store + ModelRuntimeProfile ;
+- Historical Analyzer + Context Ledger ;
+- findings observation-only ;
+- Experiment 003 seulement apres un finding reproductible.
 
 ## Non-goals
 

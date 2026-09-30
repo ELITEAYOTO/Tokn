@@ -126,6 +126,7 @@ fn v0_1_fixtures_are_sanitized() {
     let roots = [
         repo_root().join("fixtures/codex/session/v0_1"),
         repo_root().join("fixtures/codex/diagnostic/partial-protocol-only"),
+        repo_root().join("fixtures/experiments/001-runner-golden"),
     ];
     let forbidden = [
         "timot",
@@ -140,6 +141,47 @@ fn v0_1_fixtures_are_sanitized() {
 
     for root in roots {
         scan_sanitized(&root, &forbidden);
+    }
+}
+
+#[test]
+fn exp001_runner_golden_sessions_contain_only_minimal_evidence_records() {
+    let root = repo_root().join("fixtures/experiments/001-runner-golden/sessions");
+    for entry in fs::read_dir(root).expect("golden session directory readable") {
+        let path = entry.expect("golden session entry").path();
+        if path.extension().and_then(|value| value.to_str()) != Some("jsonl") {
+            continue;
+        }
+
+        for record in read_jsonl(&path) {
+            let record_type = record.get("type").and_then(Value::as_str);
+            assert!(
+                matches!(
+                    record_type,
+                    Some("session_meta" | "token_usage_record" | "response_item" | "event_msg")
+                ),
+                "golden fixture {} contains disallowed top-level record type {:?}",
+                path.display(),
+                record_type
+            );
+
+            if record_type == Some("response_item") {
+                let payload = record.get("payload").expect("response item payload");
+                assert_eq!(
+                    payload.get("type").and_then(Value::as_str),
+                    Some("custom_tool_call")
+                );
+                assert_eq!(payload.get("name").and_then(Value::as_str), Some("exec"));
+            }
+
+            if record_type == Some("event_msg") {
+                let payload = record.get("payload").expect("event payload");
+                assert_eq!(
+                    payload.get("type").and_then(Value::as_str),
+                    Some("task_complete")
+                );
+            }
+        }
     }
 }
 

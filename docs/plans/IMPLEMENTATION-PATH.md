@@ -2,7 +2,7 @@
 
 Status: ACTIVE EXECUTION PLAN
 Date: 2026-09-30
-Current state: P0-P8 DONE / P9 IN PROGRESS
+Current state: P0-P9 DONE / Experiment 002 NEXT
 
 ## Purpose
 
@@ -138,7 +138,7 @@ without manual timestamp heuristics or forensic repair.
 
 ## Phase B - P9 V0.1 release validation
 
-Status: IN PROGRESS
+Status: DONE
 Priority: BLOCKER
 
 Run:
@@ -159,7 +159,7 @@ V0.1 measurement pipeline is reproducible offline from a clean commit.
 
 ## Phase C - Experiment 002
 
-Status: BLOCKED BY P8-P9
+Status: NEXT
 
 Purpose:
 one small real Astra/Codex task validates V0.1 instrumentation end-to-end.
@@ -322,12 +322,12 @@ These remain separate from the Analyzer.
 
 ## What not to build now
 
-Do not start before P8/P9:
-- plugin package;
-- MCP adapter;
+Do not start before Experiment 002 and the Measurement Contract Freeze:
+- production plugin package;
+- MCP adapter implementation;
 - local daemon;
 - GUI;
-- Store schema implementation;
+- persistent Store schema implementation;
 - active optimization;
 - RAG/embeddings;
 - Project Memory;
@@ -338,13 +338,13 @@ but they are not a reason to skip measurement hardening.
 
 ## Current decision
 
-Immediate engineering work is P9 release validation only.
+Immediate product work is Experiment 002 instrumentation validation only.
 
-Within P8, start with:
-1. inspect current Experiment 001 START/FINISH/RECOVER orchestration;
-2. identify reusable Rust/PowerShell boundaries;
-3. write Runner request/result/evidence-folder contract;
-4. implement the smallest orchestration path;
-5. prove it offline on fixtures/golden;
-6. add recovery/failure cases;
-7. only then mark P8 DONE.
+Order:
+1. freeze the Experiment 002 task and starting workspace ;
+2. validate the preflight without launching Astra ;
+3. run one small real Codex/Astra task through Runner V0.1 ;
+4. inspect the self-contained evidence folder ;
+5. accept or reject instrumentation validity ;
+6. if accepted, freeze the V0.1 Measurement Contract ;
+7. only then begin Store/Profile and historical analysis layers.

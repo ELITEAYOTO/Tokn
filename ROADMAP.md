@@ -32,7 +32,7 @@ voir `docs/experiments/001-POSTMORTEM.md`.
 
 ## M2 - V0.1 Measurement Hardening
 
-Statut : IN PROGRESS
+Statut : DONE
 
 P0 sanitized fixtures : DONE
 P1 source health/fallback : DONE
@@ -43,7 +43,7 @@ P5 dynamic workspace : DONE
 P6 policy evidence/runtime capability : DONE
 P7 experiment validity reducer : DONE
 P8 runner V0.1 : DONE
-P9 golden replay/release validation : IN PROGRESS
+P9 golden replay/release validation : DONE
 
 ### P6 closure
 
@@ -63,7 +63,7 @@ Plan d'execution detaille depuis P8 jusqu'aux couches post-V0.1 :
 
 ## M3 - Experiment 002
 
-Statut : BLOCKED BY P8-P9
+Statut : NEXT
 
 But :
 valider V0.1 end-to-end sur une petite tache reelle.
@@ -73,7 +73,7 @@ Il ne doit pas prouver une economie.
 
 ## M4 - Historical Analyzer + Context Ledger
 
-Statut : PLANNED AFTER V0.1
+Statut : PLANNED AFTER EXPERIMENT 002 / MEASUREMENT CONTRACT FREEZE
 
 But :
 construire l'historique fiable par projet/run/agent/phase.

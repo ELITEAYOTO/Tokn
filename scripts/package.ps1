@@ -2,7 +2,7 @@ $ErrorActionPreference = "Stop"
 $Root = Resolve-Path (Join-Path $PSScriptRoot "..")
 $OutDir = Join-Path (Split-Path $Root -Parent) "artifacts"
 $Stage = Join-Path $env:TEMP "tokn-observer-v01-stage"
-$Zip = Join-Path $OutDir "Tokn-Observer-V0.1-dev.zip"
+$Zip = Join-Path $OutDir "Tokn-Observer-V0.1.zip"
 
 if (Test-Path $Stage) { Remove-Item $Stage -Recurse -Force }
 New-Item -ItemType Directory -Force -Path $Stage | Out-Null
@@ -58,4 +58,7 @@ if (Test-Path $experimentSource) {
 if (Test-Path $Zip) { Remove-Item $Zip -Force }
 Compress-Archive -Path (Join-Path $Stage "*") -DestinationPath $Zip -CompressionLevel Optimal
 Remove-Item $Stage -Recurse -Force
+
+& (Join-Path $Root "scripts\validation\check-package-privacy.ps1") -ZipPath $Zip
+
 Write-Host $Zip

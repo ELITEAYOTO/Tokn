@@ -2,11 +2,11 @@
 
 Derniere mise a jour : **2026-09-30**
 Release de travail : **V0.1 Measurement Hardening**
-Binaire/Cargo : **V0.0 / 0.0.0**
+Binaire/Cargo : **V0.1 / 0.1.0**
 
 ## Resume
 
-**P0-P8 DONE. P9 est IN PROGRESS.**
+**P0-P9 DONE. Experiment 002 est NEXT.**
 
 Le projet est revenu sur une direction unique :
 mesurer l'efficacite du contexte sans reduire la capacite d'Astra.
@@ -17,13 +17,17 @@ Ils restent une evidence/diagnostic historique.
 
 ## Validation technique courante
 
-P7 full gate :
+P9 V0.1 release gate :
 - cargo fmt --check : PASS ;
-- Clippy workspace -D warnings : PASS ;
+- Clippy workspace/all-targets -D warnings : PASS ;
 - cargo test --workspace : PASS ;
 - build release tokn-observe : PASS ;
-- real CLI Experiment 001 validity replay : PASS ;
-- verdict INSTRUMENTATION_ONLY ;
+- sanitized fixture/privacy tests : PASS ;
+- deterministic Experiment 001 Runner golden replay : PASS ;
+- package privacy validation : PASS ;
+- documentation consistency : PASS ;
+- git diff --check : PASS ;
+- verdict golden INSTRUMENTATION_ONLY ;
 - causal_claims_allowed=false ;
 - descriptive_metrics_allowed=true.
 
@@ -46,7 +50,7 @@ P5 - dynamic workspace tracking : DONE
 P6 - policy evidence/runtime capability research : DONE
 P7 - experiment validity reducer : DONE
 P8 - runner V0.1 : DONE
-P9 - golden replay/release validation : IN PROGRESS
+P9 - golden replay/release validation : DONE
 
 P6 est ferme avec une limitation connue :
 Codex Desktop 0.158.0-alpha.2.1 ne transmet pas `max_output_tokens`
@@ -127,26 +131,19 @@ Tous commencent observation-only.
 
 ## Prochaine action
 
-Executer **P9 - golden replay et release validation V0.1**.
+Preparer puis executer **Experiment 002 - Instrumentation Validation**.
 
 Chemin d'execution detaille :
 `docs/plans/IMPLEMENTATION-PATH.md`.
 
-P7 fournit maintenant le contrat de validite que le runner doit appeler :
-- input machine-readable ;
-- five verdict reducer ;
-- structured reasons ;
-- causal claim gate ;
-- Experiment 001 golden fixture ;
-- `evaluate-validity` text + JSON.
+Experiment 002 doit :
+- utiliser le Runner V0.1 de bout en bout ;
+- partir d'un workspace connu et snapshotte ;
+- capturer runtime/model/profil disponibles ;
+- produire un dossier de preuves complet sans reparation manuelle ;
+- rester une validation d'instrumentation, pas une experience d'economie.
 
-Objectif P8 :
-un seul run produit un dossier de preuves complet sans reparation forensique manuelle.
-
-Ensuite :
-P9 golden/release -> Experiment 002.
-
-Aucun nouveau run Astra n'est necessaire pour P7-P9.
+Un nouveau run Astra/Codex reel sera necessaire uniquement pour Experiment 002.
 
 ## Sources de verite
 
@@ -168,10 +165,8 @@ First Runner slice implemented:
 - no overwrite of Runner-owned evidence artifacts ;
 - offline fixture smoke test PASS.
 
-Implementation P8 est maintenant feature-complete cote Runner.
-
-Avant P8 DONE :
-rejouer Experiment 001 avec le nouveau Runner et verifier automatiquement les faits golden.
+Implementation P8 est feature-complete et fermee.
+Le replay Experiment 001 est maintenant valide comme gate P9.
 
 ## P8 final implementation slice - 2026-09-30
 

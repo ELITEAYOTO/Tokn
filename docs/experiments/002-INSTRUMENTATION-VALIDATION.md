@@ -1,7 +1,7 @@
 # Experiment 002 - Instrumentation Validation
 
-Status: PLANNED / BLOCKED BY V0.1 P7-P9
-Updated: 2026-09-29
+Status: READY / NEXT
+Updated: 2026-09-30
 
 ## Purpose
 
@@ -76,7 +76,13 @@ Repeat Experiment 002 after fixing Tokn if:
 
 ## After Experiment 002
 
-If instrumentation is valid, prepare Experiment 003 as the first controlled optimization A/B.
+If instrumentation is valid:
+1. freeze the V0.1 Measurement Contract ;
+2. implement the minimal Tokn Store + ModelRuntimeProfile ;
+3. build Historical Analyzer + Context Ledger observation-only ;
+4. produce recurring evidence-backed findings ;
+5. select one reproducible low-risk finding ;
+6. only then prepare Experiment 003 as the first controlled optimization A/B.
 
 Experiment 003 requirements:
 - choose one reproducible finding from Historical Analyzer / Context Efficiency analysis;

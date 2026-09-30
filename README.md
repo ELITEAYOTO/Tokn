@@ -4,11 +4,11 @@ Tokn est un profiler/analyzer local pour Codex/Astra.
 Son objectif est d'augmenter le travail utile et la qualite obtenus par token,
 sans brider la capacite du modele.
 
-Version binaire actuelle : **V0.0** (workspace Cargo 0.0.0)
-Release de travail : **V0.1 Measurement Hardening**
+Version binaire actuelle : **V0.1** (workspace Cargo 0.1.0)
+Release : **V0.1 Measurement Hardening**
 
-Etat au 2026-09-29 :
-**P0-P7 DONE ; P8 NEXT ; P9 TODO.**
+Etat au 2026-09-30 :
+**P0-P9 DONE ; Experiment 002 NEXT.**
 
 ## Principe
 
@@ -47,14 +47,15 @@ DONE :
 - P4 session tool adapter + policy observation ;
 - P5 dynamic workspace tracking ;
 - P6 policy hint/observation/enforcement + limite hook documentee ;
-- P7 experiment validity reducer + structured causal claim gate.
-
-NEXT :
+- P7 experiment validity reducer + structured causal claim gate ;
 - P8 runner V0.1 self-contained ;
 - P9 golden replay + release validation.
 
-Experiment 002 reste bloque jusqu'a P9.
-Il validera l'instrumentation, pas une economie.
+NEXT :
+- Experiment 002 instrumentation validation.
+
+Experiment 002 valide l'instrumentation V0.1 sur un petit run reel.
+Il ne cherche pas a prouver une economie.
 
 ## P6 - conclusion
 

@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "watch_root": "E:\\fixture",
+  "candidates": [
+    {
+      "root": "E:\\fixture\\B07-B_WORKING\\PROJECT",
+      "relative": "B07-B_WORKING/PROJECT",
+      "markers": [
+        {
+          "name": "package.json"
+        }
+      ]
+    }
+  ]
+}

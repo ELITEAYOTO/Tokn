@@ -630,3 +630,14 @@ P6 remains IN PROGRESS until one controlled real PreToolUse callback proves the 
 - RunnerRequest now accepts optional `session_candidates` for deterministic offline RunGroup reconstruction.
 - Normal execution still uses the Codex session index when `session_candidates` is empty.
 - Current live B07-C workspace no longer reproduces the historical 13/4/0 snapshot diff (current observation: 11/8/0), so P9 will use a repo-contained immutable golden fixture rather than mutable external workspace state.
+
+## 2026-09-30 - V0.1 Measurement Hardening release gate completed
+
+- normalized workspace Cargo version from 0.0.0 to 0.1.0 ;
+- added sanitized repo-contained Experiment 001 Runner golden fixture with explicit provenance ;
+- deterministic golden replay preserves accepted aggregate facts without relying on mutable external workspaces ;
+- package privacy validator now checks the golden fixture and validation scripts ;
+- added documentation consistency validator for canonical active status files ;
+- P9 release gates pass: fmt, clippy all-targets, workspace tests, release build, golden replay, package privacy, docs consistency and git diff check ;
+- P0-P9 are DONE ; V0.1 Measurement Hardening is complete ;
+- Experiment 002 Instrumentation Validation is NEXT.

@@ -580,7 +580,7 @@ dependencies = [
 
 [[package]]
 name = "tokn-analysis"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "serde",
  "serde_json",
@@ -589,7 +589,7 @@ dependencies = [
 
 [[package]]
 name = "tokn-codex"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "anyhow",
  "serde",
@@ -601,7 +601,7 @@ dependencies = [
 
 [[package]]
 name = "tokn-domain"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "serde",
  "serde_json",
@@ -610,7 +610,7 @@ dependencies = [
 
 [[package]]
 name = "tokn-ingest"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "blake3",
  "serde_json",
@@ -620,7 +620,7 @@ dependencies = [
 
 [[package]]
 name = "tokn-observe"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "anyhow",
  "clap",
@@ -639,7 +639,7 @@ dependencies = [
 
 [[package]]
 name = "tokn-platform"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "anyhow",
  "tokn-domain",
@@ -647,7 +647,7 @@ dependencies = [
 
 [[package]]
 name = "tokn-report"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "serde_json",
  "tokn-analysis",
@@ -657,7 +657,7 @@ dependencies = [
 
 [[package]]
 name = "tokn-storage"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "rusqlite",
  "tokn-domain",

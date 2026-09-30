@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "run_id": "exp001-golden-fixture",
+  "source": "fixtures/experiments/001-runner-golden/sessions/parent.jsonl",
+  "session_candidates": [
+    "fixtures/experiments/001-runner-golden/sessions/child-ui.jsonl",
+    "fixtures/experiments/001-runner-golden/sessions/child-fix.jsonl",
+    "fixtures/experiments/001-runner-golden/sessions/child-budget.jsonl"
+  ],
+  "source_root": "E:\\fixture\\B07-B_WORKING\\PROJECT",
+  "after_inventory": "fixtures/experiments/001-runner-golden/workspace-after-inventory.json",
+  "before_inventory": "fixtures/experiments/001-runner-golden/workspace-before-inventory.json",
+  "before_snapshot": "fixtures/experiments/001-runner-golden/workspace-before-snapshot.json",
+  "after_snapshot": "fixtures/experiments/001-runner-golden/workspace-after-snapshot.json",
+  "expected_outputs": [],
+  "evidence_dir": "target/p9-exp001-golden",
+  "experiment": {
+    "experiment_id": "001-runtime-output-caps",
+    "intent": "INSTRUMENTATION",
+    "validity": {
+      "exact_task_captured": "PASS",
+      "completion_required": true,
+      "tool_evidence_required": true,
+      "policy_enforcement_accurately_labeled": "PASS",
+      "model_recorded": "UNKNOWN",
+      "configuration_recorded": "UNKNOWN",
+      "comparable_to_baseline": "UNKNOWN",
+      "human_or_host_gates": "NOT_REQUIRED",
+      "baseline_available": "FAIL",
+      "same_task": "UNKNOWN",
+      "same_starting_workspace": "UNKNOWN",
+      "same_runtime_model_config": "UNKNOWN",
+      "single_primary_variable": "FAIL"
+    }
+  },
+  "policy": {
+    "policy_id": "exp001-output-cap-policy",
+    "marker": "Tokn Experiment 001 - Runtime Output Policy",
+    "policy_paths": [],
+    "caps": {
+      "file_read": 5000,
+      "search": 3000
+    },
+    "enforcement": "SUPPORTED_INSUFFICIENT_INPUT"
+  },
+  "quality": {
+    "required": false,
+    "program": null,
+    "args": []
+  }
+}

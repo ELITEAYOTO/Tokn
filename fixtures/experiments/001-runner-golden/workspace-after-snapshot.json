@@ -1,0 +1,124 @@
+{
+  "schema_version": 1,
+  "created_at": "2026-09-27T19:50:00Z",
+  "project_root": "E:\\fixture\\B07-C_WORKING\\PROJECT",
+  "excluded_top_level": [
+    "node_modules",
+    ".test-build",
+    ".browser-build",
+    "dist",
+    ".git"
+  ],
+  "file_count": 18,
+  "total_bytes": 751,
+  "files": [
+    {
+      "path": "fixture/unchanged.txt",
+      "sha256": "same",
+      "bytes": 10,
+      "last_write_utc": "2026-09-27T19:50:00Z"
+    },
+    {
+      "path": "fixture/modified-01.txt",
+      "sha256": "after-01",
+      "bytes": 31,
+      "last_write_utc": "2026-09-27T19:50:00Z"
+    },
+    {
+      "path": "fixture/modified-02.txt",
+      "sha256": "after-02",
+      "bytes": 32,
+      "last_write_utc": "2026-09-27T19:50:00Z"
+    },
+    {
+      "path": "fixture/modified-03.txt",
+      "sha256": "after-03",
+      "bytes": 33,
+      "last_write_utc": "2026-09-27T19:50:00Z"
+    },
+    {
+      "path": "fixture/modified-04.txt",
+      "sha256": "after-04",
+      "bytes": 34,
+      "last_write_utc": "2026-09-27T19:50:00Z"
+    },
+    {
+      "path": "fixture/added-01.txt",
+      "sha256": "added-01",
+      "bytes": 41,
+      "last_write_utc": "2026-09-27T19:50:00Z"
+    },
+    {
+      "path": "fixture/added-02.txt",
+      "sha256": "added-02",
+      "bytes": 42,
+      "last_write_utc": "2026-09-27T19:50:00Z"
+    },
+    {
+      "path": "fixture/added-03.txt",
+      "sha256": "added-03",
+      "bytes": 43,
+      "last_write_utc": "2026-09-27T19:50:00Z"
+    },
+    {
+      "path": "fixture/added-04.txt",
+      "sha256": "added-04",
+      "bytes": 44,
+      "last_write_utc": "2026-09-27T19:50:00Z"
+    },
+    {
+      "path": "fixture/added-05.txt",
+      "sha256": "added-05",
+      "bytes": 45,
+      "last_write_utc": "2026-09-27T19:50:00Z"
+    },
+    {
+      "path": "fixture/added-06.txt",
+      "sha256": "added-06",
+      "bytes": 46,
+      "last_write_utc": "2026-09-27T19:50:00Z"
+    },
+    {
+      "path": "fixture/added-07.txt",
+      "sha256": "added-07",
+      "bytes": 47,
+      "last_write_utc": "2026-09-27T19:50:00Z"
+    },
+    {
+      "path": "fixture/added-08.txt",
+      "sha256": "added-08",
+      "bytes": 48,
+      "last_write_utc": "2026-09-27T19:50:00Z"
+    },
+    {
+      "path": "fixture/added-09.txt",
+      "sha256": "added-09",
+      "bytes": 49,
+      "last_write_utc": "2026-09-27T19:50:00Z"
+    },
+    {
+      "path": "fixture/added-10.txt",
+      "sha256": "added-10",
+      "bytes": 50,
+      "last_write_utc": "2026-09-27T19:50:00Z"
+    },
+    {
+      "path": "fixture/added-11.txt",
+      "sha256": "added-11",
+      "bytes": 51,
+      "last_write_utc": "2026-09-27T19:50:00Z"
+    },
+    {
+      "path": "fixture/added-12.txt",
+      "sha256": "added-12",
+      "bytes": 52,
+      "last_write_utc": "2026-09-27T19:50:00Z"
+    },
+    {
+      "path": "fixture/added-13.txt",
+      "sha256": "added-13",
+      "bytes": 53,
+      "last_write_utc": "2026-09-27T19:50:00Z"
+    }
+  ]
+}
