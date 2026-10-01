@@ -7,7 +7,8 @@ Derniere mise a jour : **2026-10-01**
 P0-P9 : DONE
 Experiment 002 : DONE / ACCEPTED
 Measurement Contract V1 : DONE / FROZEN
-Store + ModelRuntimeProfile : NEXT
+Store foundation + ModelRuntimeProfile persistence : DONE
+Local MCP integration prototype : NEXT
 
 Workspace :
 `E:\Tokn\V0-CodexTkn-Consume\tool`
@@ -25,15 +26,16 @@ Ne pas refaire l'enquete P6 ni la recherche plugin/telemetry R1-R8 avant qu'un b
 
 ## Premiere action
 
-Implementer **Tokn Store + ModelRuntimeProfile persistence**.
+Implementer le **Local MCP integration prototype**.
 
 Premier scope :
-- persister project/workspace identity sans chemin personnel comme identite ;
-- persister runs, agents et usage summaries ;
-- persister ModelRuntimeProfile V1 sans raw prompts/secrets ;
-- conserver provenance + contract versions ;
-- garantir l'idempotence d'un meme run/source ;
-- ne pas ajouter Findings/GUI/optimisation active dans ce slice.
+- process MCP local lance a la demande ;
+- handshake/version/capabilities structures ;
+- doctor/status ;
+- lecture evidence/history via le Store commun ;
+- appel des fonctions Runner/Store existantes sans dupliquer leur logique ;
+- erreurs structurees ;
+- aucun daemon permanent par defaut.
 
 Aucun nouveau quota Astra/Codex n'est necessaire pour ce travail.
 
@@ -75,10 +77,9 @@ Tests obligatoires :
 ## Apres V0.1
 
 NEXT :
-Tokn Store + ModelRuntimeProfile.
+Local MCP integration prototype.
 
 Puis :
-- Local MCP integration prototype ;
 - Historical Analyzer + Context Ledger ;
 - findings observation-only ;
 - Experiment 003 seulement apres un finding reproductible.

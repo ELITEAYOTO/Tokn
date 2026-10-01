@@ -126,13 +126,14 @@ Repeat Experiment 002 after fixing Tokn if:
 
 Instrumentation is valid and the Measurement Contract V1 is now frozen.
 
+The minimal Store + ModelRuntimeProfile foundation is now implemented.
+
 Next:
-1. implement the minimal Tokn Store + ModelRuntimeProfile persistence ;
-2. prototype the thin local MCP adapter over the shared Engine/Store ;
-3. build Historical Analyzer + Context Ledger observation-only ;
-4. produce recurring evidence-backed findings ;
-5. select one reproducible low-risk finding ;
-6. only then prepare Experiment 003 as the first controlled optimization A/B.
+1. prototype the thin local MCP adapter over the shared Engine/Store ;
+2. build Historical Analyzer + Context Ledger observation-only ;
+3. produce recurring evidence-backed findings ;
+4. select one reproducible low-risk finding ;
+5. only then prepare Experiment 003 as the first controlled optimization A/B.
 
 Experiment 003 requirements:
 - choose one reproducible finding from Historical Analyzer / Context Efficiency analysis;

@@ -6,7 +6,7 @@ Binaire/Cargo : **V0.1 / 0.1.0**
 
 ## Resume
 
-**P0-P9 DONE. Experiment 002 est ACCEPTED. Measurement Contract V1 est FROZEN. Store + ModelRuntimeProfile est NEXT.**
+**P0-P9 DONE. Experiment 002 est ACCEPTED. Measurement Contract V1 est FROZEN. Store foundation est DONE. Local MCP prototype est NEXT.**
 
 Le projet est revenu sur une direction unique :
 mesurer l'efficacite du contexte sans reduire la capacite d'Astra.
@@ -188,15 +188,34 @@ Points figes :
 Versions workspace/snapshot inconnues : rejet fail-closed.
 Experiment 001 golden : inchangé et replay PASS avec toutes les versions du contrat.
 
+## Store V2 foundation - termine
+
+Le Store V2 persiste maintenant :
+- project/workspace identities pseudonymisees ;
+- runs + agents ;
+- usage summaries avec compteurs de couverture ;
+- provenance par fingerprint ;
+- ModelRuntimeProfile V1.
+
+`tokn-observe store-evidence` ingere un dossier Runner V1 sans modifier le contrat Runner.
+L'ingestion est idempotente et le replay Experiment 001 la rejoue deux fois avec succes.
+
+Privacy : aucun chemin workspace/session brut n'est persiste dans le Store V2.
+Les anciens chemins du schema legacy sont pseudonymises puis physiquement nettoyes par VACUUM lors de la migration V2.
+Les versions futures inconnues sont refusees fail-closed.
+
+Rate-limit ingestion, Findings et Experiment Lab persistence restent differes.
+
 ## Prochaine action
 
-Implementer **Store + ModelRuntimeProfile persistence**.
+Implementer le **Local MCP integration prototype**.
 
 Chemin d'execution detaille :
 `docs/plans/IMPLEMENTATION-PATH.md`.
 
-Premier slice : projects/workspaces + runs + agents + usage summaries + provenance
-+ ModelRuntimeProfile V1, avec idempotence et sans raw prompts/secrets.
+Premier slice : process MCP local lance a la demande, handshake/version/capabilities,
+doctor/status et acces lecture aux preuves/historique via le moteur/store partage.
+Aucune logique analytique dupliquee et aucun daemon permanent par defaut.
 
 Aucun nouveau run Astra/Codex n'est necessaire pour ce slice.
 

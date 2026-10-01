@@ -14,7 +14,7 @@ Lire seulement :
 5. `plans/NEXT-SESSION-CHECKLIST.md` - prochaine action concrete.
 
 Etat actuel :
-**P0-P9 DONE ; Experiment 002 ACCEPTED ; Measurement Contract V1 FROZEN ; Store + ModelRuntimeProfile NEXT.**
+**P0-P9 DONE ; Experiment 002 ACCEPTED ; Measurement Contract V1 FROZEN ; Store foundation DONE ; Local MCP prototype NEXT.**
 
 ## Organisation documentaire
 
@@ -64,6 +64,8 @@ Un document historique ne doit pas remplacer une source de verite courante.
 - `design/V0.1-MEASUREMENT-ARCHITECTURE.md`
 - `design/MEASUREMENT-CONTRACT-V0.1.md`
   Contrat V1 fige apres Experiment 002 : schemas, evidence layout et semantiques de mesure.
+- `design/TOKN-STORE-V2.md`
+  Fondation SQLite V2 : identities pseudonymisees, runs/agents/profiles/provenance et ingestion `store-evidence`.
 - `design/SESSION-ROLLOUT-ADAPTER.md`
 - `design/AGENT-COST-ATTRIBUTION.md`
 - `design/WORKSPACE-TRACKING.md`

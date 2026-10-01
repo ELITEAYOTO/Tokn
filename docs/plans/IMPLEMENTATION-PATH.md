@@ -2,7 +2,7 @@
 
 Status: ACTIVE EXECUTION PLAN
 Date: 2026-09-30
-Current state: P0-P9 DONE / Experiment 002 ACCEPTED / Measurement Contract V1 FROZEN / Store + ModelRuntimeProfile NEXT
+Current state: P0-P9 DONE / Experiment 002 ACCEPTED / Measurement Contract V1 FROZEN / Store foundation DONE / Local MCP prototype NEXT
 
 ## Purpose
 
@@ -215,27 +215,30 @@ Breaking changes remain possible later, but become explicit schema migrations.
 
 ## Phase E - Tokn Store + ModelRuntimeProfile
 
-Status: NEXT
+Status: FOUNDATION DONE / EXTENSIONS DEFERRED
 
-Build the smallest local persistent store for:
-- projects/workspaces;
+Foundation implemented:
+- projects/workspaces with privacy-preserving logical identities;
 - runs;
 - agents;
 - runtime/model profiles;
-- usage summaries;
-- rate-limit snapshots;
-- findings;
-- experiments;
-- provenance.
+- usage summaries with known counters;
+- provenance fingerprints;
+- versioned Store schema + fail-closed migrations;
+- `store-evidence` ingestion from immutable Runner evidence.
+
+The rate-limit table exists, but ingestion remains deferred.
+Findings and Experiment Lab persistence remain deferred until their consumer contracts are justified.
 
 Do not store raw prompts or secrets by default.
+Legacy source paths are pseudonymized and physically removed on the one-time V2 migration.
 
-Implement MODEL-RUNTIME-PROFILE.md from observed fields,
+ModelRuntimeProfile V1 persistence is implemented from observed fields,
 not speculative universal model metadata.
 
 ## Phase F - Local Codex integration prototype
 
-Status: AFTER STORE FOUNDATION
+Status: NEXT
 Direction: RESEARCH-BACKED / NOT YET ACCEPTED AS FINAL TRANSPORT
 
 Preferred first prototype:
@@ -340,31 +343,32 @@ These remain separate from the Analyzer.
 
 ## What not to build now
 
-Do not start before Experiment 002 and the Measurement Contract Freeze:
+Current non-goals while the Local MCP prototype is NEXT:
 - production plugin package;
-- MCP adapter implementation;
-- local daemon;
+- permanent local daemon;
 - GUI;
-- persistent Store schema implementation;
+- Findings persistence before a Findings contract exists;
+- Experiment Lab persistence before its consumer contract exists;
 - active optimization;
 - RAG/embeddings;
 - Project Memory;
 - context rewriting.
 
-The research documents may guide future design,
-but they are not a reason to skip measurement hardening.
+The MCP prototype must remain process-bound and thin over the already validated
+Runner/Store boundaries. Research documents may guide the prototype, but they are
+not a reason to widen scope prematurely.
 
 ## Current decision
 
-Immediate product work is **Store + ModelRuntimeProfile persistence**.
+Immediate product work is **Local MCP integration prototype**.
 
-The Measurement Contract V1 is frozen in `docs/design/MEASUREMENT-CONTRACT-V0.1.md`.
+The Measurement Contract V1 and Store V2 foundation are now stable inputs.
 
 Order:
-1. persist project/workspace identity without using personal paths as identity ;
-2. persist runs and agents idempotently ;
-3. persist V1 usage summaries and provenance with contract versions ;
-4. persist ModelRuntimeProfile V1 with UNKNOWN preserved ;
-5. add migration/version guards before richer history queries ;
-6. then prototype the thin local MCP adapter over the shared Engine/Store ;
-7. keep Historical Analyzer / Context Ledger observation-only after the Store foundation.
+1. expose a command-launched MCP server process with structured capability/version metadata ;
+2. keep the MCP surface thin over existing Runner/Store functions ;
+3. support doctor/status and evidence/history access before richer workflows ;
+4. do not duplicate analysis logic in MCP handlers ;
+5. keep standalone Runner and `store-evidence` behavior unchanged ;
+6. avoid a permanent localhost daemon unless a measured requirement appears ;
+7. after the prototype boundary is stable, begin Historical Analyzer / Context Ledger observation-only.

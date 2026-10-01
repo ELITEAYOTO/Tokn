@@ -16,6 +16,7 @@ mod resolve_workspace;
 mod runner;
 mod sessions;
 mod simulate_caps;
+mod store_evidence;
 
 use crate::cli::{Cli, Command};
 
@@ -32,6 +33,21 @@ pub fn run(cli: Cli) -> anyhow::Result<()> {
             output_json,
         } => analyze_run::run(&source, output_json.as_deref()),
         Command::Runner { request } => runner::run(&request),
+        Command::StoreEvidence {
+            evidence_dir,
+            project_key,
+            workspace_key,
+            parent_workspace_key,
+            runtime_profile,
+            db,
+        } => store_evidence::run(
+            &evidence_dir,
+            &project_key,
+            &workspace_key,
+            parent_workspace_key.as_deref(),
+            runtime_profile.as_deref(),
+            db.as_deref(),
+        ),
         Command::EvaluateValidity { input, output_json } => {
             evaluate_validity::run(&input, output_json.as_deref())
         }

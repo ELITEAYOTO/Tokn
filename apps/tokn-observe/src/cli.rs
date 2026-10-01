@@ -45,6 +45,19 @@ pub enum Command {
     Runner {
         request: PathBuf,
     },
+    StoreEvidence {
+        evidence_dir: PathBuf,
+        #[arg(long)]
+        project_key: String,
+        #[arg(long)]
+        workspace_key: String,
+        #[arg(long)]
+        parent_workspace_key: Option<String>,
+        #[arg(long)]
+        runtime_profile: Option<PathBuf>,
+        #[arg(long)]
+        db: Option<PathBuf>,
+    },
     InspectPolicy {
         source: String,
         #[arg(long, default_value = "policy")]

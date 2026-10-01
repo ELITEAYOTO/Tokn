@@ -690,3 +690,16 @@ P6 remains IN PROGRESS until one controlled real PreToolUse callback proves the 
 - added the serializable ModelRuntimeProfile V1 domain contract while leaving persistence for the next phase ;
 - Experiment 001 golden replay now asserts every frozen contract version while preserving all historical golden facts ;
 - Store + ModelRuntimeProfile persistence is now the next roadmap phase.
+
+## 2026-10-01 - Store V2 foundation and ModelRuntimeProfile persistence
+
+- added additive SQLite Store schema V2 for privacy-preserving projects/workspaces, runs, agents, runtime profiles, provenance and prepared rate-limit snapshots ;
+- added `tokn-observe store-evidence` to ingest immutable Runner V1 evidence without changing RunnerRequest V1 ;
+- project/workspace/source/profile identities are pseudonymized before persistence ;
+- usage totals keep known counters so UNKNOWN coverage is not collapsed into zero ;
+- persisted ModelRuntimeProfile V1 JSON with schema validation and idempotent profile identity ;
+- legacy import paths are now replaced by private source references ;
+- one-time V2 migration pseudonymizes legacy paths and runs VACUUM so removed paths do not remain in free SQLite pages ;
+- unknown future Store schema versions are refused fail-closed ;
+- Experiment 001 release replay now ingests Store evidence twice and verifies no raw golden workspace/session path is present in the database ;
+- Store foundation is DONE; thin command-launched Local MCP integration prototype is NEXT.

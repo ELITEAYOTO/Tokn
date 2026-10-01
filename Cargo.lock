@@ -659,7 +659,10 @@ dependencies = [
 name = "tokn-storage"
 version = "0.1.0"
 dependencies = [
+ "blake3",
  "rusqlite",
+ "serde_json",
+ "thiserror",
  "tokn-domain",
 ]
 

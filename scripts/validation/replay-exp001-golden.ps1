@@ -6,6 +6,8 @@ $ErrorActionPreference = "Stop"
 $Repo = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
 $Fixture = Join-Path $Repo "fixtures\experiments\001-runner-golden"
 $Evidence = Join-Path $Repo "target\p9-exp001-golden"
+$StoreDb = Join-Path $Repo "target\p9-exp001-store.sqlite3"
+$RuntimeProfile = Join-Path $Fixture "runtime-profile.json"
 
 function Assert-Equal {
     param([string]$Name, $Actual, $Expected)
@@ -22,6 +24,9 @@ try {
     }
     if (Test-Path -LiteralPath $Evidence) {
         Remove-Item -LiteralPath $Evidence -Recurse -Force
+    }
+    if (Test-Path -LiteralPath $StoreDb) {
+        Remove-Item -LiteralPath $StoreDb -Force
     }
 
     & $BinaryPath runner (Join-Path $Fixture "runner-request.json")
@@ -108,8 +113,45 @@ try {
     Assert-Equal "quality_status" $Result.quality_status $Expected.quality_status
     Assert-Equal "pending_steps" @($Result.pending_steps).Count 0
 
+    & $BinaryPath store-evidence $Evidence `
+        --project-key "exp001-fixture-project" `
+        --workspace-key "b07-c-working" `
+        --runtime-profile $RuntimeProfile `
+        --db $StoreDb
+    if ($LASTEXITCODE -ne 0) {
+        throw "Store evidence first import exited with code $LASTEXITCODE"
+    }
+    Write-Host "[PASS] store evidence first import"
+
+    & $BinaryPath store-evidence $Evidence `
+        --project-key "exp001-fixture-project" `
+        --workspace-key "b07-c-working" `
+        --runtime-profile $RuntimeProfile `
+        --db $StoreDb
+    if ($LASTEXITCODE -ne 0) {
+        throw "Store evidence idempotent replay exited with code $LASTEXITCODE"
+    }
+    Write-Host "[PASS] store evidence idempotent replay"
+
+    if (-not (Test-Path -LiteralPath $StoreDb)) {
+        throw "Measurement Store database was not created"
+    }
+    $StoreText = [System.Text.Encoding]::UTF8.GetString([System.IO.File]::ReadAllBytes($StoreDb))
+    foreach ($privateNeedle in @(
+        "E:\fixture\B07-C_WORKING\PROJECT",
+        "fixtures/experiments/001-runner-golden/sessions/parent.jsonl"
+    )) {
+        if ($StoreText.Contains($privateNeedle)) {
+            throw "Measurement Store leaked raw evidence path: $privateNeedle"
+        }
+    }
+    Write-Host "[PASS] measurement store contains no raw golden workspace/session path"
+
     Write-Host "EXP001 GOLDEN REPLAY PASS"
 }
 finally {
+    if (Test-Path -LiteralPath $StoreDb) {
+        Remove-Item -LiteralPath $StoreDb -Force
+    }
     Pop-Location
 }

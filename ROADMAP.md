@@ -97,15 +97,23 @@ Resultat :
 
 ## M3.6 - Store + ModelRuntimeProfile persistence
 
-Statut : NEXT
+Statut : DONE / FOUNDATION
 
-But :
-persister le minimum fiable pour projects/workspaces, runs, agents,
-usage summaries, provenance et ModelRuntimeProfile V1.
+Resultat :
+- Store schema V2 versionne et fail-closed ;
+- projects/workspaces pseudonymises ;
+- runs + agents + usage summaries + known counters ;
+- provenance par fingerprint sans chemin brut ;
+- ModelRuntimeProfile V1 persiste ;
+- commande `store-evidence` idempotente ;
+- migration legacy efface physiquement les anciens chemins apres VACUUM ;
+- replay Experiment 001 valide Runner -> Store deux fois sans multiplier le run.
+
+Rate-limit ingestion, Findings et Experiment Lab restent differes jusqu'a un consommateur concret.
 
 ## M3.7 - Local MCP integration prototype
 
-Statut : PLANNED AFTER M3.6
+Statut : NEXT
 
 But :
 exposer le moteur/store local via un adapter MCP process-bound mince,
