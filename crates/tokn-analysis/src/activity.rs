@@ -196,7 +196,7 @@ fn exact_repetitions(activities: &[HistoricalToolActivityRecord]) -> Vec<ExactRe
         .into_iter()
         .filter_map(
             |((category, operation_fingerprint), (occurrences, runs, threads))| {
-                (occurrences > 1).then(|| ExactRepeatedOperation {
+                (occurrences > 1).then_some(ExactRepeatedOperation {
                     operation_fingerprint,
                     category,
                     occurrences,
