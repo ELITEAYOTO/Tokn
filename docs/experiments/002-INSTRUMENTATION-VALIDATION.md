@@ -1,7 +1,7 @@
 # Experiment 002 - Instrumentation Validation
 
 Status: READY / NEXT
-Updated: 2026-09-30
+Updated: 2026-10-01
 
 ## Purpose
 
@@ -35,7 +35,11 @@ Do not ask Astra to be faster, shorter or less thorough.
 Before launch:
 - V0.1 tests PASS;
 - no active run;
-- runtime/model versions recorded;
+- harness provisioned from a clean Git commit and SHA-256 manifest verified;
+- release binary provenance points to the same commit and binary SHA-256;
+- complete frozen baseline still matches 833 tests / 832 PASS / 1 known FAIL;
+- runtime/app versions recorded;
+- run-scoped model/config values captured after the run from diagnostic evidence;
 - source workspace snapshot complete;
 - expected output workspace recorded when known;
 - policy placement paths recorded;
@@ -62,7 +66,16 @@ Policy/evidence:
 - no hard-cap enforcement is required for this instrumentation run.
 
 Experiment:
-- machine-readable validity verdict generated.
+- machine-readable validity verdict generated;
+- runtime validity is PASS when CLI/runtime evidence exists;
+- model_recorded is PASS only when run-scoped model evidence is observed;
+- configuration_recorded may remain UNKNOWN until the post-run ModelRuntimeProfile contract is frozen.
+
+Harness source of truth:
+- `scripts/experiment/002/` contains the versioned task and lifecycle scripts;
+- `scripts/experiment/prepare-exp002-harness.ps1` provisions the external run workspace;
+- real traces/runs remain outside Git.
+
 ## Failure conditions
 
 Repeat Experiment 002 after fixing Tokn if:

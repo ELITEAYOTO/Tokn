@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "experiment_id": "002-instrumentation-validation",
+  "purpose": "Validate Tokn V0.1 end-to-end instrumentation on one bounded real Codex/Astra task; no savings claim.",
+  "tokn_repo": "__TOKN_REPO__",
+  "required_tokn_commit": "__GENERATED_FROM_CLEAN_HEAD__",
+  "required_tokn_version": "0.1.0",
+  "project_root": "__PROJECT_ROOT__",
+  "workspace_watch_root": "__WORKSPACE_WATCH_ROOT__",
+  "workspace_inventory_max_depth": 2,
+  "expected_output_workspace": "__EXPECTED_OUTPUT_WORKSPACE__",
+  "trace_label": "exp002-instrumentation",
+  "baseline": {
+    "state": "KNOWN_SINGLE_FAILURE",
+    "test_total": 833,
+    "test_pass": 832,
+    "test_fail": 1,
+    "failing_test_file": "tests/b07c-quick-fix-workflow.test.cjs",
+    "failure": "Cannot find module '../../.test-build/src/plugin/quick-fix-workflow.js'",
+    "missing_source": "src/plugin/quick-fix-workflow.ts"
+  },
+  "quality": {
+    "targeted_program": "cmd.exe",
+    "targeted_args": [
+      "/d",
+      "/s",
+      "/c",
+      "npm.cmd run build:test && node --test tests/b07c-quick-fix-workflow.test.cjs"
+    ],
+    "final_program": "npm.cmd",
+    "final_args": [
+      "run",
+      "verify:local"
+    ],
+    "success_requires": "final quality gate PASS"
+  },
+  "policy": null,
+  "experiment_intent": "INSTRUMENTATION"
+}

@@ -1,6 +1,6 @@
 # Tokn V0.1 - Next Session Checklist
 
-Derniere mise a jour : **2026-09-30**
+Derniere mise a jour : **2026-10-01**
 
 ## Etat de depart
 
@@ -28,8 +28,12 @@ Preparer puis executer **Experiment 002 - Instrumentation Validation**.
 Preflight :
 - choisir une petite tache reelle et bornee ;
 - partir d'un workspace connu et snapshotte ;
+- provisionner le harness versionne depuis un commit Git propre ;
+- reconstruire le binaire release et verifier commit + SHA-256 ;
+- confirmer le baseline complet 833/832/1 avant tout lancement ;
 - utiliser le Runner V0.1 de bout en bout ;
-- enregistrer runtime/model/config disponibles ;
+- enregistrer runtime/model/config disponibles avec provenance ;
+- garder configuration_recorded=UNKNOWN tant que ModelRuntimeProfile n'est pas fige ;
 - definir un quality gate clair ;
 - ne pas introduire d'optimisation active ;
 - ne pas consommer de quota Astra tant que le preflight n'est pas valide.

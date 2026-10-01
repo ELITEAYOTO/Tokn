@@ -169,7 +169,8 @@ This is not an optimization experiment.
 Required:
 - small bounded task;
 - known starting workspace;
-- current runtime/model/profile captured;
+- run-scoped runtime/model/config values captured with provenance;
+- configuration completeness may remain UNKNOWN until ModelRuntimeProfile is frozen after this experiment;
 - Runner used from start to finish;
 - no manual evidence repair;
 - post-run evidence folder complete;

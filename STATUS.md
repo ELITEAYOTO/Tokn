@@ -1,6 +1,6 @@
 # Tokn Observer - Status
 
-Derniere mise a jour : **2026-09-30**
+Derniere mise a jour : **2026-10-01**
 Release de travail : **V0.1 Measurement Hardening**
 Binaire/Cargo : **V0.1 / 0.1.0**
 
@@ -139,7 +139,9 @@ Chemin d'execution detaille :
 Experiment 002 doit :
 - utiliser le Runner V0.1 de bout en bout ;
 - partir d'un workspace connu et snapshotte ;
-- capturer runtime/model/profil disponibles ;
+- utiliser un harness versionne/provisionne depuis un commit Git propre ;
+- verifier la provenance SHA-256 du binaire release avant lancement ;
+- capturer les valeurs runtime/model/config disponibles sans anticiper le ModelRuntimeProfile ;
 - produire un dossier de preuves complet sans reparation manuelle ;
 - rester une validation d'instrumentation, pas une experience d'economie.
 

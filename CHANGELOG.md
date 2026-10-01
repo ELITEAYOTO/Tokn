@@ -641,3 +641,19 @@ P6 remains IN PROGRESS until one controlled real PreToolUse callback proves the 
 - P9 release gates pass: fmt, clippy all-targets, workspace tests, release build, golden replay, package privacy, docs consistency and git diff check ;
 - P0-P9 are DONE ; V0.1 Measurement Hardening is complete ;
 - Experiment 002 Instrumentation Validation is NEXT.
+
+## 2026-10-01 - Experiment 002 preflight hardening
+
+- versioned the Experiment 002 harness under `scripts/experiment/002/` while keeping real runs/traces outside Git ;
+- added a clean-HEAD provisioner with a SHA-256 harness manifest and generated external launchers ;
+- release builds now emit `tokn-observe.provenance.json` with source commit, version and binary SHA-256 ;
+- START refuses harness drift, dirty Git, binary/provenance mismatch or a changed frozen baseline ;
+- START now verifies the complete 833/832/1 baseline before the targeted workflow failure ;
+- added run-scoped runtime/model/config observation from diagnostic trace evidence ;
+- model evidence can be marked PASS when observed, while configuration completeness remains UNKNOWN until ModelRuntimeProfile is frozen ;
+- no real Experiment 002 Codex/Astra run has been launched by this hardening pass.
+
+## 2026-10-01 - Context Pack status de-duplication
+
+- removed stale hard-coded milestone text from the Context Pack manifest generator ;
+- generated packs now point to the exact-commit STATUS.md and ROADMAP.md for project state instead of duplicating mutable status.
