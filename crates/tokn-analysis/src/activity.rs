@@ -96,14 +96,16 @@ pub fn build_activity_timeline(
     >::new();
 
     for activity in &history.activities {
-        let entry = run_groups.entry(activity.run_id.clone()).or_insert_with(|| {
-            (
-                activity.project_id.clone(),
-                activity.workspace_id.clone(),
-                activity.run_created_at_unix,
-                BTreeMap::new(),
-            )
-        });
+        let entry = run_groups
+            .entry(activity.run_id.clone())
+            .or_insert_with(|| {
+                (
+                    activity.project_id.clone(),
+                    activity.workspace_id.clone(),
+                    activity.run_created_at_unix,
+                    BTreeMap::new(),
+                )
+            });
         entry
             .3
             .entry(activity.thread_id.clone())
@@ -172,13 +174,9 @@ fn activity_order_status(activities: &[HistoricalToolActivityRecord]) -> Activit
     }
 }
 
-fn exact_repetitions(
-    activities: &[HistoricalToolActivityRecord],
-) -> Vec<ExactRepeatedOperation> {
-    let mut groups = BTreeMap::<
-        (String, String),
-        (u64, BTreeSet<String>, BTreeSet<(String, String)>),
-    >::new();
+fn exact_repetitions(activities: &[HistoricalToolActivityRecord]) -> Vec<ExactRepeatedOperation> {
+    let mut groups =
+        BTreeMap::<(String, String), (u64, BTreeSet<String>, BTreeSet<(String, String)>)>::new();
 
     for activity in activities {
         let Some(fingerprint) = activity.operation_fingerprint.as_ref() else {
@@ -214,10 +212,7 @@ fn exact_repetitions(
             .occurrences
             .cmp(&left.occurrences)
             .then(left.category.cmp(&right.category))
-            .then(
-                left.operation_fingerprint
-                    .cmp(&right.operation_fingerprint),
-            )
+            .then(left.operation_fingerprint.cmp(&right.operation_fingerprint))
     });
     repetitions
 }
@@ -336,10 +331,7 @@ mod tests {
         assert!(matches!(
             build_activity_timeline(&history),
             Err(
-                ActivityTimelineBuildError::UnsupportedToolActivityHistorySchema {
-                    actual: 99,
-                    ..
-                }
+                ActivityTimelineBuildError::UnsupportedToolActivityHistorySchema { actual: 99, .. }
             )
         ));
     }
