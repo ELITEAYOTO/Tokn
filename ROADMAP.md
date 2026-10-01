@@ -1,6 +1,6 @@
 # Tokn Roadmap
 
-Derniere mise a jour : **2026-09-30**
+Derniere mise a jour : **2026-10-01**
 
 ## North Star
 
@@ -63,17 +63,37 @@ Plan d'execution detaille depuis P8 jusqu'aux couches post-V0.1 :
 
 ## M3 - Experiment 002
 
-Statut : NEXT
+Statut : DONE / ACCEPTED
 
 But :
 valider V0.1 end-to-end sur une petite tache reelle.
 
-Ce run valide l'instrumentation.
-Il ne doit pas prouver une economie.
+Resultat :
+- Runner COMPLETE ;
+- terminal COMPLETED ;
+- quality PASS, 863/863 tests ;
+- 2 agents / 49 usage records ;
+- workspace correct et diff 1/2/0 ;
+- modele `gpt-6.1-sol` observe ;
+- configuration_recorded=UNKNOWN ;
+- validity INSTRUMENTATION_ONLY ;
+- aucune conclusion causale autorisee.
+
+Le FINISH reel a revele un probleme de layout de trace CLI et un probleme
+`$LASTEXITCODE` PowerShell. Les preuves ont ete recuperees sans relancer le modele,
+puis le fallback session a ete versionne et regression-teste.
+
+## M3.5 - Measurement Contract Freeze
+
+Statut : NEXT
+
+But :
+figer les contrats de mesure consommes par Store, ModelRuntimeProfile
+et les analyseurs historiques avant d'ajouter une nouvelle couche produit.
 
 ## M4 - Historical Analyzer + Context Ledger
 
-Statut : PLANNED AFTER EXPERIMENT 002 / MEASUREMENT CONTRACT FREEZE
+Statut : PLANNED AFTER M3.5 / STORE + MODELRUNTIMEPROFILE
 
 But :
 construire l'historique fiable par projet/run/agent/phase.

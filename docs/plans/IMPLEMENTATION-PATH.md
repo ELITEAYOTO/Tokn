@@ -2,7 +2,7 @@
 
 Status: ACTIVE EXECUTION PLAN
 Date: 2026-09-30
-Current state: P0-P9 DONE / Experiment 002 NEXT
+Current state: P0-P9 DONE / Experiment 002 ACCEPTED / Measurement Contract Freeze NEXT
 
 ## Purpose
 
@@ -159,20 +159,37 @@ V0.1 measurement pipeline is reproducible offline from a clean commit.
 
 ## Phase C - Experiment 002
 
-Status: NEXT
+Status: DONE / ACCEPTED
 
 Purpose:
 one small real Astra/Codex task validates V0.1 instrumentation end-to-end.
 
 This is not an optimization experiment.
 
+Observed acceptance:
+- pipeline COMPLETE ;
+- root terminal COMPLETED ;
+- quality PASS (`npm run verify:local`, 863/863 tests) ;
+- 1 parent + 1 descendant, 49 usage records ;
+- selected workspace matches the expected B07-C workspace ;
+- diff 1 added / 2 modified / 0 removed ;
+- model `gpt-6.1-sol` recorded ;
+- configuration completeness remains UNKNOWN ;
+- validity INSTRUMENTATION_ONLY ;
+- causal claims blocked, descriptive metrics allowed.
+
+The first FINISH attempt exposed two harness defects, not a task failure:
+PowerShell LASTEXITCODE handling and CLI diagnostic-bundle nesting.
+The immutable persisted Codex rollout was replayed through Runner without another model run.
+The deterministic session fallback is now versioned and covered by CI.
+
 Required:
 - small bounded task;
 - known starting workspace;
 - run-scoped runtime/model/config values captured with provenance;
 - configuration completeness may remain UNKNOWN until ModelRuntimeProfile is frozen after this experiment;
-- Runner used from start to finish;
-- no manual evidence repair;
+- Runner used for the accepted evidence reduction;
+- no invented or mutated evidence; deterministic harness-only recovery may reuse immutable persisted rollouts when fully documented and regression-tested;
 - post-run evidence folder complete;
 - validity expected to reflect instrumentation purpose honestly.
 
@@ -181,7 +198,7 @@ V0.1 works on one new real run, not only the historical golden.
 
 ## Phase D - Measurement Contract Freeze
 
-Status: AFTER EXPERIMENT 002
+Status: NEXT
 
 Freeze the interfaces that downstream systems may depend on:
 - Runner request/result schema;
@@ -339,13 +356,13 @@ but they are not a reason to skip measurement hardening.
 
 ## Current decision
 
-Immediate product work is Experiment 002 instrumentation validation only.
+Immediate product work is **Measurement Contract Freeze V0.1**.
 
 Order:
-1. freeze the Experiment 002 task and starting workspace ;
-2. validate the preflight without launching Astra ;
-3. run one small real Codex/Astra task through Runner V0.1 ;
-4. inspect the self-contained evidence folder ;
-5. accept or reject instrumentation validity ;
-6. if accepted, freeze the V0.1 Measurement Contract ;
-7. only then begin Store/Profile and historical analysis layers.
+1. freeze schemas and evidence semantics already exercised by P8/P9/Experiment 002 ;
+2. add explicit contract/schema versioning where downstream consumers need it ;
+3. freeze the minimum ModelRuntimeProfile boundary without inventing unavailable config ;
+4. add compatibility/regression tests for the frozen contract ;
+5. synchronize canonical docs ;
+6. only then begin Store + ModelRuntimeProfile persistence ;
+7. keep Historical Analyzer / Context Ledger observation-only after Store/Profile.

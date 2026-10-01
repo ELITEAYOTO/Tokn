@@ -44,6 +44,10 @@ jobs:
         shell: pwsh
         run: ./scripts/validation/replay-exp001-golden.ps1
 
+      - name: Experiment 002 source-selection regression
+        shell: pwsh
+        run: ./scripts/validation/check-exp002-source-selection.ps1
+
       - name: Documentation consistency
         shell: pwsh
         run: ./scripts/validation/check-doc-consistency.ps1

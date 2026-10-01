@@ -8,6 +8,7 @@ $InventoryScript = Join-Path $ToolRoot 'scripts\experiment\inventory-workspaces.
 $SnapshotScript = Join-Path $ToolRoot 'scripts\experiment\snapshot-project.ps1'
 $ToknBin = Join-Path $ToolRoot 'target\release\tokn-observe.exe'
 $RuntimeObservationScript = Join-Path $ToolRoot 'scripts\experiment\capture-runtime-observation.ps1'
+$SourceSelectionScript = Join-Path $ToolRoot 'scripts\experiment\resolve-exp002-source.ps1'
 
 function Clear-ToknTraceEnvironment {
     Add-Type @"
@@ -46,20 +47,30 @@ Clear-ToknTraceEnvironment
 
 $RuntimeObservationPath = Join-Path $RunRoot 'runtime-observation.json'
 & $RuntimeObservationScript -EvidenceRoot $TraceRoot -OutputPath $RuntimeObservationPath -CodexCliVersion ([string]$run.codex_cli_version) -CodexAppVersion ([string]$run.codex_app_version)
-if ($LASTEXITCODE -ne 0) { throw "Runtime observation failed with exit code $LASTEXITCODE" }
+if (-not (Test-Path -LiteralPath $RuntimeObservationPath -PathType Leaf)) { throw 'Runtime observation report was not created.' }
 $runtimeObservation = Get-Content -LiteralPath $RuntimeObservationPath -Raw | ConvertFrom-Json
+if ([string]$runtimeObservation.model_recorded -ne 'PASS') {
+    throw "Runtime observation did not record a model. Status=$($runtimeObservation.model_recorded)"
+}
 
 $AfterInventory = Join-Path $RunRoot 'workspace-after.json'
 & $InventoryScript -WatchRoot $WatchRoot -OutputPath $AfterInventory -MaxDepth $MaxDepth
 
-$ResolutionPath = Join-Path $RunRoot 'workspace-resolution-pre-runner.json'
-& $ToknBin resolve-workspace $TraceRoot --inventory $AfterInventory --before-inventory $run.before_inventory --source-root $ProjectRoot --output-json $ResolutionPath
-if ($LASTEXITCODE -ne 0) { throw "Workspace resolver failed with exit code $LASTEXITCODE" }
+$SourceSelectionPath = Join-Path $RunRoot 'source-selection.json'
+& $SourceSelectionScript -TraceRoot $TraceRoot -ToknBin $ToknBin -AfterInventory $AfterInventory -BeforeInventory ([string]$run.before_inventory) -SourceRoot $ProjectRoot -ExpectedOutput ([string]$config.expected_output_workspace) -OutputPath $SourceSelectionPath
+if (-not (Test-Path -LiteralPath $SourceSelectionPath -PathType Leaf)) { throw 'Experiment 002 source selection report was not created.' }
+$sourceSelection = Get-Content -LiteralPath $SourceSelectionPath -Raw | ConvertFrom-Json
+$AnalysisSource = [string]$sourceSelection.selected_source
+$SessionCandidates = @($sourceSelection.session_candidates)
+$ResolutionPath = [string]$sourceSelection.workspace_resolution
 $resolution = Get-Content -LiteralPath $ResolutionPath -Raw | ConvertFrom-Json
 if ([string]$resolution.status -ne 'SELECTED' -or [string]::IsNullOrWhiteSpace([string]$resolution.selected_root)) {
     throw "Workspace resolution did not select exactly one output. Status=$($resolution.status)"
 }
 $SelectedWorkspace = [string]$resolution.selected_root
+if ($SelectedWorkspace -ne [string]$config.expected_output_workspace) {
+    throw "Selected workspace mismatch. Expected $($config.expected_output_workspace), got $SelectedWorkspace"
+}
 
 $AfterSnapshot = Join-Path $RunRoot 'project-after.json'
 & $SnapshotScript -ProjectRoot $SelectedWorkspace -OutputPath $AfterSnapshot
@@ -69,13 +80,14 @@ $RunnerRequestPath = Join-Path $RunRoot 'runner-request.json'
 $runnerRequest = [ordered]@{
     schema_version = 1
     run_id = ('exp002-' + (Split-Path $RunRoot -Leaf))
-    source = $TraceRoot
+    source = $AnalysisSource
+    session_candidates = @($SessionCandidates)
     source_root = $ProjectRoot
     after_inventory = $AfterInventory
     before_inventory = [string]$run.before_inventory
     before_snapshot = [string]$run.before_snapshot
     after_snapshot = $AfterSnapshot
-    expected_outputs = @()
+    expected_outputs = @([string]$config.expected_output_workspace)
     evidence_dir = $EvidenceDir
     experiment = [ordered]@{
         experiment_id = '002-instrumentation-validation'
@@ -135,6 +147,12 @@ $final = [ordered]@{
     accepted = $accepted
     run_root = $RunRoot
     trace_root = $TraceRoot
+    analysis_source = $AnalysisSource
+    analysis_source_kind = [string]$sourceSelection.source_kind
+    source_selection_fallback_used = [bool]$sourceSelection.fallback_used
+    source_selection_fallback_reason = [string]$sourceSelection.fallback_reason
+    diagnostic_bundle = [string]$sourceSelection.diagnostic_bundle
+    source_selection = $SourceSelectionPath
     selected_workspace = [string]$result.selected_workspace
     pipeline_status = [string]$result.pipeline_status
     terminal_status = [string]$result.root_terminal
@@ -164,6 +182,8 @@ $summary = @(
     ('Quality: `' + $result.quality_status + '`'),
     ('Validity: `' + $result.validity_verdict + '`'),
     ('Agents: `' + $result.agent_count + '`'),
+    ('Analysis source kind: `' + $sourceSelection.source_kind + '`'),
+    ('Source fallback used: `' + $sourceSelection.fallback_used + '`'),
     ('Runtime recorded: `' + $validityInput.runtime.runtime_recorded + '`'),
     ('Model recorded: `' + $runtimeObservation.model_recorded + '`'),
     ('Configuration recorded: `' + $runtimeObservation.configuration_recorded + '`'),
@@ -176,6 +196,9 @@ $summary | Set-Content -LiteralPath (Join-Path $RunRoot 'FINISH-SUMMARY.md') -En
 $run | Add-Member -NotePropertyName finished_at -NotePropertyValue ((Get-Date).ToString('o')) -Force
 $run | Add-Member -NotePropertyName selected_workspace -NotePropertyValue ([string]$result.selected_workspace) -Force
 $run | Add-Member -NotePropertyName experiment_accepted -NotePropertyValue $accepted -Force
+$run | Add-Member -NotePropertyName analysis_source -NotePropertyValue $AnalysisSource -Force
+$run | Add-Member -NotePropertyName analysis_source_kind -NotePropertyValue ([string]$sourceSelection.source_kind) -Force
+$run | Add-Member -NotePropertyName source_selection_fallback_used -NotePropertyValue ([bool]$sourceSelection.fallback_used) -Force
 $run | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath (Join-Path $RunRoot 'run.json') -Encoding UTF8
 Remove-Item -LiteralPath $ActivePath -Force
 

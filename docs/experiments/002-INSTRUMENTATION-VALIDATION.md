@@ -1,6 +1,6 @@
 # Experiment 002 - Instrumentation Validation
 
-Status: READY / NEXT
+Status: DONE / ACCEPTED
 Updated: 2026-10-01
 
 ## Purpose
@@ -76,10 +76,45 @@ Harness source of truth:
 - `scripts/experiment/prepare-exp002-harness.ps1` provisions the external run workspace;
 - real traces/runs remain outside Git.
 
+## Real run result - 2026-10-01
+
+Experiment 002 is accepted for instrumentation validation.
+
+Measured result:
+- runtime: `codex-cli 0.161.0-alpha.2`;
+- observed model: `gpt-6.1-sol`;
+- RunGroup: 1 parent + 1 subagent;
+- usage records: 49;
+- input tokens: 3,328,582;
+- cached input tokens: 3,168,256;
+- output tokens: 13,394;
+- reasoning output tokens: 3,734;
+- parent terminal: COMPLETED;
+- Runner pipeline: COMPLETE;
+- quality gate: PASS, 863/863 tests;
+- workspace diff: 1 added / 2 modified / 0 removed;
+- validity: INSTRUMENTATION_ONLY;
+- causal claims: blocked;
+- descriptive metrics: allowed;
+- configuration completeness: UNKNOWN.
+
+The live run exposed two FINISH harness defects:
+1. `$LASTEXITCODE` was incorrectly treated as authoritative after an internal PowerShell script;
+2. Codex CLI diagnostic capture stored the bundle one level below the configured trace root,
+   while the V0.1 workspace resolver correctly rejected the parent folder.
+
+No model rerun was used to repair the evidence.
+Tokn reused the persisted healthy Codex parent rollout plus its descendant,
+resolved the correct workspace, reran the Runner deterministically and reached COMPLETE.
+The fallback path is now versioned and covered by `check-exp002-source-selection.ps1` in CI.
+
+This recovery does not strengthen the experiment beyond instrumentation validation.
+It does not prove savings, efficiency improvement or a causal intervention.
+
 ## Failure conditions
 
 Repeat Experiment 002 after fixing Tokn if:
-- source fallback needs manual repair;
+- source fallback requires semantic reconstruction, invented evidence or mutation of original run data;
 - descendant sessions are missed;
 - output workspace is wrong;
 - quality gate runs on the wrong root;

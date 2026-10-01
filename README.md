@@ -10,7 +10,7 @@ Version binaire actuelle : **V0.1** (workspace Cargo 0.1.0)
 Release : **V0.1 Measurement Hardening**
 
 Etat au 2026-10-01 :
-**P0-P9 DONE ; Experiment 002 NEXT.**
+**P0-P9 DONE ; Experiment 002 ACCEPTED ; Measurement Contract Freeze NEXT.**
 
 ## Principe
 
@@ -54,10 +54,11 @@ DONE :
 - P9 golden replay + release validation.
 
 NEXT :
-- Experiment 002 instrumentation validation.
+- Measurement Contract Freeze V0.1.
 
-Experiment 002 valide l'instrumentation V0.1 sur un petit run reel.
-Il ne cherche pas a prouver une economie.
+Experiment 002 a valide l'instrumentation sur un run reel :
+pipeline COMPLETE, terminal COMPLETED, quality PASS, verdict INSTRUMENTATION_ONLY.
+Le run ne prouve aucune economie et n'autorise aucune conclusion causale.
 
 ## P6 - conclusion
 

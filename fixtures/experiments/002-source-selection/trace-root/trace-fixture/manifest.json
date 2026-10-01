@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "trace_id": "fixture-exp002",
+  "rollout_id": "fixture-root",
+  "root_thread_id": "fixture-root",
+  "started_at_unix_ms": 0,
+  "raw_event_log": "trace.jsonl",
+  "payloads_dir": "payloads"
+}

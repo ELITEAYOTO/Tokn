@@ -665,3 +665,17 @@ P6 remains IN PROGRESS until one controlled real PreToolUse callback proves the 
 - aligned the repository with its declared MIT OR Apache-2.0 license by adding both license texts ;
 - hardened .gitignore against local credentials, keys, traces and real experiment run directories ;
 - added CODEOWNERS for @ELITEAYOTO and removed the machine-specific build root from README.
+
+## 2026-10-01 - Experiment 002 real-run acceptance and FINISH hardening
+
+- executed the bounded real Experiment 002 task on the frozen B07-C workspace ;
+- observed `codex-cli 0.161.0-alpha.2` and `gpt-6.1-sol` from run-scoped evidence ;
+- Runner recovery from persisted Codex rollouts produced 2 agents / 49 usage records, terminal COMPLETED, pipeline COMPLETE and INSTRUMENTATION_ONLY ;
+- quality gate `npm run verify:local` passed with 863/863 tests ;
+- workspace diff was 1 added / 2 modified / 0 removed ;
+- causal claims remain blocked and configuration completeness remains UNKNOWN ;
+- first FINISH attempt exposed PowerShell LASTEXITCODE handling and nested CLI diagnostic-bundle layout defects ;
+- no model rerun was used for recovery: the immutable parent rollout plus descendant were replayed through Runner ;
+- added deterministic Experiment 002 source selection with diagnostic-to-session fallback ;
+- added CI regression coverage for the fallback path ;
+- Measurement Contract Freeze is now the next roadmap phase.

@@ -6,7 +6,7 @@ Binaire/Cargo : **V0.1 / 0.1.0**
 
 ## Resume
 
-**P0-P9 DONE. Experiment 002 est NEXT.**
+**P0-P9 DONE. Experiment 002 est ACCEPTED. Measurement Contract Freeze est NEXT.**
 
 Le projet est revenu sur une direction unique :
 mesurer l'efficacite du contexte sans reduire la capacite d'Astra.
@@ -58,6 +58,43 @@ au PreToolUse Bash de unified exec.
 
 La sonde live JSONL a zero ligne reste une dette diagnostique,
 mais elle ne bloque plus V0.1 car l'enforcement des caps n'est pas un objectif produit.
+
+## Experiment 002 - run reel accepte
+
+Verdict :
+**INSTRUMENTATION_ONLY / ACCEPTED FOR MEASUREMENT VALIDATION**
+
+Run reel du 2026-10-01 :
+- runtime observe : `codex-cli 0.161.0-alpha.2` ;
+- modele observe : `gpt-6.1-sol` ;
+- 1 parent + 1 sous-agent ;
+- 49 usage records ;
+- input 3,328,582 ;
+- cached input 3,168,256 ;
+- output 13,394 ;
+- reasoning output 3,734 ;
+- terminal parent : COMPLETED ;
+- pipeline Runner : COMPLETE ;
+- quality gate : PASS, `verify:local`, 863/863 tests ;
+- workspace : `JEM_Ultimate_v0.12.1_B07-C_WORKING\\PROJECT` ;
+- diff : 1 added / 2 modified / 0 removed ;
+- validity : INSTRUMENTATION_ONLY ;
+- causal_claims_allowed=false ;
+- descriptive_metrics_allowed=true ;
+- configuration_recorded=UNKNOWN.
+
+Le premier FINISH a revele deux defauts de harness :
+1. `$LASTEXITCODE` ne devait pas etre teste apres un script PowerShell interne ;
+2. la trace CLI place le bundle diagnostic sous un sous-dossier `trace-*`,
+   et ce layout n'est pas directement consommable par le resolver V0.1.
+
+Les preuves originales ont ete conservees.
+Le run n'a pas ete relance : Tokn a recupere le rollout Codex persiste parent + sous-agent,
+puis a rejoue le Runner de maniere deterministe.
+Le fallback session est maintenant versionne et couvert par CI.
+
+Cette recuperation ne transforme pas Experiment 002 en experience causale.
+Elle valide uniquement la chaine de mesure et documente explicitement la dette de configuration runtime.
 
 ## Golden Experiment 001
 
@@ -131,21 +168,24 @@ Tous commencent observation-only.
 
 ## Prochaine action
 
-Preparer puis executer **Experiment 002 - Instrumentation Validation**.
+Executer **Measurement Contract Freeze V0.1**.
 
 Chemin d'execution detaille :
 `docs/plans/IMPLEMENTATION-PATH.md`.
 
-Experiment 002 doit :
-- utiliser le Runner V0.1 de bout en bout ;
-- partir d'un workspace connu et snapshotte ;
-- utiliser un harness versionne/provisionne depuis un commit Git propre ;
-- verifier la provenance SHA-256 du binaire release avant lancement ;
-- capturer les valeurs runtime/model/config disponibles sans anticiper le ModelRuntimeProfile ;
-- produire un dossier de preuves complet sans reparation manuelle ;
-- rester une validation d'instrumentation, pas une experience d'economie.
+Le freeze doit stabiliser avant Store/Profile :
+- RunnerRequest / RunnerResult ;
+- layout du dossier de preuves ;
+- identite RunGroup et relations parent/sous-agent ;
+- semantique input/cached/cache-write/output/reasoning ;
+- provenance et source health ;
+- terminal status ;
+- workspace lineage et diff ;
+- experiment validity ;
+- schema minimal ModelRuntimeProfile ;
+- versionnement explicite des contrats.
 
-Un nouveau run Astra/Codex reel sera necessaire uniquement pour Experiment 002.
+Aucun nouveau run Astra/Codex n'est necessaire pour cette phase.
 
 ## Sources de verite
 

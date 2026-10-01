@@ -35,16 +35,16 @@ if ($Cargo -notmatch '(?m)^version = "0\.1\.0"\r?$') {
 }
 Write-Host "[PASS] Cargo workspace version = 0.1.0"
 
-Assert-Contains "README.md" "**P0-P9 DONE ; Experiment 002 NEXT.**"
-Assert-Contains "STATUS.md" "**P0-P9 DONE. Experiment 002 est NEXT.**"
+Assert-Contains "README.md" "**P0-P9 DONE ; Experiment 002 ACCEPTED ; Measurement Contract Freeze NEXT.**"
+Assert-Contains "STATUS.md" "**P0-P9 DONE. Experiment 002 est ACCEPTED. Measurement Contract Freeze est NEXT.**"
 Assert-Contains "ROADMAP.md" "P9 golden replay/release validation : DONE"
 Assert-Contains "docs/plans/V0.1-IMPLEMENTATION-PLAN.md" "Status: **DONE - P0-P9 DONE**"
 Assert-Contains "docs/plans/V0.1-TEST-MATRIX.md" "Status: **P0-P9 PASS / V0.1 DONE**"
 Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "P0-P9 : DONE"
-Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "Experiment 002 : NEXT"
-Assert-Contains "docs/plans/IMPLEMENTATION-PATH.md" "Current state: P0-P9 DONE / Experiment 002 NEXT"
-Assert-Contains "docs/experiments/002-INSTRUMENTATION-VALIDATION.md" "Status: READY / NEXT"
-Assert-Contains "docs/INDEX.md" "**P0-P9 DONE ; Experiment 002 NEXT.**"
+Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "Measurement Contract Freeze : NEXT"
+Assert-Contains "docs/plans/IMPLEMENTATION-PATH.md" "Current state: P0-P9 DONE / Experiment 002 ACCEPTED / Measurement Contract Freeze NEXT"
+Assert-Contains "docs/experiments/002-INSTRUMENTATION-VALIDATION.md" "Status: DONE / ACCEPTED"
+Assert-Contains "docs/INDEX.md" "**P0-P9 DONE ; Experiment 002 ACCEPTED ; Measurement Contract Freeze NEXT.**"
 
 $activeDocs = @(
     "README.md",

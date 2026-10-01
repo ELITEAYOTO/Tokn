@@ -5,7 +5,8 @@ Derniere mise a jour : **2026-10-01**
 ## Etat de depart
 
 P0-P9 : DONE
-Experiment 002 : NEXT
+Experiment 002 : DONE / ACCEPTED
+Measurement Contract Freeze : NEXT
 
 Workspace :
 `E:\Tokn\V0-CodexTkn-Consume\tool`
@@ -23,20 +24,21 @@ Ne pas refaire l'enquete P6 ni la recherche plugin/telemetry R1-R8 avant qu'un b
 
 ## Premiere action
 
-Preparer puis executer **Experiment 002 - Instrumentation Validation**.
+Executer **Measurement Contract Freeze V0.1**.
 
-Preflight :
-- choisir une petite tache reelle et bornee ;
-- partir d'un workspace connu et snapshotte ;
-- provisionner le harness versionne depuis un commit Git propre ;
-- reconstruire le binaire release et verifier commit + SHA-256 ;
-- confirmer le baseline complet 833/832/1 avant tout lancement ;
-- utiliser le Runner V0.1 de bout en bout ;
-- enregistrer runtime/model/config disponibles avec provenance ;
-- garder configuration_recorded=UNKNOWN tant que ModelRuntimeProfile n'est pas fige ;
-- definir un quality gate clair ;
-- ne pas introduire d'optimisation active ;
-- ne pas consommer de quota Astra tant que le preflight n'est pas valide.
+A figer :
+- Runner request/result ;
+- evidence layout ;
+- RunGroup identity ;
+- token/accounting semantics ;
+- source health + provenance ;
+- terminal status ;
+- workspace lineage/diff ;
+- validity contract ;
+- minimum ModelRuntimeProfile ;
+- schema/evidence/analyzer versioning.
+
+Aucun nouveau quota Astra/Codex n'est necessaire pour cette phase.
 
 Build/test environment valide :
 Visual Studio Build Tools 2022 via `vcvars64.bat`.
@@ -76,11 +78,11 @@ Tests obligatoires :
 ## Apres V0.1
 
 NEXT :
-Experiment 002 instrumentation validation.
+Measurement Contract Freeze.
 
-Si Experiment 002 valide l'instrumentation :
-- freeze du Measurement Contract ;
+Puis :
 - Tokn Store + ModelRuntimeProfile ;
+- Local MCP integration prototype ;
 - Historical Analyzer + Context Ledger ;
 - findings observation-only ;
 - Experiment 003 seulement apres un finding reproductible.
