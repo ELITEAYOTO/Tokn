@@ -358,7 +358,11 @@ impl Database {
                     activity.original_token_count.map(to_i64).transpose()?,
                     activity.operation_fingerprint,
                     activity.workdir_fingerprint,
-                    if activity.parse_error_present { 1_i64 } else { 0_i64 },
+                    if activity.parse_error_present {
+                        1_i64
+                    } else {
+                        0_i64
+                    },
                     now
                 ],
             )?;
@@ -453,7 +457,9 @@ impl Database {
 
     pub fn tool_activity_count(&self) -> rusqlite::Result<i64> {
         self.connection()
-            .query_row("SELECT COUNT(*) FROM tool_activity_v1", [], |row| row.get(0))
+            .query_row("SELECT COUNT(*) FROM tool_activity_v1", [], |row| {
+                row.get(0)
+            })
     }
 
     pub fn recent_measurement_runs(
@@ -1181,19 +1187,12 @@ mod tests {
         let path = temp_db("tool-activity-privacy");
         let _ = fs::remove_file(&path);
         let synthetic_secret = "sk-test-TOKN-SYNTHETIC-ONLY-0123456789";
-        let private_path = format!(
-            r"C:\{}ctivity-user\Secret Project\session.jsonl",
-            "Users"
-        );
+        let private_path = format!(r"C:\{}ctivity-user\Secret Project\session.jsonl", "Users");
         let private_command = format!(
             r"Get-Content C:\{}ctivity-user\Secret Project\secret-notes.txt; Write-Output {}",
-            "Users",
-            synthetic_secret
+            "Users", synthetic_secret
         );
-        let private_workdir = format!(
-            r"C:\{}ctivity-user\Secret Project",
-            "Users"
-        );
+        let private_workdir = format!(r"C:\{}ctivity-user\Secret Project", "Users");
 
         let mut input = input(&private_path);
         let operation_fingerprint = private_id(
@@ -1237,11 +1236,7 @@ mod tests {
         );
 
         let history = db
-            .tool_activity_history(
-                Some(&input.project_id),
-                Some(&input.workspace_id),
-                10,
-            )
+            .tool_activity_history(Some(&input.project_id), Some(&input.workspace_id), 10)
             .expect("tool activity history");
         assert_eq!(history.schema_version, TOOL_ACTIVITY_HISTORY_SCHEMA_VERSION);
         assert_eq!(history.activities.len(), 1);
