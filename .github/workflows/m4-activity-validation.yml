@@ -5,7 +5,7 @@ on:
     branches: [m4-activity-history]
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   validate:
@@ -25,6 +25,18 @@ jobs:
 
       - name: Cache Rust build
         uses: Swatinem/rust-cache@v2
+
+      - name: Rustfmt activity branch
+        shell: pwsh
+        run: |
+          cargo fmt --all
+          if (-not (git diff --quiet)) {
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add apps/tokn-observe/src crates/tokn-analysis/src crates/tokn-domain/src crates/tokn-report/src crates/tokn-storage/src
+            git commit -m "style: rustfmt final m4 activity slice"
+            git push origin HEAD:m4-activity-history
+          }
 
       - name: Publication privacy
         shell: pwsh
