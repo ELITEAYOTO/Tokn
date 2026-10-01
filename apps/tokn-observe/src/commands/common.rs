@@ -125,32 +125,20 @@ mod tests {
     #[test]
     fn private_filter_ids_accept_only_canonical_hashed_ids() {
         assert!(
-            validate_private_filter_id(
-                Some("prj-0123456789abcdef01234567"),
-                "project",
-                "prj-",
-            )
-            .is_ok()
+            validate_private_filter_id(Some("prj-0123456789abcdef01234567"), "project", "prj-",)
+                .is_ok()
         );
         assert!(
-            validate_private_filter_id(
-                Some("wsp-abcdef0123456789abcdef01"),
-                "workspace",
-                "wsp-",
-            )
-            .is_ok()
+            validate_private_filter_id(Some("wsp-abcdef0123456789abcdef01"), "workspace", "wsp-",)
+                .is_ok()
         );
 
         let raw = format!("C:\\{}\\someone\\project", "Users");
         assert!(validate_private_filter_id(Some(&raw), "project", "prj-").is_err());
         assert!(validate_private_filter_id(Some("prj-short"), "project", "prj-").is_err());
         assert!(
-            validate_private_filter_id(
-                Some("wsp-0123456789abcdef0123456z"),
-                "workspace",
-                "wsp-",
-            )
-            .is_err()
+            validate_private_filter_id(Some("wsp-0123456789abcdef0123456z"), "workspace", "wsp-",)
+                .is_err()
         );
     }
 

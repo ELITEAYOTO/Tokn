@@ -130,14 +130,15 @@ fn build_tool_activities(
             let operation_fingerprint = if repeat_relevant_category(&tool.category) {
                 tool.command.as_deref().and_then(|command| {
                     let command = command.trim();
-                    let workdir = tool.workdir.as_deref().map(str::trim).unwrap_or("<unknown>");
+                    let workdir = tool
+                        .workdir
+                        .as_deref()
+                        .map(str::trim)
+                        .unwrap_or("<unknown>");
                     (!command.is_empty()).then(|| {
                         private_id(
                             "op",
-                            &format!(
-                                "{project_id}:{}:{workdir}:{command}",
-                                tool.category
-                            ),
+                            &format!("{project_id}:{}:{workdir}:{command}", tool.category),
                         )
                     })
                 })
@@ -146,8 +147,7 @@ fn build_tool_activities(
             };
             let workdir_fingerprint = tool.workdir.as_deref().and_then(|workdir| {
                 let workdir = workdir.trim();
-                (!workdir.is_empty())
-                    .then(|| private_id("cwd", &format!("{project_id}:{workdir}")))
+                (!workdir.is_empty()).then(|| private_id("cwd", &format!("{project_id}:{workdir}")))
             });
 
             out.push(ToolActivityStoreInput {
@@ -260,14 +260,11 @@ mod tests {
                 .is_some_and(|value| value.starts_with("op-"))
         );
         assert!(activities[1].operation_fingerprint.is_none());
-        assert!(
-            activities
-                .iter()
-                .all(|item| item
-                    .workdir_fingerprint
-                    .as_deref()
-                    .is_some_and(|value| value.starts_with("cwd-")))
-        );
+        assert!(activities.iter().all(|item| {
+            item.workdir_fingerprint
+                .as_deref()
+                .is_some_and(|value| value.starts_with("cwd-"))
+        }));
 
         let debug = format!("{activities:?}");
         assert!(!debug.contains(&private_read));
@@ -291,5 +288,4 @@ mod tests {
             assert!(!repeat_relevant_category(category));
         }
     }
-
 }

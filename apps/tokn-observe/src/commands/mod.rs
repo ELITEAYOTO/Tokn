@@ -1,5 +1,5 @@
-mod analyze;
 mod activity_timeline;
+mod analyze;
 mod analyze_run;
 mod check_caps;
 mod common;

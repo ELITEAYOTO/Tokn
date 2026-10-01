@@ -70,10 +70,7 @@ mod tests {
         assert_eq!(value["schema_version"].as_u64(), Some(1));
         assert_eq!(value["source_history_schema_version"].as_u64(), Some(1));
         assert_eq!(value["runs"].as_array().map(Vec::len), Some(0));
-        assert_eq!(
-            value["exact_repetitions"].as_array().map(Vec::len),
-            Some(0)
-        );
+        assert_eq!(value["exact_repetitions"].as_array().map(Vec::len), Some(0));
 
         let _ = std::fs::remove_file(path);
         let _ = std::fs::remove_file(output);
