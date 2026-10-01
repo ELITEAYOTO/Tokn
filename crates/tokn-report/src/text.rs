@@ -84,7 +84,6 @@ pub fn render_text(run: &RunRecord) -> String {
     out
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
