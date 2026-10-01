@@ -217,9 +217,9 @@ mod tests {
     }
     #[test]
     fn activity_fingerprints_are_project_scoped_and_minimized() {
-        let private_workdir = format!("C:\{}\private-user\Secret Project", "Users");
-        let private_read = format!("Get-Content {private_workdir}\secret.txt");
-        let private_write = format!("Set-Content {private_workdir}\secret.txt x");
+        let private_workdir = format!(r"C:\{}\private-user\Secret Project", "Users");
+        let private_read = format!(r"Get-Content {private_workdir}\secret.txt");
+        let private_write = format!(r"Set-Content {private_workdir}\secret.txt x");
         let members = vec![AgentEvidence {
             thread_id: "thread-root".into(),
             tools: vec![
