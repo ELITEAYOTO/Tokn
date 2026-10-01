@@ -1,5 +1,6 @@
 mod contract;
 mod event;
+mod history;
 mod ids;
 mod model_runtime;
 mod observation;
@@ -13,6 +14,7 @@ mod validity;
 
 pub use contract::*;
 pub use event::*;
+pub use history::*;
 pub use ids::*;
 pub use model_runtime::*;
 pub use observation::*;

@@ -1,11 +1,15 @@
+use std::collections::BTreeSet;
 use std::num::TryFromIntError;
 use std::time::{SystemTime, UNIX_EPOCH};
 
-use rusqlite::params;
+use rusqlite::{OptionalExtension, params};
 use thiserror::Error;
 use tokn_domain::{
-    MEASUREMENT_CONTRACT_ID, MEASUREMENT_CONTRACT_VERSION, MeasurementContractManifest,
-    ModelRuntimeProfile, RunGroup, RunnerQualityStatus, RunnerResult,
+    HISTORICAL_SNAPSHOT_SCHEMA_VERSION, HistoricalAgentRecord, HistoricalProvenanceRecord,
+    HistoricalRunRecord, HistoricalRuntimeProfileRecord, HistoricalSnapshot,
+    HistoricalWorkspaceRecord, MEASUREMENT_CONTRACT_ID, MEASUREMENT_CONTRACT_VERSION,
+    MeasurementContractManifest, ModelRuntimeProfile, RunGroup, RunnerQualityStatus, RunnerResult,
+    TokenTotals,
 };
 
 use crate::Database;
@@ -407,6 +411,235 @@ impl Database {
         .collect()
     }
 
+    pub fn historical_snapshot(
+        &self,
+        project_filter: Option<&str>,
+        workspace_filter: Option<&str>,
+        limit: usize,
+    ) -> Result<HistoricalSnapshot, MeasurementStoreError> {
+        let mut snapshot = HistoricalSnapshot {
+            schema_version: HISTORICAL_SNAPSHOT_SCHEMA_VERSION,
+            project_filter: project_filter.map(str::to_string),
+            workspace_filter: workspace_filter.map(str::to_string),
+            ..Default::default()
+        };
+        if limit == 0 {
+            return Ok(snapshot);
+        }
+
+        let limit = i64::try_from(limit).unwrap_or(i64::MAX);
+        let mut stmt = self.connection().prepare(
+            "SELECT
+                run_id, project_id, workspace_id, profile_id,
+                measurement_contract_version, evidence_layout_version,
+                root_thread_id, root_terminal, source_health,
+                validity_verdict, quality_status, agent_count,
+                usage_records, input_tokens, cached_input_tokens,
+                cache_write_input_tokens, output_tokens, reasoning_output_tokens,
+                input_known, cached_input_known, cache_write_input_known,
+                output_known, reasoning_output_known, logical_tokens, created_at_unix
+             FROM measurement_runs_v2
+             WHERE (?1 IS NULL OR project_id = ?1)
+               AND (?2 IS NULL OR workspace_id = ?2)
+             ORDER BY created_at_unix DESC, run_id ASC
+             LIMIT ?3",
+        )?;
+
+        snapshot.runs = stmt
+            .query_map(params![project_filter, workspace_filter, limit], |row| {
+                Ok(HistoricalRunRecord {
+                    run_id: row.get(0)?,
+                    project_id: row.get(1)?,
+                    workspace_id: row.get(2)?,
+                    profile_id: row.get(3)?,
+                    measurement_contract_version: row_u64(row, 4)?,
+                    evidence_layout_version: row_u64(row, 5)?,
+                    root_thread_id: row.get(6)?,
+                    root_terminal: row.get(7)?,
+                    source_health: row.get(8)?,
+                    validity_verdict: row.get(9)?,
+                    quality_status: row.get(10)?,
+                    agent_count: row_u64(row, 11)?,
+                    totals: TokenTotals {
+                        usage_records: row_u64(row, 12)?,
+                        input_tokens: row_u64(row, 13)?,
+                        cached_input_tokens: row_u64(row, 14)?,
+                        cache_write_input_tokens: row_u64(row, 15)?,
+                        output_tokens: row_u64(row, 16)?,
+                        reasoning_output_tokens: row_u64(row, 17)?,
+                        input_known: row_u64(row, 18)?,
+                        cached_input_known: row_u64(row, 19)?,
+                        cache_write_input_known: row_u64(row, 20)?,
+                        output_known: row_u64(row, 21)?,
+                        reasoning_output_known: row_u64(row, 22)?,
+                    },
+                    logical_tokens: row_optional_u64(row, 23)?,
+                    created_at_unix: row.get(24)?,
+                })
+            })?
+            .collect::<rusqlite::Result<Vec<_>>>()?;
+
+        let mut workspace_ids = BTreeSet::new();
+        let mut profile_ids = BTreeSet::new();
+
+        for run in &snapshot.runs {
+            workspace_ids.insert(run.workspace_id.clone());
+            if let Some(profile_id) = run.profile_id.as_ref() {
+                profile_ids.insert(profile_id.clone());
+            }
+
+            snapshot
+                .agents
+                .extend(self.historical_agents_for_run(&run.run_id)?);
+            snapshot
+                .provenance
+                .extend(self.historical_provenance_for_run(&run.run_id)?);
+        }
+
+        let mut pending = workspace_ids.into_iter().collect::<Vec<_>>();
+        let mut seen = BTreeSet::new();
+        while let Some(workspace_id) = pending.pop() {
+            if !seen.insert(workspace_id.clone()) {
+                continue;
+            }
+            if let Some(workspace) = self.historical_workspace(&workspace_id)? {
+                if let Some(parent) = workspace.parent_workspace_id.as_ref() {
+                    pending.push(parent.clone());
+                }
+                snapshot.workspaces.push(workspace);
+            }
+        }
+        snapshot
+            .workspaces
+            .sort_by(|left, right| left.workspace_id.cmp(&right.workspace_id));
+
+        for profile_id in profile_ids {
+            if let Some(profile) = self.load_runtime_profile(&profile_id)? {
+                snapshot
+                    .runtime_profiles
+                    .push(HistoricalRuntimeProfileRecord {
+                        profile_id,
+                        profile,
+                    });
+            }
+        }
+        snapshot
+            .runtime_profiles
+            .sort_by(|left, right| left.profile_id.cmp(&right.profile_id));
+        snapshot.agents.sort_by(|left, right| {
+            left.run_id
+                .cmp(&right.run_id)
+                .then(left.depth.cmp(&right.depth))
+                .then(left.thread_id.cmp(&right.thread_id))
+        });
+        snapshot.provenance.sort_by(|left, right| {
+            left.run_id
+                .cmp(&right.run_id)
+                .then(left.source_id.cmp(&right.source_id))
+        });
+
+        Ok(snapshot)
+    }
+
+    fn historical_agents_for_run(
+        &self,
+        run_id: &str,
+    ) -> Result<Vec<HistoricalAgentRecord>, MeasurementStoreError> {
+        let mut stmt = self.connection().prepare(
+            "SELECT
+                thread_id, parent_thread_id, depth, terminal_status, duration_ms,
+                usage_records, input_tokens, cached_input_tokens, cache_write_input_tokens,
+                output_tokens, reasoning_output_tokens, input_known, cached_input_known,
+                cache_write_input_known, output_known, reasoning_output_known, logical_tokens
+             FROM agents_v2
+             WHERE run_id = ?1
+             ORDER BY depth ASC, thread_id ASC",
+        )?;
+
+        Ok(stmt
+            .query_map(params![run_id], |row| {
+                Ok(HistoricalAgentRecord {
+                    run_id: run_id.to_string(),
+                    thread_id: row.get(0)?,
+                    parent_thread_id: row.get(1)?,
+                    depth: row.get(2)?,
+                    terminal_status: row.get(3)?,
+                    duration_ms: row_optional_u64(row, 4)?,
+                    totals: TokenTotals {
+                        usage_records: row_u64(row, 5)?,
+                        input_tokens: row_u64(row, 6)?,
+                        cached_input_tokens: row_u64(row, 7)?,
+                        cache_write_input_tokens: row_u64(row, 8)?,
+                        output_tokens: row_u64(row, 9)?,
+                        reasoning_output_tokens: row_u64(row, 10)?,
+                        input_known: row_u64(row, 11)?,
+                        cached_input_known: row_u64(row, 12)?,
+                        cache_write_input_known: row_u64(row, 13)?,
+                        output_known: row_u64(row, 14)?,
+                        reasoning_output_known: row_u64(row, 15)?,
+                    },
+                    logical_tokens: row_optional_u64(row, 16)?,
+                })
+            })?
+            .collect::<rusqlite::Result<Vec<_>>>()?)
+    }
+
+    fn historical_provenance_for_run(
+        &self,
+        run_id: &str,
+    ) -> Result<Vec<HistoricalProvenanceRecord>, MeasurementStoreError> {
+        let mut stmt = self.connection().prepare(
+            "SELECT
+                source_id, source_kind, source_fingerprint, snapshot_bytes,
+                adapter_name, adapter_version, created_at_unix
+             FROM provenance_v2
+             WHERE run_id = ?1
+             ORDER BY source_id ASC",
+        )?;
+
+        Ok(stmt
+            .query_map(params![run_id], |row| {
+                Ok(HistoricalProvenanceRecord {
+                    source_id: row.get(0)?,
+                    run_id: run_id.to_string(),
+                    source_kind: row.get(1)?,
+                    source_fingerprint: row.get(2)?,
+                    snapshot_bytes: row_optional_u64(row, 3)?,
+                    adapter_name: row.get(4)?,
+                    adapter_version: row.get(5)?,
+                    created_at_unix: row.get(6)?,
+                })
+            })?
+            .collect::<rusqlite::Result<Vec<_>>>()?)
+    }
+
+    fn historical_workspace(
+        &self,
+        workspace_id: &str,
+    ) -> Result<Option<HistoricalWorkspaceRecord>, MeasurementStoreError> {
+        Ok(self
+            .connection()
+            .query_row(
+                "SELECT
+                    workspace_id, project_id, parent_workspace_id, snapshot_fingerprint,
+                    identity_version, created_at_unix
+                 FROM workspaces_v2
+                 WHERE workspace_id = ?1",
+                params![workspace_id],
+                |row| {
+                    Ok(HistoricalWorkspaceRecord {
+                        workspace_id: row.get(0)?,
+                        project_id: row.get(1)?,
+                        parent_workspace_id: row.get(2)?,
+                        snapshot_fingerprint: row.get(3)?,
+                        identity_version: row_u64(row, 4)?,
+                        created_at_unix: row.get(5)?,
+                    })
+                },
+            )
+            .optional()?)
+    }
+
     pub fn load_runtime_profile(
         &self,
         profile_id: &str,
@@ -502,6 +735,20 @@ fn validate_private_id(name: &str, value: &str, prefix: &str) -> Result<(), Meas
         )));
     }
     Ok(())
+}
+
+fn row_u64(row: &rusqlite::Row<'_>, index: usize) -> rusqlite::Result<u64> {
+    let value: i64 = row.get(index)?;
+    u64::try_from(value).map_err(|_| rusqlite::Error::IntegralValueOutOfRange(index, value))
+}
+
+fn row_optional_u64(row: &rusqlite::Row<'_>, index: usize) -> rusqlite::Result<Option<u64>> {
+    let value: Option<i64> = row.get(index)?;
+    value
+        .map(|value| {
+            u64::try_from(value).map_err(|_| rusqlite::Error::IntegralValueOutOfRange(index, value))
+        })
+        .transpose()
 }
 
 fn now_unix() -> i64 {
@@ -699,6 +946,69 @@ mod tests {
         assert!(!haystack.contains("private-user"));
         assert!(!haystack.contains("Secret Project"));
 
+        let _ = fs::remove_file(path);
+    }
+
+    #[test]
+    fn historical_snapshot_filters_runs_and_keeps_workspace_lineage() {
+        let path = temp_db("history-snapshot");
+        let _ = fs::remove_file(&path);
+        let db = Database::open(&path).expect("open db");
+
+        let private_path = format!("C:\\{}\\history-user\\Project\\session.jsonl", "Users");
+        let parent = input(&private_path);
+        let project_id = parent.project_id.clone();
+        let parent_workspace_id = parent.workspace_id.clone();
+        db.save_measurement(&parent).expect("save parent");
+
+        let mut child = parent.clone();
+        child.result.run_id = "run-store-v2-child".into();
+        child.workspace_id = private_id("wsp", &format!("{private_path}:workspace:child"));
+        child.parent_workspace_id = Some(parent_workspace_id.clone());
+        child.workspace_snapshot_fingerprint = Some(fingerprint_bytes(b"child-snapshot"));
+        child.source_fingerprint = fingerprint_bytes(b"child-source");
+        let child_workspace_id = child.workspace_id.clone();
+        db.save_measurement(&child).expect("save child");
+
+        let snapshot = db
+            .historical_snapshot(Some(&project_id), Some(&child_workspace_id), 10)
+            .expect("historical snapshot");
+
+        assert_eq!(snapshot.schema_version, HISTORICAL_SNAPSHOT_SCHEMA_VERSION);
+        assert_eq!(
+            snapshot.project_filter.as_deref(),
+            Some(project_id.as_str())
+        );
+        assert_eq!(
+            snapshot.workspace_filter.as_deref(),
+            Some(child_workspace_id.as_str())
+        );
+        assert_eq!(snapshot.runs.len(), 1);
+        assert_eq!(snapshot.runs[0].run_id, "run-store-v2-child");
+        assert_eq!(snapshot.runs[0].totals.usage_records, 2);
+        assert_eq!(snapshot.runs[0].totals.input_known, 2);
+        assert_eq!(snapshot.agents.len(), 1);
+        assert_eq!(snapshot.provenance.len(), 1);
+        assert_eq!(snapshot.runtime_profiles.len(), 1);
+        assert_eq!(snapshot.workspaces.len(), 2);
+
+        let child_workspace = snapshot
+            .workspaces
+            .iter()
+            .find(|item| item.workspace_id == child_workspace_id)
+            .expect("child workspace");
+        assert_eq!(
+            child_workspace.parent_workspace_id.as_deref(),
+            Some(parent_workspace_id.as_str())
+        );
+        assert!(
+            snapshot
+                .workspaces
+                .iter()
+                .any(|item| item.workspace_id == parent_workspace_id)
+        );
+
+        drop(db);
         let _ = fs::remove_file(path);
     }
 
