@@ -1180,16 +1180,18 @@ mod tests {
     fn tool_activity_is_idempotent_and_does_not_persist_raw_command_or_workdir() {
         let path = temp_db("tool-activity-privacy");
         let _ = fs::remove_file(&path);
+        let synthetic_secret = "sk-test-TOKN-SYNTHETIC-ONLY-0123456789";
         let private_path = format!(
-            "C:\{}\activity-user\Secret Project\session.jsonl",
+            r"C:\{}ctivity-user\Secret Project\session.jsonl",
             "Users"
         );
         let private_command = format!(
-            "Get-Content C:\{}\activity-user\Secret Project\secret-notes.txt",
-            "Users"
+            r"Get-Content C:\{}ctivity-user\Secret Project\secret-notes.txt; Write-Output {}",
+            "Users",
+            synthetic_secret
         );
         let private_workdir = format!(
-            "C:\{}\activity-user\Secret Project",
+            r"C:\{}ctivity-user\Secret Project",
             "Users"
         );
 
@@ -1266,6 +1268,7 @@ mod tests {
         assert!(!haystack.contains(&private_workdir));
         assert!(!haystack.contains("secret-notes.txt"));
         assert!(!haystack.contains("activity-user"));
+        assert!(!haystack.contains(synthetic_secret));
 
         let _ = fs::remove_file(path);
     }
