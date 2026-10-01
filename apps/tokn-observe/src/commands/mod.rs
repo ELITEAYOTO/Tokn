@@ -3,6 +3,7 @@ mod analyze_run;
 mod check_caps;
 mod common;
 mod compare;
+mod context_ledger;
 mod doctor;
 mod evaluate_validity;
 mod health;
@@ -33,6 +34,19 @@ pub fn run(cli: Cli) -> anyhow::Result<()> {
             output_json,
         } => analyze_run::run(&source, output_json.as_deref()),
         Command::Runner { request } => runner::run(&request),
+        Command::ContextLedger {
+            project_id,
+            workspace_id,
+            limit,
+            db,
+            output_json,
+        } => context_ledger::run(
+            project_id.as_deref(),
+            workspace_id.as_deref(),
+            limit,
+            db.as_deref(),
+            output_json.as_deref(),
+        ),
         Command::StoreEvidence {
             evidence_dir,
             project_key,
