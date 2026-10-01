@@ -2,7 +2,7 @@
 
 Status: ACTIVE EXECUTION PLAN
 Date: 2026-09-30
-Current state: P0-P9 DONE / Experiment 002 ACCEPTED / Measurement Contract Freeze NEXT
+Current state: P0-P9 DONE / Experiment 002 ACCEPTED / Measurement Contract V1 FROZEN / Store + ModelRuntimeProfile NEXT
 
 ## Purpose
 
@@ -198,7 +198,7 @@ V0.1 works on one new real run, not only the historical golden.
 
 ## Phase D - Measurement Contract Freeze
 
-Status: NEXT
+Status: DONE / FROZEN V1
 
 Freeze the interfaces that downstream systems may depend on:
 - Runner request/result schema;
@@ -215,7 +215,7 @@ Breaking changes remain possible later, but become explicit schema migrations.
 
 ## Phase E - Tokn Store + ModelRuntimeProfile
 
-Status: AFTER CONTRACT FREEZE
+Status: NEXT
 
 Build the smallest local persistent store for:
 - projects/workspaces;
@@ -356,13 +356,15 @@ but they are not a reason to skip measurement hardening.
 
 ## Current decision
 
-Immediate product work is **Measurement Contract Freeze V0.1**.
+Immediate product work is **Store + ModelRuntimeProfile persistence**.
+
+The Measurement Contract V1 is frozen in `docs/design/MEASUREMENT-CONTRACT-V0.1.md`.
 
 Order:
-1. freeze schemas and evidence semantics already exercised by P8/P9/Experiment 002 ;
-2. add explicit contract/schema versioning where downstream consumers need it ;
-3. freeze the minimum ModelRuntimeProfile boundary without inventing unavailable config ;
-4. add compatibility/regression tests for the frozen contract ;
-5. synchronize canonical docs ;
-6. only then begin Store + ModelRuntimeProfile persistence ;
-7. keep Historical Analyzer / Context Ledger observation-only after Store/Profile.
+1. persist project/workspace identity without using personal paths as identity ;
+2. persist runs and agents idempotently ;
+3. persist V1 usage summaries and provenance with contract versions ;
+4. persist ModelRuntimeProfile V1 with UNKNOWN preserved ;
+5. add migration/version guards before richer history queries ;
+6. then prototype the thin local MCP adapter over the shared Engine/Store ;
+7. keep Historical Analyzer / Context Ledger observation-only after the Store foundation.

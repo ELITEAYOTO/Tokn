@@ -6,7 +6,7 @@ Binaire/Cargo : **V0.1 / 0.1.0**
 
 ## Resume
 
-**P0-P9 DONE. Experiment 002 est ACCEPTED. Measurement Contract Freeze est NEXT.**
+**P0-P9 DONE. Experiment 002 est ACCEPTED. Measurement Contract V1 est FROZEN. Store + ModelRuntimeProfile est NEXT.**
 
 Le projet est revenu sur une direction unique :
 mesurer l'efficacite du contexte sans reduire la capacite d'Astra.
@@ -166,26 +166,39 @@ Axes apres V0.1 :
 
 Tous commencent observation-only.
 
+## Measurement Contract V1 - freeze termine
+
+Contrat : `tokn.measurement.v0.1`.
+
+Le Runner emet maintenant `measurement-contract.json` et le replay golden verrouille
+les versions V1 des schemas, de l'evidence layout et des semantiques de mesure.
+
+Points figes :
+- RunnerRequest / RunnerResult ;
+- evidence folder layout ;
+- RunGroup identity ;
+- token accounting (`ordinary_uncached = input - cached`, cache-write separe) ;
+- source health/provenance ;
+- terminal status ;
+- workspace inventory/resolution/snapshot/diff ;
+- quality/policy/recovery/validity contracts ;
+- ModelRuntimeProfile V1 domain contract ;
+- analyzer semantics version.
+
+Versions workspace/snapshot inconnues : rejet fail-closed.
+Experiment 001 golden : inchangé et replay PASS avec toutes les versions du contrat.
+
 ## Prochaine action
 
-Executer **Measurement Contract Freeze V0.1**.
+Implementer **Store + ModelRuntimeProfile persistence**.
 
 Chemin d'execution detaille :
 `docs/plans/IMPLEMENTATION-PATH.md`.
 
-Le freeze doit stabiliser avant Store/Profile :
-- RunnerRequest / RunnerResult ;
-- layout du dossier de preuves ;
-- identite RunGroup et relations parent/sous-agent ;
-- semantique input/cached/cache-write/output/reasoning ;
-- provenance et source health ;
-- terminal status ;
-- workspace lineage et diff ;
-- experiment validity ;
-- schema minimal ModelRuntimeProfile ;
-- versionnement explicite des contrats.
+Premier slice : projects/workspaces + runs + agents + usage summaries + provenance
++ ModelRuntimeProfile V1, avec idempotence et sans raw prompts/secrets.
 
-Aucun nouveau run Astra/Codex n'est necessaire pour cette phase.
+Aucun nouveau run Astra/Codex n'est necessaire pour ce slice.
 
 ## Sources de verite
 

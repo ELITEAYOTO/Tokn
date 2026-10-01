@@ -679,3 +679,14 @@ P6 remains IN PROGRESS until one controlled real PreToolUse callback proves the 
 - added deterministic Experiment 002 source selection with diagnostic-to-session fallback ;
 - added CI regression coverage for the fallback path ;
 - Measurement Contract Freeze is now the next roadmap phase.
+
+## 2026-10-01 - Measurement Contract V1 freeze
+
+- froze `tokn.measurement.v0.1` after the accepted real Experiment 002 run ;
+- Runner now emits `measurement-contract.json` in every evidence folder ;
+- versioned Runner request/result, evidence layout, session evidence, RunGroup, token accounting, source health, terminal status, workspace inventory/resolution/snapshot/diff, policy, quality, recovery, validity, ModelRuntimeProfile and analyzer semantics ;
+- Runner now rejects unsupported workspace inventory and project snapshot schema versions ;
+- froze ordinary uncached input as `input - cached`; cache-write remains a separate metric and is not subtracted from ordinary uncached ;
+- added the serializable ModelRuntimeProfile V1 domain contract while leaving persistence for the next phase ;
+- Experiment 001 golden replay now asserts every frozen contract version while preserving all historical golden facts ;
+- Store + ModelRuntimeProfile persistence is now the next roadmap phase.

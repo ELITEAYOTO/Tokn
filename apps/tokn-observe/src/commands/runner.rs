@@ -13,12 +13,14 @@ use tokn_codex::session::{
     inspect_session_policy,
 };
 use tokn_domain::{
-    CaptureValidityInput, CausalControlsInput, ExperimentValidityInput, PolicyEvidenceReport,
+    CaptureValidityInput, CausalControlsInput, ExperimentValidityInput,
+    MeasurementContractManifest, PROJECT_SNAPSHOT_SCHEMA_VERSION, PolicyEvidenceReport,
     PolicyObservationStatus, PolicyObservationSummary, PolicyPlacement, PolicyValidityInput,
-    QualityValidityInput, RunnerArtifactPaths, RunnerPipelineStatus, RunnerQualityReport,
-    RunnerQualityRequest, RunnerQualityStatus, RunnerRecoveryReport, RunnerRecoveryStatus,
-    RunnerRequest, RunnerResult, RunnerSourceReport, RuntimeValidityInput, SourceKind,
-    TaskValidityInput, ValidityCheckStatus, WorkspaceValidityInput,
+    QualityValidityInput, RUNNER_RESULT_SCHEMA_VERSION, RunnerArtifactPaths, RunnerPipelineStatus,
+    RunnerQualityReport, RunnerQualityRequest, RunnerQualityStatus, RunnerRecoveryReport,
+    RunnerRecoveryStatus, RunnerRequest, RunnerResult, RunnerSourceReport, RuntimeValidityInput,
+    SourceKind, TaskValidityInput, ValidityCheckStatus, WORKSPACE_INVENTORY_SCHEMA_VERSION,
+    WorkspaceValidityInput,
 };
 
 use super::common::{
@@ -39,6 +41,7 @@ pub fn run(request_path: &Path) -> anyhow::Result<()> {
     std::fs::create_dir_all(&evidence_dir)?;
 
     let normalized_request_path = evidence_dir.join("runner-request.json");
+    let measurement_contract_path = evidence_dir.join("measurement-contract.json");
     let source_health_path = evidence_dir.join("source-health.json");
     let session_evidence_path = evidence_dir.join("session-evidence.json");
     let run_group_path = evidence_dir.join("run-group.json");
@@ -76,6 +79,7 @@ pub fn run(request_path: &Path) -> anyhow::Result<()> {
 
     let mut owned_paths = vec![
         normalized_request_path.as_path(),
+        measurement_contract_path.as_path(),
         source_health_path.as_path(),
         session_evidence_path.as_path(),
         run_group_path.as_path(),
@@ -107,6 +111,10 @@ pub fn run(request_path: &Path) -> anyhow::Result<()> {
     let recovery_report = prepare_owned_artifacts(&owned_paths, &runner_result_path)?;
 
     write_json(&normalized_request_path, &request)?;
+    write_json(
+        &measurement_contract_path,
+        &MeasurementContractManifest::default(),
+    )?;
     write_json(&recovery_report_path, &recovery_report)?;
 
     let source_path = resolve_source(&request.source)?;
@@ -419,6 +427,7 @@ pub fn run(request_path: &Path) -> anyhow::Result<()> {
 
     let mut completed_steps = vec![
         "RECOVERY".into(),
+        "MEASUREMENT_CONTRACT".into(),
         "SOURCE_HEALTH_REPORT".into(),
         "SESSION_ROOT_RESOLUTION".into(),
         "SESSION_EVIDENCE".into(),
@@ -454,7 +463,7 @@ pub fn run(request_path: &Path) -> anyhow::Result<()> {
         };
 
     let result = RunnerResult {
-        schema_version: 1,
+        schema_version: RUNNER_RESULT_SCHEMA_VERSION,
         run_id: request.run_id.clone(),
         pipeline_status,
         source_requested: request.source.clone(),
@@ -495,6 +504,7 @@ pub fn run(request_path: &Path) -> anyhow::Result<()> {
         warnings,
         artifacts: RunnerArtifactPaths {
             normalized_request: normalized_request_path.to_string_lossy().to_string(),
+            measurement_contract: Some(measurement_contract_path.to_string_lossy().to_string()),
             source_health: source_health_path.to_string_lossy().to_string(),
             session_evidence: session_evidence_path.to_string_lossy().to_string(),
             run_group: run_group_path.to_string_lossy().to_string(),
@@ -672,13 +682,29 @@ fn read_request(path: &Path) -> anyhow::Result<RunnerRequest> {
 fn read_inventory(path: &Path) -> anyhow::Result<WorkspaceInventory> {
     let bytes = std::fs::read(path)?;
     let bytes = bytes.strip_prefix(&[0xEF, 0xBB, 0xBF]).unwrap_or(&bytes);
-    Ok(serde_json::from_slice(bytes)?)
+    let inventory: WorkspaceInventory = serde_json::from_slice(bytes)?;
+    if inventory.schema_version != WORKSPACE_INVENTORY_SCHEMA_VERSION {
+        anyhow::bail!(
+            "unsupported workspace inventory schema_version {}; expected {}",
+            inventory.schema_version,
+            WORKSPACE_INVENTORY_SCHEMA_VERSION
+        );
+    }
+    Ok(inventory)
 }
 
 fn read_project_snapshot(path: &Path) -> anyhow::Result<ProjectSnapshot> {
     let bytes = std::fs::read(path)?;
     let bytes = bytes.strip_prefix(&[0xEF, 0xBB, 0xBF]).unwrap_or(&bytes);
-    Ok(serde_json::from_slice(bytes)?)
+    let snapshot: ProjectSnapshot = serde_json::from_slice(bytes)?;
+    if snapshot.schema_version != PROJECT_SNAPSHOT_SCHEMA_VERSION {
+        anyhow::bail!(
+            "unsupported project snapshot schema_version {}; expected {}",
+            snapshot.schema_version,
+            PROJECT_SNAPSHOT_SCHEMA_VERSION
+        );
+    }
+    Ok(snapshot)
 }
 
 fn same_path(left: &str, right: &str) -> bool {
@@ -750,4 +776,53 @@ fn prepare_owned_artifacts(
         policy_placements_mutated: false,
         message,
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::time::{SystemTime, UNIX_EPOCH};
+
+    fn temp_json(name: &str, content: &str) -> PathBuf {
+        let stamp = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .expect("clock")
+            .as_nanos();
+        let path = std::env::temp_dir().join(format!(
+            "tokn-runner-{name}-{}-{stamp}.json",
+            std::process::id()
+        ));
+        std::fs::write(&path, content).expect("write fixture");
+        path
+    }
+
+    #[test]
+    fn rejects_unknown_workspace_inventory_schema() {
+        let path = temp_json(
+            "inventory-schema",
+            r#"{"schema_version":99,"watch_root":"E:/fixture","candidates":[]}"#,
+        );
+        let error = read_inventory(&path).expect_err("unknown inventory schema must fail");
+        std::fs::remove_file(path).ok();
+        assert!(
+            error
+                .to_string()
+                .contains("workspace inventory schema_version 99")
+        );
+    }
+
+    #[test]
+    fn rejects_unknown_project_snapshot_schema() {
+        let path = temp_json(
+            "snapshot-schema",
+            r#"{"schema_version":99,"project_root":"E:/fixture","file_count":0,"total_bytes":0,"files":[]}"#,
+        );
+        let error = read_project_snapshot(&path).expect_err("unknown snapshot schema must fail");
+        std::fs::remove_file(path).ok();
+        assert!(
+            error
+                .to_string()
+                .contains("project snapshot schema_version 99")
+        );
+    }
 }

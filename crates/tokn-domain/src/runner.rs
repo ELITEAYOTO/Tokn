@@ -4,7 +4,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     ExperimentIntent, ExperimentValidityVerdict, PolicyEnforcementStatus, PolicyObservationStatus,
-    SourceHealth, SourceHealthStatus, SourceKind, TerminalStatus, ValidityCheckStatus,
+    RUNNER_REQUEST_SCHEMA_VERSION, SourceHealth, SourceHealthStatus, SourceKind, TerminalStatus,
+    ValidityCheckStatus,
 };
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
@@ -181,10 +182,10 @@ impl RunnerRequest {
     pub fn validation_errors(&self) -> Vec<String> {
         let mut errors = Vec::new();
 
-        if self.schema_version != 1 {
+        if self.schema_version != RUNNER_REQUEST_SCHEMA_VERSION {
             errors.push(format!(
-                "unsupported runner request schema_version {}; expected 1",
-                self.schema_version
+                "unsupported runner request schema_version {}; expected {}",
+                self.schema_version, RUNNER_REQUEST_SCHEMA_VERSION
             ));
         }
         for (name, value) in [
@@ -261,6 +262,8 @@ pub struct RunnerSourceReport {
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct RunnerArtifactPaths {
     pub normalized_request: String,
+    #[serde(default)]
+    pub measurement_contract: Option<String>,
     pub source_health: String,
     pub session_evidence: String,
     pub run_group: String,
@@ -314,7 +317,7 @@ mod tests {
 
     fn request() -> RunnerRequest {
         RunnerRequest {
-            schema_version: 1,
+            schema_version: RUNNER_REQUEST_SCHEMA_VERSION,
             run_id: "fixture-run".into(),
             source: "fixture.jsonl".into(),
             session_candidates: vec!["child-a.jsonl".into(), "child-b.jsonl".into()],

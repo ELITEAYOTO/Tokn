@@ -85,15 +85,35 @@ puis le fallback session a ete versionne et regression-teste.
 
 ## M3.5 - Measurement Contract Freeze
 
+Statut : DONE / FROZEN V1
+
+Resultat :
+- `measurement-contract.json` emis par Runner ;
+- versions explicites des schemas/evidence/semantiques ;
+- Runner refuse les versions workspace/snapshot inconnues ;
+- token accounting V1 fige (`uncached = input - cached`, cache-write separe) ;
+- ModelRuntimeProfile V1 fige au niveau domaine ;
+- replay Experiment 001 verifie toutes les versions sans changer les golden facts.
+
+## M3.6 - Store + ModelRuntimeProfile persistence
+
 Statut : NEXT
 
 But :
-figer les contrats de mesure consommes par Store, ModelRuntimeProfile
-et les analyseurs historiques avant d'ajouter une nouvelle couche produit.
+persister le minimum fiable pour projects/workspaces, runs, agents,
+usage summaries, provenance et ModelRuntimeProfile V1.
+
+## M3.7 - Local MCP integration prototype
+
+Statut : PLANNED AFTER M3.6
+
+But :
+exposer le moteur/store local via un adapter MCP process-bound mince,
+sans dupliquer la logique analytique et sans daemon permanent par defaut.
 
 ## M4 - Historical Analyzer + Context Ledger
 
-Statut : PLANNED AFTER M3.5 / STORE + MODELRUNTIMEPROFILE
+Statut : PLANNED AFTER STORE FOUNDATION
 
 But :
 construire l'historique fiable par projet/run/agent/phase.

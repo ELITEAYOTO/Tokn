@@ -18,11 +18,7 @@ impl TokenUsage {
     pub fn ordinary_uncached(&self) -> Option<u64> {
         let input = self.input_tokens?;
         let cached = self.cached_input_tokens?;
-        let after_cached = input.checked_sub(cached)?;
-        match self.cache_write_input_tokens {
-            Some(writes) => after_cached.checked_sub(writes),
-            None => Some(after_cached),
-        }
+        input.checked_sub(cached)
     }
 }
 
@@ -121,6 +117,14 @@ mod tests {
             ..Default::default()
         };
         assert_eq!(usage.ordinary_uncached(), Some(30));
+
+        let with_cache_write = TokenUsage {
+            input_tokens: Some(100),
+            cached_input_tokens: Some(70),
+            cache_write_input_tokens: Some(20),
+            ..Default::default()
+        };
+        assert_eq!(with_cache_write.ordinary_uncached(), Some(30));
 
         let unknown_cached = TokenUsage {
             input_tokens: Some(100),

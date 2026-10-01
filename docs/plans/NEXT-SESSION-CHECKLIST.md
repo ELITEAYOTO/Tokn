@@ -6,7 +6,8 @@ Derniere mise a jour : **2026-10-01**
 
 P0-P9 : DONE
 Experiment 002 : DONE / ACCEPTED
-Measurement Contract Freeze : NEXT
+Measurement Contract V1 : DONE / FROZEN
+Store + ModelRuntimeProfile : NEXT
 
 Workspace :
 `E:\Tokn\V0-CodexTkn-Consume\tool`
@@ -24,21 +25,17 @@ Ne pas refaire l'enquete P6 ni la recherche plugin/telemetry R1-R8 avant qu'un b
 
 ## Premiere action
 
-Executer **Measurement Contract Freeze V0.1**.
+Implementer **Tokn Store + ModelRuntimeProfile persistence**.
 
-A figer :
-- Runner request/result ;
-- evidence layout ;
-- RunGroup identity ;
-- token/accounting semantics ;
-- source health + provenance ;
-- terminal status ;
-- workspace lineage/diff ;
-- validity contract ;
-- minimum ModelRuntimeProfile ;
-- schema/evidence/analyzer versioning.
+Premier scope :
+- persister project/workspace identity sans chemin personnel comme identite ;
+- persister runs, agents et usage summaries ;
+- persister ModelRuntimeProfile V1 sans raw prompts/secrets ;
+- conserver provenance + contract versions ;
+- garantir l'idempotence d'un meme run/source ;
+- ne pas ajouter Findings/GUI/optimisation active dans ce slice.
 
-Aucun nouveau quota Astra/Codex n'est necessaire pour cette phase.
+Aucun nouveau quota Astra/Codex n'est necessaire pour ce travail.
 
 Build/test environment valide :
 Visual Studio Build Tools 2022 via `vcvars64.bat`.
@@ -78,10 +75,9 @@ Tests obligatoires :
 ## Apres V0.1
 
 NEXT :
-Measurement Contract Freeze.
+Tokn Store + ModelRuntimeProfile.
 
 Puis :
-- Tokn Store + ModelRuntimeProfile ;
 - Local MCP integration prototype ;
 - Historical Analyzer + Context Ledger ;
 - findings observation-only ;

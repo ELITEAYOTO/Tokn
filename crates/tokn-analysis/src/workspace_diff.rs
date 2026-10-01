@@ -1,6 +1,7 @@
 use std::collections::BTreeMap;
 
 use serde::{Deserialize, Serialize};
+use tokn_domain::WORKSPACE_DIFF_SCHEMA_VERSION;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ProjectSnapshotFile {
@@ -94,7 +95,7 @@ pub fn diff_project_snapshots(
     }
 
     WorkspaceDiffReport {
-        schema_version: 1,
+        schema_version: WORKSPACE_DIFF_SCHEMA_VERSION,
         before: before_label.into(),
         after: after_label.into(),
         added_count: added.len() as u64,
@@ -117,6 +118,7 @@ fn signed_delta(before: u64, after: u64) -> i64 {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use tokn_domain::PROJECT_SNAPSHOT_SCHEMA_VERSION;
 
     fn file(path: &str, sha256: &str, bytes: u64) -> ProjectSnapshotFile {
         ProjectSnapshotFile {
@@ -129,7 +131,7 @@ mod tests {
 
     fn snapshot(files: Vec<ProjectSnapshotFile>) -> ProjectSnapshot {
         ProjectSnapshot {
-            schema_version: 1,
+            schema_version: PROJECT_SNAPSHOT_SCHEMA_VERSION,
             created_at: None,
             project_root: "E:/fixture".into(),
             excluded_top_level: vec![],

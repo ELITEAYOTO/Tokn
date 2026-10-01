@@ -31,6 +31,7 @@ try {
 
     $Expected = (Get-Content (Join-Path $Fixture "expected.json") -Raw | ConvertFrom-Json).expected
     $Result = Get-Content (Join-Path $Evidence "runner-result.json") -Raw | ConvertFrom-Json
+    $Contract = Get-Content (Join-Path $Evidence "measurement-contract.json") -Raw | ConvertFrom-Json
     $Group = Get-Content (Join-Path $Evidence "run-group.json") -Raw | ConvertFrom-Json
     $Policy = Get-Content (Join-Path $Evidence "policy-evidence.json") -Raw | ConvertFrom-Json
     $Diff = Get-Content (Join-Path $Evidence "workspace-diff.json") -Raw | ConvertFrom-Json
@@ -43,6 +44,35 @@ try {
     $DescendantLogical = 0
     foreach ($Agent in @($Group.agents | Where-Object { $_.depth -gt 0 })) {
         $DescendantLogical += [uint64]$Agent.totals.input_tokens + [uint64]$Agent.totals.output_tokens
+    }
+
+    Assert-Equal "measurement_contract_id" $Contract.contract_id "tokn.measurement.v0.1"
+    foreach ($property in @(
+        "schema_version",
+        "measurement_contract_version",
+        "evidence_layout_version",
+        "runner_request_schema_version",
+        "runner_result_schema_version",
+        "session_evidence_schema_version",
+        "run_group_schema_version",
+        "token_accounting_semantics_version",
+        "source_health_schema_version",
+        "terminal_status_semantics_version",
+        "workspace_inventory_schema_version",
+        "workspace_resolution_schema_version",
+        "project_snapshot_schema_version",
+        "workspace_diff_schema_version",
+        "policy_evidence_schema_version",
+        "quality_gate_schema_version",
+        "recovery_report_schema_version",
+        "experiment_validity_schema_version",
+        "model_runtime_profile_schema_version",
+        "analyzer_semantics_version"
+    )) {
+        Assert-Equal ("contract_" + $property) $Contract.$property 1
+    }
+    if ([string]::IsNullOrWhiteSpace([string]$Result.artifacts.measurement_contract)) {
+        throw "runner result does not reference measurement-contract.json"
     }
 
     Assert-Equal "pipeline_status" $Result.pipeline_status $Expected.pipeline_status

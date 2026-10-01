@@ -1,6 +1,8 @@
 # Token Accounting
 
-Derniere mise a jour : 2026-09-29
+Derniere mise a jour : 2026-10-01
+
+Contract: **V1 FROZEN** (`token_accounting_semantics_version=1`)
 
 ## Invariants de base
 
@@ -16,8 +18,8 @@ Ordinary uncached :
 si input et cached existent,
 ordinary_uncached = input - cached.
 
-Si cache-write existe, sa semantique est conservee separement
-et n'est jamais additionnee comme un nouveau cout logique.
+Si cache-write existe, sa semantique est conservee separement :
+elle n'est ni soustraite de `ordinary_uncached`, ni additionnee comme un nouveau cout logique.
 
 cached/input est un indicateur de reutilisation reportee, pas un score de qualite.
 Tokn distingue :

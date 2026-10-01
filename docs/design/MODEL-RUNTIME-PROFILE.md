@@ -1,7 +1,7 @@
 # Tokn ModelRuntimeProfile
 
-Status: ACCEPTED DESIGN / IMPLEMENTATION PENDING
-Date: 2026-09-30
+Status: FROZEN V1 DOMAIN CONTRACT / PERSISTENCE PENDING
+Date: 2026-10-01
 
 ## Purpose
 
@@ -13,11 +13,16 @@ and the capabilities Tokn actually observed.
 
 It is descriptive infrastructure, not a model quality score.
 
+The V1 serializable domain contract is implemented in
+`crates/tokn-domain/src/model_runtime.rs` and versioned by
+`docs/design/MEASUREMENT-CONTRACT-V0.1.md`.
+Store persistence is intentionally the next phase, not part of this freeze.
+
 ## Profile identity
 
 Minimum identity fields:
 
-- profile_schema_version;
+- schema_version;
 - observed_at;
 - runtime_kind;
 - runtime_version;

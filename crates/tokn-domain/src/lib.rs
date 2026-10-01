@@ -1,5 +1,7 @@
+mod contract;
 mod event;
 mod ids;
+mod model_runtime;
 mod observation;
 mod policy;
 mod run;
@@ -9,8 +11,10 @@ mod token;
 mod truth;
 mod validity;
 
+pub use contract::*;
 pub use event::*;
 pub use ids::*;
+pub use model_runtime::*;
 pub use observation::*;
 pub use policy::*;
 pub use run::*;

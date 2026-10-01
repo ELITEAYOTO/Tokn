@@ -124,9 +124,11 @@ Repeat Experiment 002 after fixing Tokn if:
 
 ## After Experiment 002
 
-If instrumentation is valid:
-1. freeze the V0.1 Measurement Contract ;
-2. implement the minimal Tokn Store + ModelRuntimeProfile ;
+Instrumentation is valid and the Measurement Contract V1 is now frozen.
+
+Next:
+1. implement the minimal Tokn Store + ModelRuntimeProfile persistence ;
+2. prototype the thin local MCP adapter over the shared Engine/Store ;
 3. build Historical Analyzer + Context Ledger observation-only ;
 4. produce recurring evidence-backed findings ;
 5. select one reproducible low-risk finding ;

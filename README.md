@@ -10,7 +10,7 @@ Version binaire actuelle : **V0.1** (workspace Cargo 0.1.0)
 Release : **V0.1 Measurement Hardening**
 
 Etat au 2026-10-01 :
-**P0-P9 DONE ; Experiment 002 ACCEPTED ; Measurement Contract Freeze NEXT.**
+**P0-P9 DONE ; Experiment 002 ACCEPTED ; Measurement Contract V1 FROZEN ; Store + ModelRuntimeProfile NEXT.**
 
 ## Principe
 
@@ -54,7 +54,7 @@ DONE :
 - P9 golden replay + release validation.
 
 NEXT :
-- Measurement Contract Freeze V0.1.
+- Tokn Store + ModelRuntimeProfile persistence.
 
 Experiment 002 a valide l'instrumentation sur un run reel :
 pipeline COMPLETE, terminal COMPLETED, quality PASS, verdict INSTRUMENTATION_ONLY.
