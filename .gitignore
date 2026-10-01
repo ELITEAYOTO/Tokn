@@ -3,4 +3,15 @@
 *.sqlite3
 *.sqlite3-shm
 *.sqlite3-wal
+.env
+.env.*
+auth.json
+credentials*
+secrets*
+*.pem
+*.key
+*.p12
+*.pfx
+/traces/
+/experiments/*/runs/
 .DS_Store

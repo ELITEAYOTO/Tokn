@@ -657,3 +657,11 @@ P6 remains IN PROGRESS until one controlled real PreToolUse callback proves the 
 
 - removed stale hard-coded milestone text from the Context Pack manifest generator ;
 - generated packs now point to the exact-commit STATUS.md and ROADMAP.md for project state instead of duplicating mutable status.
+
+## 2026-10-01 - GitHub publication hardening
+
+- added GitHub Actions CI for publication privacy, fmt/clippy/tests, release build, Experiment 001 golden replay and documentation consistency ;
+- added repository publication privacy validation for common credentials, raw run artifacts and user-home paths ;
+- aligned the repository with its declared MIT OR Apache-2.0 license by adding both license texts ;
+- hardened .gitignore against local credentials, keys, traces and real experiment run directories ;
+- added CODEOWNERS for @ELITEAYOTO and removed the machine-specific build root from README.

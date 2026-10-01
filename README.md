@@ -1,5 +1,7 @@
 # Tokn Observer
 
+[![CI](https://github.com/ELITEAYOTO/Tokn/actions/workflows/ci.yml/badge.svg)](https://github.com/ELITEAYOTO/Tokn/actions/workflows/ci.yml)
+
 Tokn est un profiler/analyzer local pour Codex/Astra.
 Son objectif est d'augmenter le travail utile et la qualite obtenus par token,
 sans brider la capacite du modele.
@@ -7,7 +9,7 @@ sans brider la capacite du modele.
 Version binaire actuelle : **V0.1** (workspace Cargo 0.1.0)
 Release : **V0.1 Measurement Hardening**
 
-Etat au 2026-09-30 :
+Etat au 2026-10-01 :
 **P0-P9 DONE ; Experiment 002 NEXT.**
 
 ## Principe
@@ -108,8 +110,7 @@ Puis Finding Engine -> Experiment Lab -> seulement ensuite optimisation active.
 
 ## Build
 
-Depuis :
-`E:\Tokn\V0-CodexTkn-Consume\tool`
+Depuis la racine du repository.
 
 Validation :
 - `scripts\test.ps1`
@@ -131,3 +132,8 @@ Pour reprendre le developpement :
 4. `docs/plans/NEXT-SESSION-CHECKLIST.md`
 
 Ne pas relire tous les documents historiques pour reprendre le travail.
+
+## Licence
+
+Tokn est distribue sous double licence **MIT OR Apache-2.0**.
+Voir `LICENSE-MIT` et `LICENSE-APACHE`.
