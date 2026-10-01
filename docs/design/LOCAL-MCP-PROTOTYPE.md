@@ -1,6 +1,6 @@
 # Tokn Local MCP Prototype
 
-Status: TRANSPORT PROTOTYPE ACCEPTED / DIRECT HOST TOOL CALL PENDING
+Status: TRANSPORT PROTOTYPE ACCEPTED / DIRECT HOST TOOL CALL VALIDATED
 Date: 2026-10-01
 
 ## Purpose
@@ -193,29 +193,40 @@ performs MCP initialization and discovers the Tokn tool catalog.
 
 No model turn is created by this validation.
 
-## Direct host tool-call boundary
+## Direct host tool-call validation
 
-Codex app-server also exposes:
+Codex app-server exposes:
 `mcpServer/tool/call`.
 
-That API requires a valid Codex `threadId`.
+The local validation now proves this path without a model turn:
 
-Observed:
-- an invented thread ID is correctly rejected as `thread not found`;
-- creating a new Codex thread in a disposable unauthenticated Codex home attempts
-  to initialize the OpenAI provider connection and receives HTTP 401.
+1. create a disposable isolated `CODEX_HOME`;
+2. register only Tokn;
+3. start the native Codex app-server;
+4. initialize the app-server experimental API;
+5. discover Tokn through `mcpServerStatus/list`;
+6. create an ephemeral Codex thread;
+7. verify the thread is `idle` with zero turns;
+8. call `tokn_status` through `mcpServer/tool/call`;
+9. validate the returned Tokn status payload;
+10. delete the isolated Codex home and temporary Store.
 
-Tokn did not copy or inspect the user's authentication data to bypass this.
-Tokn did not start a model turn.
-No quota-consuming validation run was intentionally performed.
+Observed result on 2026-10-01:
+**PASS**.
 
-Therefore this document does **not** claim:
-- a direct `mcpServer/tool/call` through an authenticated Codex thread;
-- model-driven tool selection;
-- plugin UX validation.
+The direct Codex tool call returned:
+- server name `tokn-mcp`;
+- transport `stdio`;
+- `read_only=true`;
+- Store schema version `2`;
+- `tokn_status` and `tokn_recent_runs`.
 
-Those are separate integration validations and are not needed to prove the local
-command-launched stdio transport architecture.
+No user authentication data was copied or inspected.
+No `turn/start` request was submitted.
+The validation thread remained idle with zero model turns.
+
+This proves direct host invocation of a Tokn MCP tool.
+It does **not** prove model-driven tool selection or production plugin UX; those remain separate concerns.
 
 ## Acceptance decision
 
@@ -228,6 +239,8 @@ The local transport prototype is accepted because:
 - Store access uses shared Rust logic;
 - target Codex accepts the registration;
 - target Codex launches the process and discovers its tools;
+- target Codex directly calls `tokn_status` through `mcpServer/tool/call`;
+- the validation uses an idle zero-turn ephemeral thread;
 - standalone Runner behavior remains independent;
 - no daemon is required.
 

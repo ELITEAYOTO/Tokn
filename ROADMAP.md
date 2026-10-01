@@ -124,10 +124,10 @@ Resultat :
 - Codex app-server lance Tokn et decouvre les deux outils, toolsError=null ;
 - aucun daemon permanent ;
 - aucune logique analytique dupliquee ;
+- thread ephemere local cree idle avec 0 turns ;
+- `mcpServer/tool/call` appelle `tokn_status` avec succes via Codex ;
+- aucune auth utilisateur copiee ou inspectee ;
 - aucun turn modele ni quota volontairement consomme pour la validation.
-
-Dette non bloquante : `mcpServer/tool/call` via Codex exige un thread authentifie ;
-ce chemin n'est pas revendique comme valide tant qu'il n'est pas teste explicitement.
 
 ## M4 - Historical Analyzer + Context Ledger
 

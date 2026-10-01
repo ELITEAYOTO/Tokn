@@ -15,6 +15,12 @@ if (-not (Test-Path -LiteralPath $BinaryPath)) {
 }
 
 $CodexVersion = (& codex --version | Out-String).Trim()
+$Doctor = (& codex doctor --json | Out-String) | ConvertFrom-Json
+$CodexExe = [string]$Doctor.checks.'runtime.provenance'.details.'current executable'
+if ([string]::IsNullOrWhiteSpace($CodexExe) -or -not (Test-Path -LiteralPath $CodexExe)) {
+    throw "Unable to resolve the native Codex executable."
+}
+
 $CodexHomePath = Join-Path $Repo "target\codex-home-mcp-runtime-check"
 $DbPath = Join-Path $Repo "target\codex-mcp-runtime-check.sqlite3"
 $ResolvedBinary = (Resolve-Path $BinaryPath).Path
@@ -25,6 +31,45 @@ New-Item -ItemType Directory -Force -Path $CodexHomePath | Out-Null
 
 $OldCodexHome = $env:CODEX_HOME
 $env:CODEX_HOME = $CodexHomePath
+$Process = $null
+
+function Read-AppResponseById {
+    param(
+        [Parameter(Mandatory = $true)] [System.Diagnostics.Process]$Process,
+        [Parameter(Mandatory = $true)] [int]$Id,
+        [int]$TimeoutMs = 15000
+    )
+
+    $Deadline = [DateTime]::UtcNow.AddMilliseconds($TimeoutMs)
+    while ([DateTime]::UtcNow -lt $Deadline) {
+        $Task = $Process.StandardOutput.ReadLineAsync()
+        $Remaining = [int][Math]::Max(1, ($Deadline - [DateTime]::UtcNow).TotalMilliseconds)
+        if (-not $Task.Wait($Remaining)) {
+            throw "Timed out waiting for Codex app-server response id=$Id"
+        }
+
+        $Line = $Task.Result
+        if ($null -eq $Line) {
+            throw "Codex app-server stdout closed while waiting for id=$Id"
+        }
+        if ([string]::IsNullOrWhiteSpace($Line)) {
+            continue
+        }
+
+        try {
+            $Message = $Line | ConvertFrom-Json
+        }
+        catch {
+            continue
+        }
+
+        if ($Message.id -eq $Id) {
+            return $Message
+        }
+    }
+
+    throw "Timed out waiting for Codex app-server response id=$Id"
+}
 
 try {
     & codex mcp add tokn -- $ResolvedBinary --db $DbPath | Out-Null
@@ -47,72 +92,58 @@ try {
         throw "Tokn MCP registered arguments mismatch"
     }
 
-    $psi = [System.Diagnostics.ProcessStartInfo]::new()
-    $psi.FileName = "cmd.exe"
-    $psi.Arguments = '/d /s /c "codex app-server --stdio"'
-    $psi.UseShellExecute = $false
-    $psi.CreateNoWindow = $true
-    $psi.RedirectStandardInput = $true
-    $psi.RedirectStandardOutput = $true
-    $psi.RedirectStandardError = $true
-    $psi.Environment["CODEX_HOME"] = $CodexHomePath
+    $Psi = [System.Diagnostics.ProcessStartInfo]::new()
+    $Psi.FileName = $CodexExe
+    $Psi.Arguments = "app-server --stdio"
+    $Psi.UseShellExecute = $false
+    $Psi.CreateNoWindow = $true
+    $Psi.RedirectStandardInput = $true
+    $Psi.RedirectStandardOutput = $true
+    $Psi.RedirectStandardError = $true
+    $Psi.Environment["CODEX_HOME"] = $CodexHomePath
 
     $Process = [System.Diagnostics.Process]::new()
-    $Process.StartInfo = $psi
+    $Process.StartInfo = $Psi
     if (-not $Process.Start()) {
-        throw "Failed to start Codex app-server"
+        throw "Failed to start native Codex app-server"
     }
 
-    $Initialize = '{"id":1,"method":"initialize","params":{"clientInfo":{"name":"tokn-runtime-check","version":"1"},"capabilities":{}}}'
-    $Inventory = '{"id":2,"method":"mcpServerStatus/list","params":{"serverName":"tokn","detail":"full","limit":10}}'
+    $Initialize = @{
+        id = 1
+        method = "initialize"
+        params = @{
+            clientInfo = @{
+                name = "tokn-runtime-check"
+                version = "1"
+            }
+            capabilities = @{
+                experimentalApi = $true
+            }
+        }
+    } | ConvertTo-Json -Depth 8 -Compress
 
     $Process.StandardInput.WriteLine($Initialize)
     $Process.StandardInput.Flush()
-    Start-Sleep -Milliseconds 700
+    $InitializeResponse = Read-AppResponseById -Process $Process -Id 1 -TimeoutMs 10000
+    if ($null -ne $InitializeResponse.error) {
+        throw "Codex app-server initialize failed: $($InitializeResponse.error | ConvertTo-Json -Compress)"
+    }
+
+    $Process.StandardInput.WriteLine('{"method":"initialized"}')
+
+    $Inventory = @{
+        id = 2
+        method = "mcpServerStatus/list"
+        params = @{
+            serverName = "tokn"
+            detail = "full"
+            limit = 10
+        }
+    } | ConvertTo-Json -Depth 6 -Compress
     $Process.StandardInput.WriteLine($Inventory)
     $Process.StandardInput.Flush()
-    Start-Sleep -Seconds 4
-    $Process.StandardInput.Close()
 
-    if (-not $Process.WaitForExit(12000)) {
-        try { $Process.Kill() } catch {}
-        throw "Codex app-server did not exit after stdin closed"
-    }
-
-    $Stdout = $Process.StandardOutput.ReadToEnd()
-    $Stderr = $Process.StandardError.ReadToEnd()
-    if ($Process.ExitCode -ne 0) {
-        throw "Codex app-server exited with code $($Process.ExitCode): $Stderr"
-    }
-    if (-not [string]::IsNullOrWhiteSpace($Stderr)) {
-        throw "Codex app-server wrote unexpected stderr: $Stderr"
-    }
-
-    $Responses = @()
-    foreach ($Line in @($Stdout -split "\r?\n")) {
-        if ([string]::IsNullOrWhiteSpace($Line)) {
-            continue
-        }
-        try {
-            $Message = $Line | ConvertFrom-Json
-        }
-        catch {
-            continue
-        }
-        if ($null -ne $Message.id) {
-            $Responses += $Message
-        }
-    }
-
-    $InitializeResponse = @($Responses | Where-Object { $_.id -eq 1 })[0]
-    if ($null -eq $InitializeResponse -or $null -ne $InitializeResponse.error) {
-        throw "Codex app-server initialize failed"
-    }
-
-    $InventoryResponse = @($Responses | Where-Object { $_.id -eq 2 })[0]
-    if ($null -eq $InventoryResponse) {
-        throw "Codex MCP inventory response is missing"
-    }
+    $InventoryResponse = Read-AppResponseById -Process $Process -Id 2 -TimeoutMs 20000
     if ($null -ne $InventoryResponse.error) {
         throw "Codex MCP inventory returned an error: $($InventoryResponse.error | ConvertTo-Json -Compress)"
     }
@@ -149,19 +180,98 @@ try {
         throw "Codex did not discover tokn_recent_runs"
     }
 
-    if ($Stdout.Contains($DbPath)) {
-        throw "Codex MCP inventory output leaked the local database path"
+    $ThreadStart = @{
+        id = 3
+        method = "thread/start"
+        params = @{
+            ephemeral = $true
+            cwd = $Repo
+        }
+    } | ConvertTo-Json -Depth 8 -Compress
+    $Process.StandardInput.WriteLine($ThreadStart)
+    $Process.StandardInput.Flush()
+
+    $ThreadResponse = Read-AppResponseById -Process $Process -Id 3 -TimeoutMs 15000
+    if ($null -ne $ThreadResponse.error) {
+        throw "Codex thread/start failed: $($ThreadResponse.error | ConvertTo-Json -Compress)"
     }
 
-    Write-Host "Codex MCP runtime discovery: PASS"
+    $ThreadId = [string]$ThreadResponse.result.thread.id
+    if ([string]::IsNullOrWhiteSpace($ThreadId)) {
+        throw "Codex thread/start returned no thread id"
+    }
+    if ($ThreadResponse.result.thread.status.type -ne "idle") {
+        throw "Validation thread is not idle"
+    }
+    if (@($ThreadResponse.result.thread.turns).Count -ne 0) {
+        throw "Validation thread unexpectedly contains model turns"
+    }
+
+    $ToolCall = @{
+        id = 4
+        method = "mcpServer/tool/call"
+        params = @{
+            server = "tokn"
+            threadId = $ThreadId
+            tool = "tokn_status"
+            arguments = @{}
+        }
+    } | ConvertTo-Json -Depth 8 -Compress
+    $Process.StandardInput.WriteLine($ToolCall)
+    $Process.StandardInput.Flush()
+
+    $ToolResponse = Read-AppResponseById -Process $Process -Id 4 -TimeoutMs 15000
+    if ($null -ne $ToolResponse.error) {
+        throw "Codex MCP tool call failed: $($ToolResponse.error | ConvertTo-Json -Compress)"
+    }
+    if ($ToolResponse.result.isError -eq $true) {
+        throw "Tokn MCP tool returned isError=true"
+    }
+
+    $TextItems = @($ToolResponse.result.content | Where-Object { $_.type -eq "text" })
+    if ($TextItems.Count -lt 1 -or [string]::IsNullOrWhiteSpace([string]$TextItems[0].text)) {
+        throw "Tokn status returned no text content"
+    }
+    $StatusPayload = $TextItems[0].text | ConvertFrom-Json
+    if ($StatusPayload.server.name -ne "tokn-mcp") {
+        throw "Tokn status server name mismatch"
+    }
+    if ($StatusPayload.server.transport -ne "stdio") {
+        throw "Tokn status transport mismatch"
+    }
+    if ($StatusPayload.server.read_only -ne $true) {
+        throw "Tokn status read_only mismatch"
+    }
+    if ([string]$StatusPayload.store.schema_version -ne "2") {
+        throw "Tokn status Store schema mismatch"
+    }
+    if (@($StatusPayload.tools) -notcontains "tokn_status" -or
+        @($StatusPayload.tools) -notcontains "tokn_recent_runs") {
+        throw "Tokn status tool list mismatch"
+    }
+
+    $SerializedStatus = $ToolResponse | ConvertTo-Json -Depth 20 -Compress
+    if ($SerializedStatus.Contains($DbPath)) {
+        throw "Tokn MCP tool output leaked the local database path"
+    }
+
+    Write-Host "Codex MCP runtime tool call: PASS"
     Write-Host "Codex: $CodexVersion"
     Write-Host "Server: $($Server.serverInfo.name) $($Server.serverInfo.version)"
     Write-Host "Tools: $($ToolNames -join ', ')"
+    Write-Host "Thread: ephemeral / idle / 0 turns"
+    Write-Host "Tool call: tokn_status via mcpServer/tool/call"
 }
 finally {
     $env:CODEX_HOME = $OldCodexHome
     if ($null -ne $Process -and -not $Process.HasExited) {
-        try { $Process.Kill() } catch {}
+        try {
+            $Process.StandardInput.Close()
+        }
+        catch {}
+        if (-not $Process.WaitForExit(3000)) {
+            try { $Process.Kill() } catch {}
+        }
     }
     if ($null -ne $Process) {
         $Process.Dispose()

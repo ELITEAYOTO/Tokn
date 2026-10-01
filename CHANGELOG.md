@@ -719,3 +719,12 @@ P6 remains IN PROGRESS until one controlled real PreToolUse callback proves the 
 - target-runtime discovery is reproducible with `scripts/validation/check-codex-mcp-runtime.ps1` and does not mutate normal Codex config ;
 - direct `mcpServer/tool/call` through an authenticated Codex thread remains an explicit non-blocking debt; no user auth was copied and no model turn was started for this validation ;
 - Local MCP transport prototype is accepted; Historical Analyzer + Context Ledger is NEXT.
+
+## 2026-10-01 - Codex direct MCP host tool-call validation
+
+- strengthened `scripts/validation/check-codex-mcp-runtime.ps1` to use the native Codex app-server interactively instead of wrapper timing heuristics ;
+- validation now creates an isolated disposable `CODEX_HOME`, registers only Tokn and discovers the server through `mcpServerStatus/list` ;
+- the target Codex runtime creates an ephemeral idle thread with zero turns and directly calls `tokn_status` through `mcpServer/tool/call` ;
+- the returned payload confirms `tokn-mcp` 0.1.0, stdio transport, read-only mode and Store schema V2 ;
+- no user authentication material is copied or inspected and no model turn is started ;
+- the previous direct-host-tool-call validation debt is closed ; Historical Analyzer + Context Ledger remains NEXT.

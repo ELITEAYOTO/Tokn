@@ -218,11 +218,11 @@ Validation :
 - `codex app-server` lance Tokn, lit `serverInfo`, les capabilities et les deux tools ;
 - `toolsError=null` ;
 - config utilisateur normale non modifiee ;
+- thread ephemere cree avec etat idle et 0 turns ;
+- `mcpServer/tool/call` appelle reellement `tokn_status` via Codex ;
+- retour confirme `tokn-mcp 0.1.0`, stdio, read_only=true et Store schema 2 ;
+- aucune auth utilisateur copiee ou inspectee ;
 - aucun turn modele ni quota volontairement consomme.
-
-Limite explicite : le direct `mcpServer/tool/call` n'est pas revendique,
-car Codex exige un thread valide et un thread isole sans auth provoque un 401 provider.
-Aucune auth utilisateur n'a ete copiee ou inspectee pour contourner ce point.
 
 ## Prochaine action
 

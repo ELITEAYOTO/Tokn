@@ -130,11 +130,11 @@ Observed prototype result:
 - release smoke validates initialize/list/call directly against the process ;
 - Codex 0.161.0-alpha.2 accepts isolated stdio registration ;
 - Codex app-server launches Tokn and discovers both tools with `toolsError=null` ;
+- an ephemeral idle zero-turn thread is sufficient for direct `mcpServer/tool/call` ;
+- Codex directly calls `tokn_status` and validates the returned Store/server status ;
+- no user authentication data is copied or inspected ;
+- no model turn is started ;
 - no permanent daemon or duplicated analysis logic is required.
-
-Direct `mcpServer/tool/call` through an authenticated Codex thread remains an
-explicit non-blocking validation debt. The isolated runtime test did not copy user
-authentication or start a model turn.
 
 Therefore command-launched local stdio MCP is accepted as the current local transport
 prototype. Production/public plugin packaging remains a separate decision.

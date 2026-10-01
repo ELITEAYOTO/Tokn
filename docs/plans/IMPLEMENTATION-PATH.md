@@ -264,12 +264,10 @@ Observed exit evidence:
 - release-process smoke passes ;
 - Codex 0.161.0-alpha.2 accepts stdio registration ;
 - Codex app-server launches Tokn and discovers `tokn_status` + `tokn_recent_runs` with `toolsError=null` ;
+- an ephemeral idle zero-turn Codex thread is created locally ;
+- Codex directly invokes `tokn_status` through `mcpServer/tool/call` ;
+- no user authentication material is copied or inspected ;
 - standalone Runner remains independently usable.
-
-Non-blocking debt:
-Codex `mcpServer/tool/call` requires a valid authenticated thread. No authenticated
-thread/model turn was created for this transport validation, so direct host tool-call
-execution is not claimed.
 
 ## Phase G - Historical Analyzer + Context Ledger
 
@@ -353,7 +351,7 @@ These remain separate from the Analyzer.
 
 ## What not to build now
 
-Current non-goals while the Local MCP prototype is NEXT:
+Current non-goals while Historical Analyzer + Context Ledger is NEXT:
 - production plugin package;
 - permanent local daemon;
 - GUI;

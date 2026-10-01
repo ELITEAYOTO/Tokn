@@ -52,7 +52,7 @@ Assert-Contains "docs/experiments/002-INSTRUMENTATION-VALIDATION.md" "Status: DO
 Assert-Contains "docs/design/MEASUREMENT-CONTRACT-V0.1.md" "Status: FROZEN V1 CONTRACT"
 Assert-Contains "docs/design/MODEL-RUNTIME-PROFILE.md" "Status: FROZEN V1 DOMAIN CONTRACT / PERSISTENCE IMPLEMENTED"
 Assert-Contains "docs/design/TOKN-STORE-V2.md" "Status: FOUNDATION IMPLEMENTED"
-Assert-Contains "docs/design/LOCAL-MCP-PROTOTYPE.md" "Status: TRANSPORT PROTOTYPE ACCEPTED / DIRECT HOST TOOL CALL PENDING"
+Assert-Contains "docs/design/LOCAL-MCP-PROTOTYPE.md" "Status: TRANSPORT PROTOTYPE ACCEPTED / DIRECT HOST TOOL CALL VALIDATED"
 Assert-Contains "docs/design/PLUGIN-ENGINE-INTEGRATION.md" "Status: LOCAL STDIO TRANSPORT PROTOTYPE ACCEPTED"
 Assert-Contains "docs/INDEX.md" "**P0-P9 DONE ; Experiment 002 ACCEPTED ; Measurement Contract V1 FROZEN ; Store foundation DONE ; Local MCP transport prototype ACCEPTED ; Historical Analyzer NEXT.**"
 
@@ -89,6 +89,8 @@ $stale = @(
     "PERSISTENCE PENDING",
     "Local MCP prototype NEXT",
     "Local MCP integration prototype : NEXT",
+    "DIRECT HOST TOOL CALL PENDING",
+    "direct host tool-call execution is not claimed",
     "P0-P7 DONE / P8 NEXT"
 )
 
