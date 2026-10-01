@@ -57,6 +57,18 @@ pub enum Command {
         #[arg(long)]
         output_json: Option<PathBuf>,
     },
+    ActivityTimeline {
+        #[arg(long)]
+        project_id: Option<String>,
+        #[arg(long)]
+        workspace_id: Option<String>,
+        #[arg(long, default_value_t = 50)]
+        limit: usize,
+        #[arg(long)]
+        db: Option<PathBuf>,
+        #[arg(long)]
+        output_json: Option<PathBuf>,
+    },
     StoreEvidence {
         evidence_dir: PathBuf,
         #[arg(long)]

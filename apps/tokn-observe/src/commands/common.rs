@@ -70,6 +70,32 @@ pub fn map_policy_observation_status(status: CapPolicyStatus) -> PolicyObservati
     }
 }
 
+pub fn validate_private_filter_id(
+    value: Option<&str>,
+    label: &str,
+    expected_prefix: &str,
+) -> anyhow::Result<()> {
+    let Some(value) = value else {
+        return Ok(());
+    };
+
+    if value.trim() != value || value.is_empty() {
+        anyhow::bail!("{label} id must be a non-empty canonical Store id");
+    }
+    let Some(hex) = value.strip_prefix(expected_prefix) else {
+        anyhow::bail!(
+            "{label} id must be a privacy-preserving Store id beginning with {expected_prefix}"
+        );
+    };
+    if hex.len() != 24 || !hex.bytes().all(|byte| byte.is_ascii_hexdigit()) {
+        anyhow::bail!(
+            "{label} id must contain exactly 24 hexadecimal characters after {expected_prefix}"
+        );
+    }
+
+    Ok(())
+}
+
 pub fn parse_cap_overrides(values: &[String]) -> anyhow::Result<BTreeMap<String, u64>> {
     let mut out = BTreeMap::new();
     for value in values {
@@ -95,6 +121,38 @@ pub fn parse_cap_overrides(values: &[String]) -> anyhow::Result<BTreeMap<String,
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn private_filter_ids_accept_only_canonical_hashed_ids() {
+        assert!(
+            validate_private_filter_id(
+                Some("prj-0123456789abcdef01234567"),
+                "project",
+                "prj-",
+            )
+            .is_ok()
+        );
+        assert!(
+            validate_private_filter_id(
+                Some("wsp-abcdef0123456789abcdef01"),
+                "workspace",
+                "wsp-",
+            )
+            .is_ok()
+        );
+
+        let raw = format!("C:\\{}\\someone\\project", "Users");
+        assert!(validate_private_filter_id(Some(&raw), "project", "prj-").is_err());
+        assert!(validate_private_filter_id(Some("prj-short"), "project", "prj-").is_err());
+        assert!(
+            validate_private_filter_id(
+                Some("wsp-0123456789abcdef0123456z"),
+                "workspace",
+                "wsp-",
+            )
+            .is_err()
+        );
+    }
 
     #[test]
     fn parses_repeatable_category_caps() {

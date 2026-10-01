@@ -2,10 +2,12 @@ use std::path::{Path, PathBuf};
 
 use anyhow::Context;
 use tokn_domain::{
-    MeasurementContractManifest, ModelRuntimeProfile, RunGroup, RunnerResult, RunnerSourceReport,
-    SourceKind,
+    AgentEvidence, MeasurementContractManifest, ModelRuntimeProfile, RunGroup, RunnerResult,
+    RunnerSourceReport, SourceKind,
 };
-use tokn_storage::{Database, MeasurementStoreInput, fingerprint_bytes, private_id};
+use tokn_storage::{
+    Database, MeasurementStoreInput, ToolActivityStoreInput, fingerprint_bytes, private_id,
+};
 
 use super::common::{db_path, open_db};
 
@@ -39,6 +41,12 @@ pub fn run(
     let session_evidence_path = evidence_dir.join("session-evidence.json");
     let session_evidence = std::fs::read(&session_evidence_path)
         .with_context(|| format!("read {}", session_evidence_path.display()))?;
+    let session_members: Vec<AgentEvidence> = serde_json::from_slice(
+        session_evidence
+            .strip_prefix(&[0xEF, 0xBB, 0xBF])
+            .unwrap_or(&session_evidence),
+    )
+    .with_context(|| format!("parse {}", session_evidence_path.display()))?;
     let source_fingerprint = fingerprint_bytes(&session_evidence);
 
     let workspace_snapshot_path = evidence_dir.join("workspace-after-snapshot.json");
@@ -55,6 +63,7 @@ pub fn run(
         .transpose()?;
 
     let project_id = private_id("prj", project_key);
+    let tool_activities = build_tool_activities(&project_id, &session_members);
     let workspace_id = private_id("wsp", &format!("{project_key}:{workspace_key}"));
     let parent_workspace_id =
         parent_workspace_key.map(|key| private_id("wsp", &format!("{project_key}:{key}")));
@@ -73,6 +82,7 @@ pub fn run(
         result,
         group,
         profile,
+        tool_activities,
     };
 
     let db = match db_override {
@@ -86,6 +96,7 @@ pub fn run(
     println!("  project_id: {}", summary.project_id);
     println!("  workspace_id: {}", summary.workspace_id);
     println!("  agents: {}", summary.agent_count);
+    println!("  tool_activities: {}", summary.tool_activity_count);
     println!("  source_id: {}", summary.source_id);
     println!(
         "  profile_id: {}",
@@ -108,6 +119,68 @@ pub fn run(
     Ok(())
 }
 
+fn build_tool_activities(
+    project_id: &str,
+    members: &[AgentEvidence],
+) -> Vec<ToolActivityStoreInput> {
+    let mut out = Vec::new();
+
+    for member in members {
+        for (ordinal, tool) in member.tools.iter().enumerate() {
+            let operation_fingerprint = if repeat_relevant_category(&tool.category) {
+                tool.command.as_deref().and_then(|command| {
+                    let command = command.trim();
+                    let workdir = tool.workdir.as_deref().map(str::trim).unwrap_or("<unknown>");
+                    (!command.is_empty()).then(|| {
+                        private_id(
+                            "op",
+                            &format!(
+                                "{project_id}:{}:{workdir}:{command}",
+                                tool.category
+                            ),
+                        )
+                    })
+                })
+            } else {
+                None
+            };
+            let workdir_fingerprint = tool.workdir.as_deref().and_then(|workdir| {
+                let workdir = workdir.trim();
+                (!workdir.is_empty())
+                    .then(|| private_id("cwd", &format!("{project_id}:{workdir}")))
+            });
+
+            out.push(ToolActivityStoreInput {
+                source_call_key: tool.tool_call_id.clone(),
+                thread_id: member.thread_id.clone(),
+                agent_ordinal: ordinal as u64,
+                kind: tool.kind.clone(),
+                tool_name: tool.tool_name.clone(),
+                category: tool.category.clone(),
+                surface: tool.surface.clone(),
+                requester_type: tool.requester_type.clone(),
+                status: tool.status.clone(),
+                started_seq: tool.started_seq,
+                ended_seq: tool.ended_seq,
+                invocation_payload_bytes: tool.invocation_payload_bytes,
+                result_payload_bytes: tool.result_payload_bytes,
+                result_output_chars: tool.result_output_chars,
+                max_output_tokens: tool.max_output_tokens,
+                original_token_count: tool.original_token_count,
+                operation_fingerprint,
+                workdir_fingerprint,
+                parse_error_present: tool.parse_error.is_some(),
+            });
+        }
+    }
+
+    out
+}
+
+fn repeat_relevant_category(category: &str) -> bool {
+    matches!(category, "file_read" | "search" | "directory_list" | "git")
+}
+
 fn read_json<T>(path: &Path) -> anyhow::Result<T>
 where
     T: serde::de::DeserializeOwned,
@@ -128,6 +201,7 @@ fn source_kind_label(kind: &SourceKind) -> &'static str {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use tokn_domain::ToolObservation;
 
     #[test]
     fn source_kind_labels_match_serialized_contract() {
@@ -141,4 +215,81 @@ mod tests {
         );
         assert_eq!(source_kind_label(&SourceKind::Unknown), "unknown");
     }
+    #[test]
+    fn activity_fingerprints_are_project_scoped_and_minimized() {
+        let private_workdir = format!("C:\{}\private-user\Secret Project", "Users");
+        let private_read = format!("Get-Content {private_workdir}\secret.txt");
+        let private_write = format!("Set-Content {private_workdir}\secret.txt x");
+        let members = vec![AgentEvidence {
+            thread_id: "thread-root".into(),
+            tools: vec![
+                ToolObservation {
+                    tool_call_id: "call-1".into(),
+                    kind: "exec_command".into(),
+                    tool_name: Some("exec_command".into()),
+                    category: "file_read".into(),
+                    surface: "session_rollout".into(),
+                    status: "completed".into(),
+                    command: Some(private_read.clone()),
+                    workdir: Some(private_workdir.clone()),
+                    ..Default::default()
+                },
+                ToolObservation {
+                    tool_call_id: "call-2".into(),
+                    kind: "exec_command".into(),
+                    tool_name: Some("exec_command".into()),
+                    category: "write_mutation".into(),
+                    surface: "session_rollout".into(),
+                    status: "completed".into(),
+                    command: Some(private_write.clone()),
+                    workdir: Some(private_workdir.clone()),
+                    ..Default::default()
+                },
+            ],
+            ..Default::default()
+        }];
+
+        let project_id = "prj-0123456789abcdef01234567";
+        let activities = build_tool_activities(project_id, &members);
+
+        assert_eq!(activities.len(), 2);
+        assert!(
+            activities[0]
+                .operation_fingerprint
+                .as_deref()
+                .is_some_and(|value| value.starts_with("op-"))
+        );
+        assert!(activities[1].operation_fingerprint.is_none());
+        assert!(
+            activities
+                .iter()
+                .all(|item| item
+                    .workdir_fingerprint
+                    .as_deref()
+                    .is_some_and(|value| value.starts_with("cwd-")))
+        );
+
+        let debug = format!("{activities:?}");
+        assert!(!debug.contains(&private_read));
+        assert!(!debug.contains(&private_write));
+        assert!(!debug.contains(&private_workdir));
+        assert!(!debug.contains("secret.txt"));
+    }
+
+    #[test]
+    fn only_repeat_relevant_categories_get_operation_fingerprints() {
+        for category in ["file_read", "search", "directory_list", "git"] {
+            assert!(repeat_relevant_category(category));
+        }
+        for category in [
+            "write_mutation",
+            "test_build",
+            "process_control",
+            "command_other",
+            "command_unknown",
+        ] {
+            assert!(!repeat_relevant_category(category));
+        }
+    }
+
 }

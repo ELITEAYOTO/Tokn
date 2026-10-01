@@ -40,6 +40,7 @@ impl Database {
         ensure_usage_conflicts_column(&conn)?;
         ensure_cache_write_input_tokens_column(&conn)?;
         apply_measurement_store_migrations(&conn)?;
+        apply_tool_activity_migrations(&conn)?;
         Ok(Self {
             conn,
             path: path.to_path_buf(),
@@ -193,6 +194,23 @@ fn apply_measurement_store_migrations(conn: &Connection) -> rusqlite::Result<()>
             conn.execute_batch("VACUUM;")?;
             Ok(())
         }
+        Some(_) => Err(rusqlite::Error::InvalidQuery),
+    }
+}
+
+fn apply_tool_activity_migrations(conn: &Connection) -> rusqlite::Result<()> {
+    let current = {
+        let mut stmt =
+            conn.prepare("SELECT value FROM schema_meta WHERE key='tool_activity_schema_version'")?;
+        let mut rows = stmt.query([])?;
+        rows.next()?
+            .map(|row| row.get::<_, String>(0))
+            .transpose()?
+    };
+
+    match current.as_deref() {
+        Some("1") => Ok(()),
+        None => conn.execute_batch(include_str!("../migrations/0003_tool_activity.sql")),
         Some(_) => Err(rusqlite::Error::InvalidQuery),
     }
 }
@@ -355,4 +373,33 @@ mod tests {
         ));
         let _ = fs::remove_file(path);
     }
+    #[test]
+    fn refuses_unknown_future_tool_activity_version() {
+        let path = std::env::temp_dir().join(format!(
+            "tokn-storage-future-activity-{}.sqlite3",
+            std::process::id()
+        ));
+        let _ = fs::remove_file(&path);
+
+        {
+            let conn = Connection::open(&path).unwrap();
+            conn.execute_batch(include_str!("../migrations/0001_initial.sql"))
+                .unwrap();
+            conn.execute_batch(include_str!("../migrations/0002_measurement_store.sql"))
+                .unwrap();
+            conn.execute(
+                "INSERT INTO schema_meta(key, value)
+                 VALUES ('tool_activity_schema_version', '99')",
+                [],
+            )
+            .unwrap();
+        }
+
+        assert!(matches!(
+            Database::open(&path),
+            Err(rusqlite::Error::InvalidQuery)
+        ));
+        let _ = fs::remove_file(path);
+    }
+
 }

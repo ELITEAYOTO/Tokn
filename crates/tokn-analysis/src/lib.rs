@@ -1,3 +1,4 @@
+mod activity;
 mod agent_graph;
 mod attribution;
 mod cap_policy;
@@ -12,6 +13,7 @@ mod validity;
 mod workspace;
 mod workspace_diff;
 
+pub use activity::*;
 pub use agent_graph::*;
 pub use attribution::*;
 pub use cap_policy::*;
