@@ -38,6 +38,22 @@ jobs:
             git push origin HEAD:m4-activity-history
           }
 
+      - name: M4 clippy diagnostic
+        shell: pwsh
+        run: |
+          $Output = (& cargo clippy --workspace --all-targets -- -D warnings 2>&1 | Out-String)
+          if ($LASTEXITCODE -ne 0) {
+            $Output | Set-Content -LiteralPath m4-clippy-error.txt -Encoding UTF8
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add m4-clippy-error.txt
+            if (-not (git diff --cached --quiet)) {
+              git commit -m "ci: capture m4 activity clippy failure"
+              git push origin HEAD:m4-activity-history
+            }
+            exit 1
+          }
+
       - name: Publication privacy
         shell: pwsh
         run: ./scripts/validation/check-repo-publication.ps1
