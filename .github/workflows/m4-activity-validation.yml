@@ -5,7 +5,7 @@ on:
     branches: [m4-activity-history]
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   validate:
@@ -25,34 +25,6 @@ jobs:
 
       - name: Cache Rust build
         uses: Swatinem/rust-cache@v2
-
-      - name: Rustfmt activity branch
-        shell: pwsh
-        run: |
-          cargo fmt --all
-          if (-not (git diff --quiet)) {
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add apps/tokn-observe/src crates/tokn-analysis/src crates/tokn-domain/src crates/tokn-storage/src
-            git commit -m "style: rustfmt m4 activity slice"
-            git push origin HEAD:m4-activity-history
-          }
-
-      - name: M4 clippy diagnostic
-        shell: pwsh
-        run: |
-          $Output = (& cargo clippy --workspace --all-targets -- -D warnings 2>&1 | Out-String)
-          if ($LASTEXITCODE -ne 0) {
-            $Output | Set-Content -LiteralPath m4-clippy-error.txt -Encoding UTF8
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add m4-clippy-error.txt
-            if (-not (git diff --cached --quiet)) {
-              git commit -m "ci: capture m4 activity clippy failure"
-              git push origin HEAD:m4-activity-history
-            }
-            exit 1
-          }
 
       - name: Publication privacy
         shell: pwsh
