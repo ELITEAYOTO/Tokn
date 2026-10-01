@@ -2,6 +2,7 @@
 resolver = "3"
 members = [
   "apps/tokn-observe",
+  "apps/tokn-mcp",
   "crates/tokn-domain",
   "crates/tokn-platform",
   "crates/tokn-ingest",

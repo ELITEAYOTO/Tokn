@@ -7,7 +7,7 @@ use tokn_analysis::CapPolicyStatus;
 use tokn_codex::diagnostic::{DiagnosticBundle, FallbackStatus, discover_session_fallback};
 use tokn_codex::session::{SessionFile, list_sessions, resolve_root_session};
 use tokn_domain::PolicyObservationStatus;
-use tokn_platform::observer_data_root;
+use tokn_platform::observer_database_path;
 use tokn_storage::Database;
 
 pub fn resolve_source(value: &str) -> anyhow::Result<PathBuf> {
@@ -53,8 +53,7 @@ pub fn resolve_session_root_from_source(path: &Path) -> anyhow::Result<PathBuf> 
 }
 
 pub fn db_path() -> anyhow::Result<PathBuf> {
-    let root = observer_data_root().context("LOCALAPPDATA is unavailable")?;
-    Ok(root.join("db").join("observer.sqlite3"))
+    observer_database_path().context("LOCALAPPDATA is unavailable")
 }
 
 pub fn open_db() -> anyhow::Result<Database> {

@@ -703,3 +703,19 @@ P6 remains IN PROGRESS until one controlled real PreToolUse callback proves the 
 - unknown future Store schema versions are refused fail-closed ;
 - Experiment 001 release replay now ingests Store evidence twice and verifies no raw golden workspace/session path is present in the database ;
 - Store foundation is DONE; thin command-launched Local MCP integration prototype is NEXT.
+
+## 2026-10-01 - Local stdio MCP transport prototype
+
+- added separate `tokn-mcp` executable as a process-bound read-only stdio MCP server ;
+- added `tokn_status` and `tokn_recent_runs` backed by shared Store V2 APIs ;
+- centralized the default Observer database path in `tokn-platform` ;
+- added read-only Store counts and recent-run query APIs ;
+- added structured MCP initialize/ping/tools/list/tools/call handling and errors ;
+- added unit tests plus a real release-process stdio smoke ;
+- release build now emits independent provenance for `tokn-observe` and `tokn-mcp` while preserving the historical observer provenance file ;
+- GitHub CI now runs the MCP process smoke after release build ;
+- isolated Codex 0.161.0-alpha.2 registration validation accepted the stdio command server ;
+- Codex app-server launched `tokn-mcp`, initialized it and discovered `tokn_status` + `tokn_recent_runs` with `toolsError=null` ;
+- target-runtime discovery is reproducible with `scripts/validation/check-codex-mcp-runtime.ps1` and does not mutate normal Codex config ;
+- direct `mcpServer/tool/call` through an authenticated Codex thread remains an explicit non-blocking debt; no user auth was copied and no model turn was started for this validation ;
+- Local MCP transport prototype is accepted; Historical Analyzer + Context Ledger is NEXT.

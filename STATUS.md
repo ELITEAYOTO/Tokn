@@ -6,7 +6,7 @@ Binaire/Cargo : **V0.1 / 0.1.0**
 
 ## Resume
 
-**P0-P9 DONE. Experiment 002 est ACCEPTED. Measurement Contract V1 est FROZEN. Store foundation est DONE. Local MCP prototype est NEXT.**
+**P0-P9 DONE. Experiment 002 est ACCEPTED. Measurement Contract V1 est FROZEN. Store foundation est DONE. Local MCP transport prototype est ACCEPTED. Historical Analyzer est NEXT.**
 
 Le projet est revenu sur une direction unique :
 mesurer l'efficacite du contexte sans reduire la capacite d'Astra.
@@ -206,18 +206,36 @@ Les versions futures inconnues sont refusees fail-closed.
 
 Rate-limit ingestion, Findings et Experiment Lab persistence restent differes.
 
+## Local MCP transport prototype - accepte
+
+Implementation : `apps/tokn-mcp`.
+
+Validation :
+- unit tests + Clippy strict PASS ;
+- vrai process release stdio PASS ;
+- `tokn_status` + `tokn_recent_runs` read-only ;
+- enregistrement stdio accepte par Codex 0.161.0-alpha.2 dans un `CODEX_HOME` isole ;
+- `codex app-server` lance Tokn, lit `serverInfo`, les capabilities et les deux tools ;
+- `toolsError=null` ;
+- config utilisateur normale non modifiee ;
+- aucun turn modele ni quota volontairement consomme.
+
+Limite explicite : le direct `mcpServer/tool/call` n'est pas revendique,
+car Codex exige un thread valide et un thread isole sans auth provoque un 401 provider.
+Aucune auth utilisateur n'a ete copiee ou inspectee pour contourner ce point.
+
 ## Prochaine action
 
-Implementer le **Local MCP integration prototype**.
+Implementer **Historical Analyzer + Context Ledger** en observation-only.
 
 Chemin d'execution detaille :
 `docs/plans/IMPLEMENTATION-PATH.md`.
 
-Premier slice : process MCP local lance a la demande, handshake/version/capabilities,
-doctor/status et acces lecture aux preuves/historique via le moteur/store partage.
-Aucune logique analytique dupliquee et aucun daemon permanent par defaut.
+Premier slice : historique multi-run fiable par project/workspace/run/agent,
+ledger token/cache/reasoning, lineage, terminal/quality/profile et provenance.
+Aucun finding causal ni optimisation active dans ce slice.
 
-Aucun nouveau run Astra/Codex n'est necessaire pour ce slice.
+Aucun nouveau run Astra/Codex n'est necessaire pour commencer.
 
 ## Sources de verite
 

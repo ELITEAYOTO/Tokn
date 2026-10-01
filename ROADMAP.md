@@ -113,15 +113,25 @@ Rate-limit ingestion, Findings et Experiment Lab restent differes jusqu'a un con
 
 ## M3.7 - Local MCP integration prototype
 
-Statut : NEXT
+Statut : DONE / TRANSPORT PROTOTYPE ACCEPTED
 
-But :
-exposer le moteur/store local via un adapter MCP process-bound mince,
-sans dupliquer la logique analytique et sans daemon permanent par defaut.
+Resultat :
+- executable separe `tokn-mcp` ;
+- transport stdio process-bound, read-only ;
+- `tokn_status` + `tokn_recent_runs` ;
+- tests Rust + smoke process release PASS ;
+- Codex 0.161.0-alpha.2 accepte l'enregistrement stdio ;
+- Codex app-server lance Tokn et decouvre les deux outils, toolsError=null ;
+- aucun daemon permanent ;
+- aucune logique analytique dupliquee ;
+- aucun turn modele ni quota volontairement consomme pour la validation.
+
+Dette non bloquante : `mcpServer/tool/call` via Codex exige un thread authentifie ;
+ce chemin n'est pas revendique comme valide tant qu'il n'est pas teste explicitement.
 
 ## M4 - Historical Analyzer + Context Ledger
 
-Statut : PLANNED AFTER STORE FOUNDATION
+Statut : NEXT
 
 But :
 construire l'historique fiable par projet/run/agent/phase.

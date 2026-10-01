@@ -1,8 +1,8 @@
 # Tokn Target Architecture
 
 Status: ACCEPTED DESIGN DIRECTION
-Date: 2026-09-30
-Current state: P0-P7 DONE / P8 NEXT
+Date: 2026-10-01
+Current state: P0-P9 DONE / Experiment 002 ACCEPTED / Measurement Contract V1 FROZEN / Store V2 foundation DONE / Local MCP transport prototype ACCEPTED / Historical Analyzer NEXT
 
 ## Principle
 
@@ -46,8 +46,12 @@ A missing capability must not be inferred as zero, false or unsupported.
 
 ### Tokn Store
 
-The future local Store persists runs, profiles, experiments, findings and history.
-Its schema should follow the stable Runner boundary rather than precede it.
+Store V2 foundation is implemented after the frozen Runner/Measurement Contract boundary.
+It currently persists privacy-preserving project/workspace identity, runs, agents,
+usage summaries, provenance and ModelRuntimeProfile V1.
+
+Findings, Experiment Lab and richer historical structures remain deferred until their
+consumer contracts are justified.
 
 ### Codex integration
 
@@ -55,8 +59,11 @@ Codex integration is a thin activation/observation/presentation layer.
 
 Current OpenAI documentation verifies the core packaging surfaces:
 portable plugins, skills, MCP configuration and lifecycle hooks.
-Tokn's exact composition, explicit invocation UX and Plugin-to-Engine transport
-remain RESEARCH until a minimal local integration prototype is measured.
+
+The local transport prototype is now measured:
+Codex 0.161.0-alpha.2 can launch `tokn-mcp` as a command-based stdio server and
+discover its read-only Store tools. Production/plugin packaging and explicit UX
+remain separate concerns.
 
 ### Future Desktop UI
 
@@ -82,11 +89,11 @@ Future integrations should call this boundary instead of rebuilding analysis.
 
 ## Transport decision
 
-For the future local Codex integration, the preferred prototype is now:
-Codex plugin -> command-launched local MCP adapter -> shared Rust Engine/Store.
+For local Codex integration, the validated prototype is:
+Codex host -> command-launched `tokn-mcp` stdio adapter -> shared Rust Engine/Store.
 
-This direction is research-backed and locally observed, but not yet an irreversible ADR.
-The prototype happens only after P8/P9 and must preserve the standalone Runner.
+The transport prototype is locally accepted, but this is still not an irreversible
+production/plugin packaging ADR. The standalone Runner remains independent.
 
 No permanent localhost service is required unless a measured need later justifies it.
 Public/remote plugin distribution remains a separate deployment concern.
@@ -97,12 +104,13 @@ versionability and low operational cost.
 
 ## Sequence after V0.1
 
-P8 Runner
--> P9 golden/release validation
--> Experiment 002 instrumentation validation
--> Store + ModelRuntimeProfiles
--> Codex integration
--> historical/context analyzers
+P8 Runner DONE
+-> P9 golden/release validation DONE
+-> Experiment 002 instrumentation validation ACCEPTED
+-> Measurement Contract V1 FROZEN
+-> Store V2 + ModelRuntimeProfile foundation DONE
+-> local Codex MCP transport prototype ACCEPTED
+-> Historical Analyzer + Context Ledger NEXT
 -> recurring findings
 -> causal experiments
 -> optimizer candidates.

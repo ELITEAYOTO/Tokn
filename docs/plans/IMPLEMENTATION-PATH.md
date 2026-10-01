@@ -2,7 +2,7 @@
 
 Status: ACTIVE EXECUTION PLAN
 Date: 2026-09-30
-Current state: P0-P9 DONE / Experiment 002 ACCEPTED / Measurement Contract V1 FROZEN / Store foundation DONE / Local MCP prototype NEXT
+Current state: P0-P9 DONE / Experiment 002 ACCEPTED / Measurement Contract V1 FROZEN / Store foundation DONE / Local MCP transport prototype ACCEPTED / Historical Analyzer NEXT
 
 ## Purpose
 
@@ -238,8 +238,8 @@ not speculative universal model metadata.
 
 ## Phase F - Local Codex integration prototype
 
-Status: NEXT
-Direction: RESEARCH-BACKED / NOT YET ACCEPTED AS FINAL TRANSPORT
+Status: DONE / TRANSPORT PROTOTYPE ACCEPTED
+Direction: LOCALLY VALIDATED / PRODUCTION PLUGIN PACKAGING STILL SEPARATE
 
 Preferred first prototype:
 Codex plugin -> command-launched local MCP adapter -> shared Rust Engine/Store.
@@ -256,14 +256,24 @@ Initial surface should remain thin:
 No analysis logic in plugin glue.
 No permanent localhost daemon unless a measured requirement appears.
 
-Exit:
-plugin integration starts/stops cleanly, reports capabilities/version,
-uses shared Engine logic, exposes structured errors, and does not break
-standalone Runner operation.
+Observed exit evidence:
+- `tokn-mcp` starts/stops cleanly over stdio ;
+- version/capability reporting is explicit ;
+- tools are read-only and backed by shared Store APIs ;
+- errors are structured ;
+- release-process smoke passes ;
+- Codex 0.161.0-alpha.2 accepts stdio registration ;
+- Codex app-server launches Tokn and discovers `tokn_status` + `tokn_recent_runs` with `toolsError=null` ;
+- standalone Runner remains independently usable.
+
+Non-blocking debt:
+Codex `mcpServer/tool/call` requires a valid authenticated thread. No authenticated
+thread/model turn was created for this transport validation, so direct host tool-call
+execution is not claimed.
 
 ## Phase G - Historical Analyzer + Context Ledger
 
-Status: AFTER RELIABLE STORE / CAN BEGIN BEFORE FULL UX POLISH
+Status: NEXT
 
 Build observation-only analytics:
 - per-run/per-turn/per-agent token ledger;
@@ -360,15 +370,15 @@ not a reason to widen scope prematurely.
 
 ## Current decision
 
-Immediate product work is **Local MCP integration prototype**.
+Immediate product work is **Historical Analyzer + Context Ledger** observation-only.
 
-The Measurement Contract V1 and Store V2 foundation are now stable inputs.
+The Measurement Contract V1, Store V2 foundation and local MCP transport boundary are stable inputs.
 
 Order:
-1. expose a command-launched MCP server process with structured capability/version metadata ;
-2. keep the MCP surface thin over existing Runner/Store functions ;
-3. support doctor/status and evidence/history access before richer workflows ;
-4. do not duplicate analysis logic in MCP handlers ;
-5. keep standalone Runner and `store-evidence` behavior unchanged ;
-6. avoid a permanent localhost daemon unless a measured requirement appears ;
-7. after the prototype boundary is stable, begin Historical Analyzer / Context Ledger observation-only.
+1. add Store queries for project/workspace/run/agent history ;
+2. expose a normalized context/token ledger with coverage semantics preserved ;
+3. include terminal, quality, validity, runtime profile and provenance beside usage ;
+4. add workspace lineage and multi-run comparison primitives ;
+5. keep current-context occupancy explicitly UNKNOWN unless directly evidenced ;
+6. validate against golden + synthetic multi-run fixtures ;
+7. only after the ledger is reliable, add repeated-observation Findings.

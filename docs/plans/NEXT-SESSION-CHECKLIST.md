@@ -8,7 +8,8 @@ P0-P9 : DONE
 Experiment 002 : DONE / ACCEPTED
 Measurement Contract V1 : DONE / FROZEN
 Store foundation + ModelRuntimeProfile persistence : DONE
-Local MCP integration prototype : NEXT
+Local MCP transport prototype : DONE / ACCEPTED
+Historical Analyzer + Context Ledger : NEXT
 
 Workspace :
 `E:\Tokn\V0-CodexTkn-Consume\tool`
@@ -26,16 +27,15 @@ Ne pas refaire l'enquete P6 ni la recherche plugin/telemetry R1-R8 avant qu'un b
 
 ## Premiere action
 
-Implementer le **Local MCP integration prototype**.
+Implementer **Historical Analyzer + Context Ledger** en observation-only.
 
 Premier scope :
-- process MCP local lance a la demande ;
-- handshake/version/capabilities structures ;
-- doctor/status ;
-- lecture evidence/history via le Store commun ;
-- appel des fonctions Runner/Store existantes sans dupliquer leur logique ;
-- erreurs structurees ;
-- aucun daemon permanent par defaut.
+- requetes historiques multi-run par project/workspace ;
+- ledger run/agent avec input/cached/uncached/cache-write/output/reasoning ;
+- terminal + quality + validity + ModelRuntimeProfile ;
+- provenance et versions de contrat ;
+- lineage workspace ;
+- aucune heuristique de finding tant que le ledger fiable n'est pas valide.
 
 Aucun nouveau quota Astra/Codex n'est necessaire pour ce travail.
 
@@ -77,10 +77,9 @@ Tests obligatoires :
 ## Apres V0.1
 
 NEXT :
-Local MCP integration prototype.
+Historical Analyzer + Context Ledger.
 
 Puis :
-- Historical Analyzer + Context Ledger ;
 - findings observation-only ;
 - Experiment 003 seulement apres un finding reproductible.
 

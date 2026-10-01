@@ -1,7 +1,7 @@
 # Tokn Plugin-to-Engine Integration
 
-Status: PROPOSED / RESEARCH-BACKED
-Date: 2026-09-30
+Status: LOCAL STDIO TRANSPORT PROTOTYPE ACCEPTED
+Date: 2026-10-01
 
 ## Purpose
 
@@ -9,8 +9,11 @@ Define the preferred prototype boundary between future Codex integration
 and the Tokn Rust Engine without making plugin infrastructure a dependency
 of P8/P9.
 
-This document is not an ADR. It records the current preferred prototype
+This document is not an ADR. It records the locally validated transport prototype
 derived from official OpenAI documentation and local Codex evidence.
+
+Implementation/validation details:
+`LOCAL-MCP-PROTOTYPE.md`.
 
 ## Established constraints
 
@@ -66,7 +69,7 @@ portable to ChatGPT/public plugin distribution.
 
 ## Preferred local prototype
 
-After P8 and P9:
+Prototype implemented after P8/P9, Experiment 002, contract freeze and Store foundation:
 
 1. Keep the P8 Runner/Engine contract standalone.
 2. Add a small Tokn MCP adapter executable/process.
@@ -122,8 +125,19 @@ The local MCP prototype is accepted only if it proves:
 - successful invocation from the target Codex runtime;
 - P8 Runner remains independently usable.
 
-Until that prototype exists, transport remains a preferred direction,
-not an irreversible architecture decision.
+Observed prototype result:
+- command-launched `tokn-mcp` over stdio starts/stops cleanly ;
+- release smoke validates initialize/list/call directly against the process ;
+- Codex 0.161.0-alpha.2 accepts isolated stdio registration ;
+- Codex app-server launches Tokn and discovers both tools with `toolsError=null` ;
+- no permanent daemon or duplicated analysis logic is required.
+
+Direct `mcpServer/tool/call` through an authenticated Codex thread remains an
+explicit non-blocking validation debt. The isolated runtime test did not copy user
+authentication or start a model turn.
+
+Therefore command-launched local stdio MCP is accepted as the current local transport
+prototype. Production/public plugin packaging remains a separate decision.
 
 ## Sources
 

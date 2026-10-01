@@ -51,6 +51,40 @@ pub struct MeasurementStoreSummary {
     pub agent_count: u64,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct MeasurementStoreCounts {
+    pub schema_version: Option<String>,
+    pub projects: i64,
+    pub workspaces: i64,
+    pub runs: i64,
+    pub agents: i64,
+    pub runtime_profiles: i64,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct MeasurementRunHistoryRecord {
+    pub run_id: String,
+    pub project_id: String,
+    pub workspace_id: String,
+    pub profile_id: Option<String>,
+    pub measurement_contract_version: i64,
+    pub evidence_layout_version: i64,
+    pub root_thread_id: String,
+    pub root_terminal: String,
+    pub source_health: String,
+    pub validity_verdict: Option<String>,
+    pub quality_status: Option<String>,
+    pub agent_count: i64,
+    pub usage_records: i64,
+    pub input_tokens: i64,
+    pub cached_input_tokens: i64,
+    pub cache_write_input_tokens: i64,
+    pub output_tokens: i64,
+    pub reasoning_output_tokens: i64,
+    pub logical_tokens: Option<i64>,
+    pub created_at_unix: i64,
+}
+
 pub fn private_id(prefix: &str, material: &str) -> String {
     let digest = blake3::hash(material.as_bytes()).to_hex().to_string();
     format!("{prefix}-{}", &digest[..PRIVATE_ID_HEX_LEN])
@@ -311,6 +345,66 @@ impl Database {
     pub fn workspace_count_v2(&self) -> rusqlite::Result<i64> {
         self.connection()
             .query_row("SELECT COUNT(*) FROM workspaces_v2", [], |row| row.get(0))
+    }
+
+    pub fn measurement_store_counts(&self) -> rusqlite::Result<MeasurementStoreCounts> {
+        Ok(MeasurementStoreCounts {
+            schema_version: self.measurement_store_schema_version()?,
+            projects: self.project_count_v2()?,
+            workspaces: self.workspace_count_v2()?,
+            runs: self.measurement_run_count()?,
+            agents: self.measurement_agent_count()?,
+            runtime_profiles: self.runtime_profile_count()?,
+        })
+    }
+
+    pub fn recent_measurement_runs(
+        &self,
+        limit: usize,
+    ) -> rusqlite::Result<Vec<MeasurementRunHistoryRecord>> {
+        if limit == 0 {
+            return Ok(Vec::new());
+        }
+
+        let mut stmt = self.connection().prepare(
+            "SELECT
+                run_id, project_id, workspace_id, profile_id,
+                measurement_contract_version, evidence_layout_version,
+                root_thread_id, root_terminal, source_health,
+                validity_verdict, quality_status,
+                agent_count, usage_records, input_tokens, cached_input_tokens,
+                cache_write_input_tokens, output_tokens, reasoning_output_tokens,
+                logical_tokens, created_at_unix
+             FROM measurement_runs_v2
+             ORDER BY created_at_unix DESC, run_id ASC
+             LIMIT ?1",
+        )?;
+
+        stmt.query_map(params![i64::try_from(limit).unwrap_or(i64::MAX)], |row| {
+            Ok(MeasurementRunHistoryRecord {
+                run_id: row.get(0)?,
+                project_id: row.get(1)?,
+                workspace_id: row.get(2)?,
+                profile_id: row.get(3)?,
+                measurement_contract_version: row.get(4)?,
+                evidence_layout_version: row.get(5)?,
+                root_thread_id: row.get(6)?,
+                root_terminal: row.get(7)?,
+                source_health: row.get(8)?,
+                validity_verdict: row.get(9)?,
+                quality_status: row.get(10)?,
+                agent_count: row.get(11)?,
+                usage_records: row.get(12)?,
+                input_tokens: row.get(13)?,
+                cached_input_tokens: row.get(14)?,
+                cache_write_input_tokens: row.get(15)?,
+                output_tokens: row.get(16)?,
+                reasoning_output_tokens: row.get(17)?,
+                logical_tokens: row.get(18)?,
+                created_at_unix: row.get(19)?,
+            })
+        })?
+        .collect()
     }
 
     pub fn load_runtime_profile(
@@ -579,6 +673,21 @@ mod tests {
         assert_eq!(db.runtime_profile_count().unwrap(), 1);
         assert_eq!(db.project_count_v2().unwrap(), 1);
         assert_eq!(db.workspace_count_v2().unwrap(), 1);
+
+        let counts = db.measurement_store_counts().unwrap();
+        assert_eq!(counts.schema_version.as_deref(), Some("2"));
+        assert_eq!(counts.projects, 1);
+        assert_eq!(counts.workspaces, 1);
+        assert_eq!(counts.runs, 1);
+        assert_eq!(counts.agents, 1);
+        assert_eq!(counts.runtime_profiles, 1);
+
+        let recent = db.recent_measurement_runs(10).unwrap();
+        assert_eq!(recent.len(), 1);
+        assert_eq!(recent[0].run_id, "run-store-v2");
+        assert_eq!(recent[0].agent_count, 1);
+        assert_eq!(recent[0].usage_records, 2);
+        assert_eq!(recent[0].logical_tokens, Some(120));
 
         let profile_id = first.profile_id.as_deref().expect("profile id");
         assert_eq!(db.load_runtime_profile(profile_id).unwrap(), input.profile);

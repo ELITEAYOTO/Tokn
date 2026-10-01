@@ -619,6 +619,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "tokn-mcp"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "clap",
+ "serde_json",
+ "tokn-domain",
+ "tokn-platform",
+ "tokn-storage",
+]
+
+[[package]]
 name = "tokn-observe"
 version = "0.1.0"
 dependencies = [

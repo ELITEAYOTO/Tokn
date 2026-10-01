@@ -40,6 +40,10 @@ jobs:
         shell: pwsh
         run: ./scripts/build-release.ps1
 
+      - name: Local MCP prototype smoke
+        shell: pwsh
+        run: ./scripts/validation/check-mcp-prototype.ps1
+
       - name: Experiment 001 golden replay
         shell: pwsh
         run: ./scripts/validation/replay-exp001-golden.ps1

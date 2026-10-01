@@ -18,3 +18,7 @@ pub fn observer_data_root() -> Option<PathBuf> {
         .map(PathBuf::from)
         .map(|p| p.join("Tokn").join("Observer"))
 }
+
+pub fn observer_database_path() -> Option<PathBuf> {
+    observer_data_root().map(|root| root.join("db").join("observer.sqlite3"))
+}

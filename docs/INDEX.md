@@ -14,7 +14,7 @@ Lire seulement :
 5. `plans/NEXT-SESSION-CHECKLIST.md` - prochaine action concrete.
 
 Etat actuel :
-**P0-P9 DONE ; Experiment 002 ACCEPTED ; Measurement Contract V1 FROZEN ; Store foundation DONE ; Local MCP prototype NEXT.**
+**P0-P9 DONE ; Experiment 002 ACCEPTED ; Measurement Contract V1 FROZEN ; Store foundation DONE ; Local MCP transport prototype ACCEPTED ; Historical Analyzer NEXT.**
 
 ## Organisation documentaire
 
@@ -89,7 +89,9 @@ Il n'est plus la direction principale d'optimisation.
 - `design/TARGET-ARCHITECTURE.md`
   Architecture cible Engine / Store / adapters / integrations.
 - `design/PLUGIN-ENGINE-INTEGRATION.md`
-  Direction de prototype locale : adapter MCP process-bound apres P8/P9, sans daemon impose.
+  Transport local valide : adapter MCP stdio process-bound, sans daemon impose.
+- `design/LOCAL-MCP-PROTOTYPE.md`
+  Implementation `tokn-mcp`, validations release + Codex runtime, limites du direct tool-call.
 - `design/MODEL-RUNTIME-PROFILE.md`
   Identite runtime/modele, capacites observees et telemetry de rate limits versionnee.
 - `strategy/CONTEXT-EFFICIENCY-STRATEGY.md`
