@@ -2,7 +2,7 @@
 
 Status: ACCEPTED DESIGN DIRECTION
 Date: 2026-10-01
-Current state: P0-P9 DONE / Experiment 002 ACCEPTED / Measurement Contract V1 FROZEN / Store V2 foundation DONE / Local MCP transport prototype ACCEPTED / Historical Analyzer NEXT
+Current state: P0-P9 DONE / Experiment 002 ACCEPTED / Measurement Contract V1 FROZEN / Store V2 foundation DONE / Local MCP transport prototype ACCEPTED / Historical Analyzer + Context Ledger IN PROGRESS
 
 ## Principle
 

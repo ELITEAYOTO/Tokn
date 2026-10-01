@@ -6,7 +6,7 @@ Binaire/Cargo : **V0.1 / 0.1.0**
 
 ## Resume
 
-**P0-P9 DONE. Experiment 002 est ACCEPTED. Measurement Contract V1 est FROZEN. Store foundation est DONE. Local MCP transport prototype est ACCEPTED. Historical Analyzer est NEXT.**
+**P0-P9 DONE. Experiment 002 est ACCEPTED. Measurement Contract V1 est FROZEN. Store foundation est DONE. Local MCP transport prototype est ACCEPTED. Historical Analyzer + Context Ledger est IN PROGRESS ; le ledger V1 run/agent multi-run, sa CLI et son exposition MCP read-only sont valides.**
 
 Le projet est revenu sur une direction unique :
 mesurer l'efficacite du contexte sans reduire la capacite d'Astra.
@@ -213,29 +213,47 @@ Implementation : `apps/tokn-mcp`.
 Validation :
 - unit tests + Clippy strict PASS ;
 - vrai process release stdio PASS ;
-- `tokn_status` + `tokn_recent_runs` read-only ;
+- `tokn_status` + `tokn_recent_runs` + `tokn_context_ledger` read-only ;
 - enregistrement stdio accepte par Codex 0.161.0-alpha.2 dans un `CODEX_HOME` isole ;
-- `codex app-server` lance Tokn, lit `serverInfo`, les capabilities et les deux tools ;
+- `codex app-server` lance Tokn, lit `serverInfo`, les capabilities et les trois tools ;
 - `toolsError=null` ;
 - config utilisateur normale non modifiee ;
 - thread ephemere cree avec etat idle et 0 turns ;
-- `mcpServer/tool/call` appelle reellement `tokn_status` via Codex ;
-- retour confirme `tokn-mcp 0.1.0`, stdio, read_only=true et Store schema 2 ;
+- `mcpServer/tool/call` appelle reellement `tokn_status` puis `tokn_context_ledger` via Codex ;
+- retour confirme `tokn-mcp 0.1.0`, stdio, read_only=true, Store schema 2 et Context Ledger schema 1 ;
+- le ledger expose explicitement per-turn = `NOT_CAPTURED` et current retained context = `UNKNOWN` ;
 - aucune auth utilisateur copiee ou inspectee ;
 - aucun turn modele ni quota volontairement consomme.
 
+## M4 - Historical Analyzer + Context Ledger - en cours
+
+Slice valide :
+- `HistoricalSnapshot` V1 depuis Store V2, filtrable par project/workspace ;
+- historique multi-run run/agent avec WorkspaceLineage ;
+- token ledger coverage-aware : input/cached/cache-write/output/reasoning ;
+- ordinary uncached et logical total seulement quand les entrees requises sont completes ;
+- terminal, quality, validity, runtime profile et provenance conserves a cote de l'usage ;
+- incoherences historiques signalees comme integrity issues, jamais reparees silencieusement ;
+- CLI `tokn-observe context-ledger` ;
+- MCP read-only `tokn_context_ledger` ;
+- validation standalone + vrai Codex 0.161.0-alpha.2 PASS, thread ephemere idle / 0 turns.
+
+Limites explicites du contrat V1 :
+- per-turn ledger = `NOT_CAPTURED` ;
+- current retained-context occupancy = `UNKNOWN` ;
+- aucun finding causal ni optimisation active.
+
 ## Prochaine action
 
-Implementer **Historical Analyzer + Context Ledger** en observation-only.
+Continuer **M4** avec l'activite historique evidence-bounded :
+tool/file activity timeline, repeated reads/searches/retries, compaction quand observable,
+duplicate/shared evidence et rediscovery multi-run.
+
+Ne pas creer artificiellement du per-turn a partir des agregats V1.
+Ne pas commencer M5 Findings tant que ces observations historiques ne sont pas fiables.
 
 Chemin d'execution detaille :
 `docs/plans/IMPLEMENTATION-PATH.md`.
-
-Premier slice : historique multi-run fiable par project/workspace/run/agent,
-ledger token/cache/reasoning, lineage, terminal/quality/profile et provenance.
-Aucun finding causal ni optimisation active dans ce slice.
-
-Aucun nouveau run Astra/Codex n'est necessaire pour commencer.
 
 ## Sources de verite
 

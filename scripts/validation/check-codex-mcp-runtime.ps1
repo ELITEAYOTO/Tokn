@@ -170,14 +170,17 @@ try {
     }
 
     $ToolNames = @($Server.tools.PSObject.Properties.Name)
-    if ($ToolNames.Count -ne 2) {
-        throw "Expected exactly two Tokn MCP tools, got $($ToolNames.Count)"
+    if ($ToolNames.Count -ne 3) {
+        throw "Expected exactly three Tokn MCP tools, got $($ToolNames.Count)"
     }
     if ($ToolNames -notcontains "tokn_status") {
         throw "Codex did not discover tokn_status"
     }
     if ($ToolNames -notcontains "tokn_recent_runs") {
         throw "Codex did not discover tokn_recent_runs"
+    }
+    if ($ToolNames -notcontains "tokn_context_ledger") {
+        throw "Codex did not discover tokn_context_ledger"
     }
 
     $ThreadStart = @{
@@ -246,7 +249,8 @@ try {
         throw "Tokn status Store schema mismatch"
     }
     if (@($StatusPayload.tools) -notcontains "tokn_status" -or
-        @($StatusPayload.tools) -notcontains "tokn_recent_runs") {
+        @($StatusPayload.tools) -notcontains "tokn_recent_runs" -or
+        @($StatusPayload.tools) -notcontains "tokn_context_ledger") {
         throw "Tokn status tool list mismatch"
     }
 
@@ -255,12 +259,55 @@ try {
         throw "Tokn MCP tool output leaked the local database path"
     }
 
+    $LedgerCall = @{
+        id = 5
+        method = "mcpServer/tool/call"
+        params = @{
+            server = "tokn"
+            threadId = $ThreadId
+            tool = "tokn_context_ledger"
+            arguments = @{}
+        }
+    } | ConvertTo-Json -Depth 8 -Compress
+    $Process.StandardInput.WriteLine($LedgerCall)
+    $Process.StandardInput.Flush()
+
+    $LedgerResponse = Read-AppResponseById -Process $Process -Id 5 -TimeoutMs 15000
+    if ($null -ne $LedgerResponse.error) {
+        throw "Codex Context Ledger tool call failed: $($LedgerResponse.error | ConvertTo-Json -Compress)"
+    }
+    if ($LedgerResponse.result.isError -eq $true) {
+        throw "Tokn Context Ledger tool returned isError=true"
+    }
+
+    $LedgerTextItems = @($LedgerResponse.result.content | Where-Object { $_.type -eq "text" })
+    if ($LedgerTextItems.Count -lt 1 -or [string]::IsNullOrWhiteSpace([string]$LedgerTextItems[0].text)) {
+        throw "Tokn Context Ledger returned no text content"
+    }
+    $LedgerPayload = $LedgerTextItems[0].text | ConvertFrom-Json
+    if ([int]$LedgerPayload.schema_version -ne 1) {
+        throw "Tokn Context Ledger schema mismatch"
+    }
+    if ($LedgerPayload.turn_granularity_status -ne "NOT_CAPTURED") {
+        throw "Tokn Context Ledger turn granularity must remain NOT_CAPTURED"
+    }
+    if ($LedgerPayload.current_retained_context_status -ne "UNKNOWN") {
+        throw "Tokn Context Ledger retained-context status must remain UNKNOWN"
+    }
+    if (@($LedgerPayload.runs).Count -ne 0) {
+        throw "Isolated Tokn Context Ledger should have no runs"
+    }
+    $SerializedLedger = $LedgerResponse | ConvertTo-Json -Depth 30 -Compress
+    if ($SerializedLedger.Contains($DbPath)) {
+        throw "Tokn Context Ledger output leaked the local database path"
+    }
+
     Write-Host "Codex MCP runtime tool call: PASS"
     Write-Host "Codex: $CodexVersion"
     Write-Host "Server: $($Server.serverInfo.name) $($Server.serverInfo.version)"
     Write-Host "Tools: $($ToolNames -join ', ')"
     Write-Host "Thread: ephemeral / idle / 0 turns"
-    Write-Host "Tool call: tokn_status via mcpServer/tool/call"
+    Write-Host "Tool calls: tokn_status + tokn_context_ledger via mcpServer/tool/call"
 }
 finally {
     $env:CODEX_HOME = $OldCodexHome

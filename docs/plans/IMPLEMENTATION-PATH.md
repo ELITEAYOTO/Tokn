@@ -2,7 +2,7 @@
 
 Status: ACTIVE EXECUTION PLAN
 Date: 2026-09-30
-Current state: P0-P9 DONE / Experiment 002 ACCEPTED / Measurement Contract V1 FROZEN / Store foundation DONE / Local MCP transport prototype ACCEPTED / Historical Analyzer NEXT
+Current state: P0-P9 DONE / Experiment 002 ACCEPTED / Measurement Contract V1 FROZEN / Store foundation DONE / Local MCP transport prototype ACCEPTED / Historical Analyzer + Context Ledger IN PROGRESS
 
 ## Purpose
 
@@ -271,22 +271,33 @@ Observed exit evidence:
 
 ## Phase G - Historical Analyzer + Context Ledger
 
-Status: NEXT
+Status: IN PROGRESS
 
-Build observation-only analytics:
-- per-run/per-turn/per-agent token ledger;
-- cached / uncached / cache-write / output / reasoning;
+Accepted current slice:
+- HistoricalSnapshot V1 from Store V2 ;
+- multi-run project/workspace/run/agent history ;
+- WorkspaceLineage ;
+- per-run/per-agent token ledger ;
+- cached / uncached / cache-write / output / reasoning with explicit coverage ;
+- terminal / quality / validity / runtime profile / provenance ;
+- integrity mismatches reported rather than repaired ;
+- `tokn-observe context-ledger` CLI ;
+- read-only `tokn_context_ledger` MCP tool ;
+- standalone stdio and target Codex 0.161.0-alpha.2 validation PASS.
+
+Contract V1 boundaries:
+- per-turn ledger is `NOT_CAPTURED` because the persisted V1 history does not carry authoritative per-turn usage ;
+- current retained-context occupancy is `UNKNOWN` ;
+- model_context_window, total usage and last usage must not be relabeled as current retained context.
+
+Still required before Phase G is DONE:
 - rate-limit snapshots over time;
 - tool/file activity timeline;
-- parent/subagent graph;
+- parent/subagent shared-evidence analysis;
 - compaction events when observable;
 - repeated reads/searches/retries;
 - duplicate evidence;
-- rediscovery across runs.
-
-Important:
-model_context_window, total usage and last usage must not be called
-current retained-context occupancy until OQ-005 is resolved.
+- rediscovery and explicit cross-run comparison primitives.
 
 ## Phase H - Findings Engine
 
@@ -351,7 +362,7 @@ These remain separate from the Analyzer.
 
 ## What not to build now
 
-Current non-goals while Historical Analyzer + Context Ledger is NEXT:
+Current non-goals while Historical Analyzer + Context Ledger is IN PROGRESS:
 - production plugin package;
 - permanent local daemon;
 - GUI;
@@ -368,15 +379,23 @@ not a reason to widen scope prematurely.
 
 ## Current decision
 
-Immediate product work is **Historical Analyzer + Context Ledger** observation-only.
+Immediate product work remains **Historical Analyzer + Context Ledger** observation-only.
 
 The Measurement Contract V1, Store V2 foundation and local MCP transport boundary are stable inputs.
 
-Order:
-1. add Store queries for project/workspace/run/agent history ;
-2. expose a normalized context/token ledger with coverage semantics preserved ;
-3. include terminal, quality, validity, runtime profile and provenance beside usage ;
-4. add workspace lineage and multi-run comparison primitives ;
-5. keep current-context occupancy explicitly UNKNOWN unless directly evidenced ;
-6. validate against golden + synthetic multi-run fixtures ;
-7. only after the ledger is reliable, add repeated-observation Findings.
+Completed in the current slice:
+1. Store queries for project/workspace/run/agent history ;
+2. normalized context/token ledger with coverage semantics preserved ;
+3. terminal, quality, validity, runtime profile and provenance beside usage ;
+4. workspace lineage ;
+5. current-context occupancy explicitly UNKNOWN unless directly evidenced ;
+6. synthetic history tests + full release/golden regressions ;
+7. CLI + read-only MCP exposure, including direct target-Codex tool-call validation.
+
+Next inside M4:
+1. persist only privacy-safe tool/file activity evidence needed by history ;
+2. build activity/phase timeline from direct evidence ;
+3. add repeated reads/searches/retries and shared/duplicate evidence analysis ;
+4. add compaction/rediscovery observations where directly supported ;
+5. add explicit multi-run comparison primitives ;
+6. only after those observations are reliable, begin M5 Findings.

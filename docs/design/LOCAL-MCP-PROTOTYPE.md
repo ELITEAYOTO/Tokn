@@ -78,6 +78,29 @@ Returns recent Store V2 run summaries:
 
 No raw prompt, raw session JSONL, cwd or personal path is returned.
 
+### tokn_context_ledger
+
+Read-only M4 integration.
+
+Input:
+- optional privacy-preserving `project_id` (`prj-` + 24 hex) ;
+- optional privacy-preserving `workspace_id` (`wsp-` + 24 hex) ;
+- optional `limit`, 1..100, default 20.
+
+Returns Context Ledger schema V1 built by shared `tokn-analysis` from a Store V2
+HistoricalSnapshot. The MCP layer does not reimplement token accounting.
+
+Semantics preserved in the output:
+- coverage status for input/cached/cache-write/output/reasoning ;
+- ordinary uncached only when input + cached coverage are complete ;
+- logical total only when authoritative ;
+- workspace lineage, run/agent history, terminal/quality/validity/profile/provenance ;
+- integrity issues instead of silent repair ;
+- per-turn granularity = `NOT_CAPTURED` for Measurement Contract V1 ;
+- current retained-context occupancy = `UNKNOWN`.
+
+No raw project/workspace path is accepted as a filter or returned as identity.
+
 ## MCP protocol surface
 
 Implemented JSON-RPC methods:
@@ -106,6 +129,7 @@ supported version.
 - tools/list;
 - status on an empty Store;
 - recent-runs on an empty Store;
+- context-ledger on an empty Store with `NOT_CAPTURED` / `UNKNOWN` boundaries ;
 - structured errors and notifications;
 - no database-path leak in tool output.
 
@@ -122,7 +146,8 @@ The script sends:
 2. notifications/initialized;
 3. tools/list;
 4. tokn_status;
-5. tokn_recent_runs.
+5. tokn_recent_runs;
+6. tokn_context_ledger.
 
 Acceptance:
 - process exits 0 after stdin closes;
@@ -185,6 +210,7 @@ Codex returned:
 - MCP tools capability;
 - `tokn_status`;
 - `tokn_recent_runs`;
+- `tokn_context_ledger`;
 - toolsError = null;
 - authStatus = unsupported, expected for local stdio without OAuth.
 
@@ -209,7 +235,9 @@ The local validation now proves this path without a model turn:
 7. verify the thread is `idle` with zero turns;
 8. call `tokn_status` through `mcpServer/tool/call`;
 9. validate the returned Tokn status payload;
-10. delete the isolated Codex home and temporary Store.
+10. call `tokn_context_ledger` through `mcpServer/tool/call`;
+11. verify Context Ledger schema V1, `NOT_CAPTURED` turn granularity and `UNKNOWN` retained context;
+12. delete the isolated Codex home and temporary Store.
 
 Observed result on 2026-10-01:
 **PASS**.
@@ -219,7 +247,10 @@ The direct Codex tool call returned:
 - transport `stdio`;
 - `read_only=true`;
 - Store schema version `2`;
-- `tokn_status` and `tokn_recent_runs`.
+- `tokn_status`, `tokn_recent_runs` and `tokn_context_ledger`;
+- Context Ledger schema version `1`;
+- turn granularity `NOT_CAPTURED`;
+- retained-context status `UNKNOWN`.
 
 No user authentication data was copied or inspected.
 No `turn/start` request was submitted.
@@ -239,7 +270,7 @@ The local transport prototype is accepted because:
 - Store access uses shared Rust logic;
 - target Codex accepts the registration;
 - target Codex launches the process and discovers its tools;
-- target Codex directly calls `tokn_status` through `mcpServer/tool/call`;
+- target Codex directly calls `tokn_status` and `tokn_context_ledger` through `mcpServer/tool/call`;
 - the validation uses an idle zero-turn ephemeral thread;
 - standalone Runner behavior remains independent;
 - no daemon is required.

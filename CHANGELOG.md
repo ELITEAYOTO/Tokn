@@ -728,3 +728,18 @@ P6 remains IN PROGRESS until one controlled real PreToolUse callback proves the 
 - the returned payload confirms `tokn-mcp` 0.1.0, stdio transport, read-only mode and Store schema V2 ;
 - no user authentication material is copied or inspected and no model turn is started ;
 - the previous direct-host-tool-call validation debt is closed ; Historical Analyzer + Context Ledger remains NEXT.
+
+
+## 2026-10-01 - Historical Context Ledger V1 and read-only MCP exposure
+
+- added HistoricalSnapshot V1 records shared by Store and Analyzer without changing RunnerRequest V1 ;
+- added read-only Store V2 history queries for project/workspace/run/agent/provenance/runtime-profile plus workspace ancestry ;
+- added Context Ledger schema V1 with coverage-aware input/cached/cache-write/output/reasoning metrics and integrity issues ;
+- ordinary uncached and logical totals remain unavailable unless their required source coverage is complete ;
+- per-turn granularity is explicitly NOT_CAPTURED in Measurement Contract V1 and current retained-context occupancy remains UNKNOWN ;
+- added `tokn-observe context-ledger` with canonical privacy-preserving project/workspace filters ;
+- added read-only MCP tool `tokn_context_ledger` backed by shared Store + Analysis logic ;
+- release smoke discovers all three MCP tools and validates Context Ledger boundaries without leaking the database path ;
+- target `codex-cli 0.161.0-alpha.2` directly invoked `tokn_status` and `tokn_context_ledger` through app-server on an isolated idle zero-turn thread ;
+- full fmt/clippy/tests, release build, MCP smoke, Experiment 001 replay, Experiment 002 regression and documentation checks passed on the validation branch ;
+- M4 is IN PROGRESS: tool/file activity, repeated reads/searches/retries, shared/duplicate evidence, compaction/rediscovery and explicit cross-run comparison remain before Findings.

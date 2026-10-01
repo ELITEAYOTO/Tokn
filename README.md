@@ -10,7 +10,7 @@ Version binaire actuelle : **V0.1** (workspace Cargo 0.1.0)
 Release : **V0.1 Measurement Hardening**
 
 Etat au 2026-10-01 :
-**P0-P9 DONE ; Experiment 002 ACCEPTED ; Measurement Contract V1 FROZEN ; Store foundation DONE ; Local MCP transport prototype ACCEPTED ; Historical Analyzer NEXT.**
+**P0-P9 DONE ; Experiment 002 ACCEPTED ; Measurement Contract V1 FROZEN ; Store foundation DONE ; Local MCP transport prototype ACCEPTED ; Historical Analyzer + Context Ledger IN PROGRESS.**
 
 ## Principe
 

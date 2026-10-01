@@ -1,6 +1,6 @@
 # Tokn Documentation Index
 
-Derniere mise a jour : **2026-09-30**
+Derniere mise a jour : **2026-10-01**
 
 Ce fichier est le point d'entree documentaire unique.
 
@@ -14,7 +14,7 @@ Lire seulement :
 5. `plans/NEXT-SESSION-CHECKLIST.md` - prochaine action concrete.
 
 Etat actuel :
-**P0-P9 DONE ; Experiment 002 ACCEPTED ; Measurement Contract V1 FROZEN ; Store foundation DONE ; Local MCP transport prototype ACCEPTED ; Historical Analyzer NEXT.**
+**P0-P9 DONE ; Experiment 002 ACCEPTED ; Measurement Contract V1 FROZEN ; Store foundation DONE ; Local MCP transport prototype ACCEPTED ; Historical Analyzer + Context Ledger IN PROGRESS.**
 
 ## Organisation documentaire
 
@@ -66,6 +66,8 @@ Un document historique ne doit pas remplacer une source de verite courante.
   Contrat V1 fige apres Experiment 002 : schemas, evidence layout et semantiques de mesure.
 - `design/TOKN-STORE-V2.md`
   Fondation SQLite V2 : identities pseudonymisees, runs/agents/profiles/provenance et ingestion `store-evidence`.
+- `design/HISTORICAL-CONTEXT-LEDGER.md`
+  M4 en cours : HistoricalSnapshot/Context Ledger V1, coverage, lineage, CLI/MCP et limites explicites.
 - `design/SESSION-ROLLOUT-ADAPTER.md`
 - `design/AGENT-COST-ATTRIBUTION.md`
 - `design/WORKSPACE-TRACKING.md`
@@ -91,7 +93,7 @@ Il n'est plus la direction principale d'optimisation.
 - `design/PLUGIN-ENGINE-INTEGRATION.md`
   Transport local valide : adapter MCP stdio process-bound, sans daemon impose.
 - `design/LOCAL-MCP-PROTOTYPE.md`
-  Implementation `tokn-mcp`, validations release + Codex runtime, limites du direct tool-call.
+  Implementation `tokn-mcp`, validations release + Codex runtime et exposition read-only du Context Ledger.
 - `design/MODEL-RUNTIME-PROFILE.md`
   Identite runtime/modele, capacites observees et telemetry de rate limits versionnee.
 - `strategy/CONTEXT-EFFICIENCY-STRATEGY.md`

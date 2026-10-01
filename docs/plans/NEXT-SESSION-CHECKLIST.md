@@ -9,7 +9,7 @@ Experiment 002 : DONE / ACCEPTED
 Measurement Contract V1 : DONE / FROZEN
 Store foundation + ModelRuntimeProfile persistence : DONE
 Local MCP transport prototype : DONE / ACCEPTED
-Historical Analyzer + Context Ledger : NEXT
+Historical Analyzer + Context Ledger : IN PROGRESS
 
 Workspace :
 `E:\Tokn\V0-CodexTkn-Consume\tool`
@@ -27,17 +27,28 @@ Ne pas refaire l'enquete P6 ni la recherche plugin/telemetry R1-R8 avant qu'un b
 
 ## Premiere action
 
-Implementer **Historical Analyzer + Context Ledger** en observation-only.
+Continuer **M4 Historical Analyzer + Context Ledger** en observation-only.
 
-Premier scope :
-- requetes historiques multi-run par project/workspace ;
-- ledger run/agent avec input/cached/uncached/cache-write/output/reasoning ;
-- terminal + quality + validity + ModelRuntimeProfile ;
-- provenance et versions de contrat ;
-- lineage workspace ;
-- aucune heuristique de finding tant que le ledger fiable n'est pas valide.
+Le core deja valide ne doit pas etre refait :
+- HistoricalSnapshot V1 + Store history queries ;
+- Context Ledger V1 run/agent coverage-aware ;
+- WorkspaceLineage ;
+- terminal + quality + validity + ModelRuntimeProfile + provenance ;
+- CLI `tokn-observe context-ledger` ;
+- MCP read-only `tokn_context_ledger` ;
+- Codex 0.161.0-alpha.2 direct tool-call PASS sur thread idle / 0 turns ;
+- per-turn = `NOT_CAPTURED` et current retained context = `UNKNOWN`.
 
-Aucun nouveau quota Astra/Codex n'est necessaire pour ce travail.
+Prochain scope :
+- definir/persister uniquement l'activite tool/file privacy-safe necessaire ;
+- activity/phase timeline ;
+- repeated reads/searches/retries ;
+- shared/duplicate evidence parent/subagent ;
+- compaction/rediscovery quand directement observable ;
+- comparaison explicite multi-run.
+
+Aucune heuristique de finding tant que ces observations historiques ne sont pas fiables.
+Aucun nouveau quota Astra/Codex n'est requis pour ce travail offline/replay.
 
 Build/test environment valide :
 Visual Studio Build Tools 2022 via `vcvars64.bat`.
@@ -76,11 +87,11 @@ Tests obligatoires :
 
 ## Apres V0.1
 
-NEXT :
-Historical Analyzer + Context Ledger.
+CURRENT :
+Historical Analyzer + Context Ledger (M4 IN PROGRESS).
 
-Puis :
-- findings observation-only ;
+Puis, seulement apres M4 :
+- findings observation-only (M5) ;
 - Experiment 003 seulement apres un finding reproductible.
 
 ## Non-goals

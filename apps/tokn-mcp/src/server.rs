@@ -2,6 +2,7 @@ use std::io::{self, BufRead, BufWriter, Write};
 
 use anyhow::Context;
 use serde_json::{Value, json};
+use tokn_analysis::build_context_ledger;
 use tokn_domain::{MEASUREMENT_CONTRACT_ID, MEASUREMENT_CONTRACT_VERSION};
 use tokn_storage::{Database, MeasurementRunHistoryRecord};
 
@@ -154,7 +155,7 @@ impl McpServer {
                 "name": SERVER_NAME,
                 "version": env!("CARGO_PKG_VERSION")
             },
-            "instructions": "Tokn local read-only prototype. It reports measurement/store status and recent persisted runs. It performs no active optimization."
+            "instructions": "Tokn local read-only integration. It reports measurement/store status, recent persisted runs and the evidence-bounded historical Context Ledger. It performs no active optimization."
         }))
     }
 
@@ -181,6 +182,30 @@ impl McpServer {
                                 "minimum": 1,
                                 "maximum": 100,
                                 "default": 10
+                            }
+                        },
+                        "additionalProperties": false
+                    }
+                },
+                {
+                    "name": "tokn_context_ledger",
+                    "description": "Return the historical Tokn Context Ledger with coverage-aware token metrics. Per-turn granularity remains NOT_CAPTURED in Measurement Contract V1 and current retained-context occupancy remains UNKNOWN. Read-only.",
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                            "project_id": {
+                                "type": "string",
+                                "pattern": "^prj-[0-9A-Fa-f]{24}$"
+                            },
+                            "workspace_id": {
+                                "type": "string",
+                                "pattern": "^wsp-[0-9A-Fa-f]{24}$"
+                            },
+                            "limit": {
+                                "type": "integer",
+                                "minimum": 1,
+                                "maximum": 100,
+                                "default": 20
                             }
                         },
                         "additionalProperties": false
@@ -229,7 +254,8 @@ impl McpServer {
                     },
                     "tools": [
                         "tokn_status",
-                        "tokn_recent_runs"
+                        "tokn_recent_runs",
+                        "tokn_context_ledger"
                     ]
                 })))
             }
@@ -260,9 +286,78 @@ impl McpServer {
                     "runs": records
                 })))
             }
+            "tokn_context_ledger" => {
+                ensure_object(&arguments)?;
+                let project_id = optional_string_argument(&arguments, "project_id")?;
+                let workspace_id = optional_string_argument(&arguments, "workspace_id")?;
+                validate_store_filter(project_id, "project", "prj-")?;
+                validate_store_filter(workspace_id, "workspace", "wsp-")?;
+
+                let limit = arguments
+                    .get("limit")
+                    .map(|value| {
+                        value
+                            .as_u64()
+                            .ok_or_else(|| RpcFailure::invalid_params("limit must be an integer"))
+                    })
+                    .transpose()?
+                    .unwrap_or(20);
+                if !(1..=100).contains(&limit) {
+                    return Err(RpcFailure::invalid_params(
+                        "limit must be between 1 and 100",
+                    ));
+                }
+
+                let snapshot = self
+                    .db
+                    .historical_snapshot(project_id, workspace_id, limit as usize)
+                    .map_err(|_| RpcFailure::internal("Store historical snapshot query failed"))?;
+                let ledger = build_context_ledger(&snapshot)
+                    .map_err(|_| RpcFailure::internal("Context Ledger build failed"))?;
+                let payload = serde_json::to_value(ledger)
+                    .map_err(|_| RpcFailure::internal("Context Ledger serialization failed"))?;
+                Ok(tool_text(payload))
+            }
             _ => Err(RpcFailure::invalid_params("unknown tool")),
         }
     }
+}
+
+fn optional_string_argument<'a>(
+    arguments: &'a Value,
+    name: &str,
+) -> Result<Option<&'a str>, RpcFailure> {
+    arguments
+        .get(name)
+        .map(|value| {
+            value
+                .as_str()
+                .ok_or_else(|| RpcFailure::invalid_params(&format!("{name} must be a string")))
+        })
+        .transpose()
+}
+
+fn validate_store_filter(
+    value: Option<&str>,
+    label: &str,
+    expected_prefix: &str,
+) -> Result<(), RpcFailure> {
+    let Some(value) = value else {
+        return Ok(());
+    };
+
+    let Some(hex) = value.strip_prefix(expected_prefix) else {
+        return Err(RpcFailure::invalid_params(&format!(
+            "{label}_id must begin with {expected_prefix}"
+        )));
+    };
+    if hex.len() != 24 || !hex.bytes().all(|byte| byte.is_ascii_hexdigit()) {
+        return Err(RpcFailure::invalid_params(&format!(
+            "{label}_id must contain exactly 24 hexadecimal characters after {expected_prefix}"
+        )));
+    }
+
+    Ok(())
 }
 
 fn ensure_object(value: &Value) -> Result<(), RpcFailure> {
@@ -408,7 +503,7 @@ mod tests {
                 "params": {}
             }))
             .expect("tools response");
-        assert_eq!(tools["result"]["tools"].as_array().map(Vec::len), Some(2));
+        assert_eq!(tools["result"]["tools"].as_array().map(Vec::len), Some(3));
 
         drop(server);
         let _ = fs::remove_file(path);
@@ -467,6 +562,43 @@ mod tests {
         let payload: Value = serde_json::from_str(text).expect("history json");
         assert_eq!(payload["count"].as_u64(), Some(0));
         assert_eq!(payload["runs"].as_array().map(Vec::len), Some(0));
+
+        drop(server);
+        let _ = fs::remove_file(path);
+    }
+
+    #[test]
+    fn context_ledger_is_read_only_and_preserves_unknown_boundaries() {
+        let (mut server, path) = server("context-ledger");
+        initialize(&mut server);
+
+        let response = server
+            .handle_message(json!({
+                "jsonrpc": "2.0",
+                "id": "ledger",
+                "method": "tools/call",
+                "params": {
+                    "name": "tokn_context_ledger",
+                    "arguments": {}
+                }
+            }))
+            .expect("ledger response");
+        let text = response["result"]["content"][0]["text"]
+            .as_str()
+            .expect("tool text");
+        let payload: Value = serde_json::from_str(text).expect("ledger json");
+
+        assert_eq!(payload["schema_version"].as_u64(), Some(1));
+        assert_eq!(
+            payload["turn_granularity_status"].as_str(),
+            Some("NOT_CAPTURED")
+        );
+        assert_eq!(
+            payload["current_retained_context_status"].as_str(),
+            Some("UNKNOWN")
+        );
+        assert_eq!(payload["runs"].as_array().map(Vec::len), Some(0));
+        assert!(!text.contains(&path.to_string_lossy().to_string()));
 
         drop(server);
         let _ = fs::remove_file(path);

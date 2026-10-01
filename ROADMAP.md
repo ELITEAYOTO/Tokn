@@ -131,20 +131,32 @@ Resultat :
 
 ## M4 - Historical Analyzer + Context Ledger
 
-Statut : NEXT
+Statut : IN PROGRESS
 
 But :
 construire l'historique fiable par projet/run/agent/phase.
 
-Capacites :
+Valide dans le slice courant :
 - ProjectIdentity et WorkspaceLineage ;
-- historique multi-run ;
-- cached/uncached/input/output/reasoning par agent/tour ;
+- historique multi-run par project/workspace/run/agent ;
+- cached/uncached/cache-write/input/output/reasoning par run/agent avec coverage explicite ;
+- terminal + quality + validity + runtime profile + provenance ;
+- integrity issues sans reparation silencieuse ;
+- CLI `tokn-observe context-ledger` ;
+- MCP read-only `tokn_context_ledger`, valide standalone et via Codex 0.161.0-alpha.2 ;
+- per-turn reste `NOT_CAPTURED` dans Measurement Contract V1 ;
+- current retained-context occupancy reste `UNKNOWN`.
+
+Reste M4 :
+- granularite par tour seulement si un futur contrat la capture directement ;
+- rate-limit snapshots over time ;
 - timeline de phases ;
 - file/tool activity graph ;
 - repeated reads/searches/retries ;
 - parent/subagent shared evidence ;
-- terminal + quality history.
+- compaction events quand observables ;
+- duplicate evidence ;
+- rediscovery et comparaison explicite entre runs.
 
 ## M5 - Context Efficiency Findings
 
