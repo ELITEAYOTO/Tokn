@@ -1,0 +1,37 @@
+    Updating crates.io index
+    Checking tokn-domain v0.1.0 (D:\a\Tokn\Tokn\crates\tokn-domain)
+   Compiling libsqlite3-sys v0.38.2
+    Checking tokn-platform v0.1.0 (D:\a\Tokn\Tokn\crates\tokn-platform)
+    Checking tokn-ingest v0.1.0 (D:\a\Tokn\Tokn\crates\tokn-ingest)
+    Checking tokn-analysis v0.1.0 (D:\a\Tokn\Tokn\crates\tokn-analysis)
+    Checking tokn-codex v0.1.0 (D:\a\Tokn\Tokn\crates\tokn-codex)
+error: unnecessary closure used with `bool::then`
+   --> crates\tokn-analysis\src\activity.rs:199:17
+    |
+199 | /                 (occurrences > 1).then(|| ExactRepeatedOperation {
+200 | |                     operation_fingerprint,
+201 | |                     category,
+202 | |                     occurrences,
+203 | |                     run_count: runs.len() as u64,
+204 | |                     thread_count: threads.len() as u64,
+205 | |                 })
+    | |__________________^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.97.0/index.html#unnecessary_lazy_evaluations
+    = note: `-D clippy::unnecessary-lazy-evaluations` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::unnecessary_lazy_evaluations)]`
+help: use `then_some` instead
+    |
+199 ~                 (occurrences > 1).then_some(ExactRepeatedOperation {
+200 +                     operation_fingerprint,
+201 +                     category,
+202 +                     occurrences,
+203 +                     run_count: runs.len() as u64,
+204 +                     thread_count: threads.len() as u64,
+205 +                 })
+    |
+
+error: could not compile `tokn-analysis` (lib) due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `tokn-analysis` (lib test) due to 1 previous error
+
