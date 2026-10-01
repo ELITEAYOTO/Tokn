@@ -30,7 +30,7 @@ function Assert-NotContains {
 }
 
 $Cargo = Read-RepoFile "Cargo.toml"
-if ($Cargo -notmatch '(?m)^version = "0\.1\.0"$') {
+if ($Cargo -notmatch '(?m)^version = "0\.1\.0"\r?$') {
     throw "Cargo workspace version is not 0.1.0"
 }
 Write-Host "[PASS] Cargo workspace version = 0.1.0"
