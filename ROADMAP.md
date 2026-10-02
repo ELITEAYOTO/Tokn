@@ -153,6 +153,7 @@ Reste M4 :
 - timeline de phases ;
 - file/tool activity graph : ACCEPTED FOUNDATION ;
 - repeated reads/searches/retries : exact-repeat foundation ACCEPTED ;
+- automatic ModelRuntimeProfile compatibility reducer : ACCEPTED FOUNDATION ;
 - parent/subagent shared evidence ;
 - compaction events quand observables ;
 - duplicate evidence ;

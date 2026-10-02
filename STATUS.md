@@ -310,10 +310,11 @@ Accepted M4 additions:
 - exact repeated-operation observations across runs/threads;
 - no raw command/workdir/parse-error persistence;
 - synthetic-secret persistence regression;
-- `tokn-observe activity-timeline` CLI.
+- 	okn-observe activity-timeline CLI;
+- automatic ModelRuntimeProfile compatibility reducer with PASS/FAIL/UNKNOWN evidence semantics;
+- causal compatibility is PASS only when required runtime/model/config evidence is complete and equal.
 
 Next M4 work:
-- automatic ModelRuntimeProfile compatibility for cross-run comparison;
 - rate-limit snapshot ingestion with window/limit identity;
 - shared/duplicate evidence parent/subagent;
 - compaction/rediscovery only when directly observable;

@@ -753,3 +753,11 @@ P6 remains IN PROGRESS until one controlled real PreToolUse callback proves the 
 - fixed legacy uncached reporting to frozen V1 semantics;
 - documented shadow Context Retrieval / Edit Strategy direction and long-term Context Compiler guardrails;
 - reviewed external Claude architecture advice against the current repository rather than adopting it blindly.
+## 2026-10-02 - M4 automatic runtime profile compatibility
+
+- added a versioned ModelRuntimeProfile compatibility reducer in shared `tokn-analysis`;
+- compares runtime, model, reasoning and material configuration without treating missing evidence as equality;
+- observed mismatches fail, missing required evidence stays UNKNOWN, and optional evidence absent on both sides is NOT_REQUIRED;
+- `causal_compatible` becomes true only for an aggregate PASS;
+- added regression tests for equal profiles, mismatches, incomplete configuration, asymmetric evidence and unsupported schemas;
+- full publication privacy, rustfmt, strict Clippy, workspace tests, release/provenance, MCP smoke, Experiment 001/002 and documentation gates passed on the validation branch.

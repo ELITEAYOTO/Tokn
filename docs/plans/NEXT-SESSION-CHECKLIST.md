@@ -117,11 +117,12 @@ Aucun quota Astra n'est requis.
 
 Do not rebuild the accepted activity foundation.
 
+Automatic ModelRuntimeProfile compatibility reducer: ACCEPTED FOUNDATION.
+
 Next concrete work:
-1. automatic ModelRuntimeProfile compatibility reducer;
-2. rate-limit snapshot ingestion;
-3. shared/duplicate evidence parent/subagent;
-4. compaction/rediscovery only when directly observed;
-5. explicit cross-run comparison.
+1. rate-limit snapshot ingestion with limit/window identity;
+2. shared/duplicate evidence parent/subagent;
+3. compaction/rediscovery only when directly observed;
+4. explicit cross-run comparison.
 
 After M4, prefer shadow retrieval/edit analysis before any active Context Compiler behavior.

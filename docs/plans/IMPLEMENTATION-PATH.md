@@ -402,7 +402,7 @@ Next inside M4:
 
 ## 2026-10-02 insertion - shadow before active optimizer
 
-Current M4 activity foundation is accepted. Next: automatic runtime-profile compatibility, rate-limit snapshots, shared/duplicate evidence and rediscovery primitives.
+Current M4 activity foundation and automatic runtime-profile compatibility reducer are accepted. Next: rate-limit snapshots, shared/duplicate evidence and rediscovery primitives.
 
 Before Findings become interventions, introduce an observation-only shadow layer where useful:
 - repo/symbol index + Git/hash invalidation;

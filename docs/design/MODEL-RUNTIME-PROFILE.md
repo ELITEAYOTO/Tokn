@@ -161,3 +161,14 @@ Local runtime observed 2026-09-30:
 
 Official OpenAI/codex source defines rate-limit windows and snapshots,
 but capability presence remains checked against the actual target runtime.
+## Automatic compatibility reducer
+
+Status: M4 ACCEPTED FOUNDATION
+
+The shared `tokn-analysis` reducer compares two persisted V1 profiles conservatively:
+- an observed material mismatch is `FAIL`;
+- missing required runtime/model/config evidence is `UNKNOWN`;
+- optional evidence absent from both sides is `NOT_REQUIRED`;
+- `causal_compatible` is true only when the aggregate verdict is `PASS`.
+The reducer ignores `observed_at` and does not infer compatibility from missing data.
+It is a cross-run evidence guardrail, not a model score or optimization decision.
