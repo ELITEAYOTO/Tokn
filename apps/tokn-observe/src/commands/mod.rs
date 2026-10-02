@@ -1,3 +1,4 @@
+mod activity_timeline;
 mod analyze;
 mod analyze_run;
 mod check_caps;
@@ -41,6 +42,19 @@ pub fn run(cli: Cli) -> anyhow::Result<()> {
             db,
             output_json,
         } => context_ledger::run(
+            project_id.as_deref(),
+            workspace_id.as_deref(),
+            limit,
+            db.as_deref(),
+            output_json.as_deref(),
+        ),
+        Command::ActivityTimeline {
+            project_id,
+            workspace_id,
+            limit,
+            db,
+            output_json,
+        } => activity_timeline::run(
             project_id.as_deref(),
             workspace_id.as_deref(),
             limit,

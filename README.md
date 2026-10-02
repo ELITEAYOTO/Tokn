@@ -138,3 +138,14 @@ Ne pas relire tous les documents historiques pour reprendre le travail.
 
 Tokn est distribue sous double licence **MIT OR Apache-2.0**.
 Voir `LICENSE-MIT` et `LICENSE-APACHE`.
+
+## M4 activity history - 2026-10-02
+
+The current accepted M4 slice adds a privacy-safe ToolActivityHistory and ActivityTimeline foundation:
+- raw command/workdir/error text is not persisted;
+- activity is ordered inside each agent only; cross-agent order remains UNKNOWN unless evidenced;
+- exact repeated-operation fingerprints are observations, not waste/savings claims;
+- `tokn-observe activity-timeline` exposes the offline timeline;
+- legacy report uncached accounting is aligned with frozen V1 semantics: input - cached, while cache-write remains separate.
+
+Long-term direction remains observation-first. Claude/Cowork and a Context Compiler are planned future runtimes/layers, not current support claims.

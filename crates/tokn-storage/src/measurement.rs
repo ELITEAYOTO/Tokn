@@ -7,9 +7,10 @@ use thiserror::Error;
 use tokn_domain::{
     HISTORICAL_SNAPSHOT_SCHEMA_VERSION, HistoricalAgentRecord, HistoricalProvenanceRecord,
     HistoricalRunRecord, HistoricalRuntimeProfileRecord, HistoricalSnapshot,
-    HistoricalWorkspaceRecord, MEASUREMENT_CONTRACT_ID, MEASUREMENT_CONTRACT_VERSION,
-    MeasurementContractManifest, ModelRuntimeProfile, RunGroup, RunnerQualityStatus, RunnerResult,
-    TokenTotals,
+    HistoricalToolActivityRecord, HistoricalWorkspaceRecord, MEASUREMENT_CONTRACT_ID,
+    MEASUREMENT_CONTRACT_VERSION, MeasurementContractManifest, ModelRuntimeProfile, RunGroup,
+    RunnerQualityStatus, RunnerResult, TOOL_ACTIVITY_HISTORY_SCHEMA_VERSION, TokenTotals,
+    ToolActivityHistory,
 };
 
 use crate::Database;
@@ -43,6 +44,30 @@ pub struct MeasurementStoreInput {
     pub result: RunnerResult,
     pub group: RunGroup,
     pub profile: Option<ModelRuntimeProfile>,
+    pub tool_activities: Vec<ToolActivityStoreInput>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ToolActivityStoreInput {
+    pub source_call_key: String,
+    pub thread_id: String,
+    pub agent_ordinal: u64,
+    pub kind: String,
+    pub tool_name: Option<String>,
+    pub category: String,
+    pub surface: String,
+    pub requester_type: Option<String>,
+    pub status: String,
+    pub started_seq: Option<u64>,
+    pub ended_seq: Option<u64>,
+    pub invocation_payload_bytes: Option<u64>,
+    pub result_payload_bytes: Option<u64>,
+    pub result_output_chars: Option<u64>,
+    pub max_output_tokens: Option<u64>,
+    pub original_token_count: Option<u64>,
+    pub operation_fingerprint: Option<String>,
+    pub workdir_fingerprint: Option<String>,
+    pub parse_error_present: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -53,6 +78,7 @@ pub struct MeasurementStoreSummary {
     pub profile_id: Option<String>,
     pub source_id: String,
     pub agent_count: u64,
+    pub tool_activity_count: u64,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -251,6 +277,10 @@ impl Database {
         )?;
 
         tx.execute(
+            "DELETE FROM tool_activity_v1 WHERE run_id = ?1",
+            params![input.result.run_id],
+        )?;
+        tx.execute(
             "DELETE FROM agents_v2 WHERE run_id = ?1",
             params![input.result.run_id],
         )?;
@@ -282,6 +312,58 @@ impl Database {
                     to_i64(totals.output_known)?,
                     to_i64(totals.reasoning_output_known)?,
                     totals.logical_total().map(to_i64).transpose()?
+                ],
+            )?;
+        }
+
+        for activity in &input.tool_activities {
+            let activity_id = private_id(
+                "act",
+                &format!(
+                    "{}:{}:{}:{}",
+                    input.result.run_id,
+                    activity.thread_id,
+                    activity.agent_ordinal,
+                    activity.source_call_key
+                ),
+            );
+            tx.execute(
+                "INSERT INTO tool_activity_v1(
+                    activity_id, run_id, thread_id, agent_ordinal, kind, tool_name,
+                    category, surface, requester_type, status, started_seq, ended_seq,
+                    invocation_payload_bytes, result_payload_bytes, result_output_chars,
+                    max_output_tokens, original_token_count, operation_fingerprint,
+                    workdir_fingerprint, parse_error_present, created_at_unix
+                 ) VALUES (
+                    ?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15,?16,
+                    ?17,?18,?19,?20,?21
+                 )",
+                params![
+                    activity_id,
+                    input.result.run_id,
+                    activity.thread_id,
+                    to_i64(activity.agent_ordinal)?,
+                    activity.kind,
+                    activity.tool_name,
+                    activity.category,
+                    activity.surface,
+                    activity.requester_type,
+                    activity.status,
+                    activity.started_seq.map(to_i64).transpose()?,
+                    activity.ended_seq.map(to_i64).transpose()?,
+                    activity.invocation_payload_bytes.map(to_i64).transpose()?,
+                    activity.result_payload_bytes.map(to_i64).transpose()?,
+                    activity.result_output_chars.map(to_i64).transpose()?,
+                    activity.max_output_tokens.map(to_i64).transpose()?,
+                    activity.original_token_count.map(to_i64).transpose()?,
+                    activity.operation_fingerprint,
+                    activity.workdir_fingerprint,
+                    if activity.parse_error_present {
+                        1_i64
+                    } else {
+                        0_i64
+                    },
+                    now
                 ],
             )?;
         }
@@ -319,6 +401,7 @@ impl Database {
             profile_id,
             source_id,
             agent_count: input.group.agents.len() as u64,
+            tool_activity_count: input.tool_activities.len() as u64,
         })
     }
 
@@ -360,6 +443,23 @@ impl Database {
             agents: self.measurement_agent_count()?,
             runtime_profiles: self.runtime_profile_count()?,
         })
+    }
+
+    pub fn tool_activity_schema_version(&self) -> rusqlite::Result<Option<String>> {
+        self.connection()
+            .query_row(
+                "SELECT value FROM schema_meta WHERE key='tool_activity_schema_version'",
+                [],
+                |row| row.get(0),
+            )
+            .optional()
+    }
+
+    pub fn tool_activity_count(&self) -> rusqlite::Result<i64> {
+        self.connection()
+            .query_row("SELECT COUNT(*) FROM tool_activity_v1", [], |row| {
+                row.get(0)
+            })
     }
 
     pub fn recent_measurement_runs(
@@ -409,6 +509,93 @@ impl Database {
             })
         })?
         .collect()
+    }
+
+    pub fn tool_activity_history(
+        &self,
+        project_filter: Option<&str>,
+        workspace_filter: Option<&str>,
+        run_limit: usize,
+    ) -> Result<ToolActivityHistory, MeasurementStoreError> {
+        let mut history = ToolActivityHistory {
+            schema_version: TOOL_ACTIVITY_HISTORY_SCHEMA_VERSION,
+            project_filter: project_filter.map(str::to_string),
+            workspace_filter: workspace_filter.map(str::to_string),
+            run_limit: u64::try_from(run_limit).unwrap_or(u64::MAX),
+            ..Default::default()
+        };
+        if run_limit == 0 {
+            return Ok(history);
+        }
+
+        let mut stmt = self.connection().prepare(
+            "WITH selected_runs AS (
+                SELECT run_id, project_id, workspace_id, created_at_unix
+                FROM measurement_runs_v2
+                WHERE (?1 IS NULL OR project_id = ?1)
+                  AND (?2 IS NULL OR workspace_id = ?2)
+                ORDER BY created_at_unix DESC, run_id ASC
+                LIMIT ?3
+             )
+             SELECT
+                activity.activity_id, activity.run_id,
+                selected.project_id, selected.workspace_id,
+                activity.thread_id, activity.agent_ordinal,
+                activity.kind, activity.tool_name, activity.category, activity.surface,
+                activity.requester_type, activity.status,
+                activity.started_seq, activity.ended_seq,
+                activity.invocation_payload_bytes, activity.result_payload_bytes,
+                activity.result_output_chars, activity.max_output_tokens,
+                activity.original_token_count, activity.operation_fingerprint,
+                activity.workdir_fingerprint, activity.parse_error_present,
+                selected.created_at_unix
+             FROM tool_activity_v1 AS activity
+             INNER JOIN selected_runs AS selected ON selected.run_id = activity.run_id
+             ORDER BY
+                selected.created_at_unix DESC,
+                activity.run_id ASC,
+                activity.thread_id ASC,
+                activity.agent_ordinal ASC",
+        )?;
+
+        history.activities = stmt
+            .query_map(
+                params![
+                    project_filter,
+                    workspace_filter,
+                    i64::try_from(run_limit).unwrap_or(i64::MAX)
+                ],
+                |row| {
+                    Ok(HistoricalToolActivityRecord {
+                        activity_id: row.get(0)?,
+                        run_id: row.get(1)?,
+                        project_id: row.get(2)?,
+                        workspace_id: row.get(3)?,
+                        thread_id: row.get(4)?,
+                        agent_ordinal: row_u64(row, 5)?,
+                        kind: row.get(6)?,
+                        tool_name: row.get(7)?,
+                        category: row.get(8)?,
+                        surface: row.get(9)?,
+                        requester_type: row.get(10)?,
+                        status: row.get(11)?,
+                        started_seq: row_optional_u64(row, 12)?,
+                        ended_seq: row_optional_u64(row, 13)?,
+                        invocation_payload_bytes: row_optional_u64(row, 14)?,
+                        result_payload_bytes: row_optional_u64(row, 15)?,
+                        result_output_chars: row_optional_u64(row, 16)?,
+                        max_output_tokens: row_optional_u64(row, 17)?,
+                        original_token_count: row_optional_u64(row, 18)?,
+                        operation_fingerprint: row.get(19)?,
+                        workdir_fingerprint: row.get(20)?,
+                        parse_error_present: row.get::<_, i64>(21)? != 0,
+                        run_created_at_unix: row.get(22)?,
+                    })
+                },
+            )?
+            .collect::<rusqlite::Result<Vec<_>>>()?;
+
+        Ok(history)
     }
 
     pub fn historical_snapshot(
@@ -710,6 +897,51 @@ fn validate_input(input: &MeasurementStoreInput) -> Result<(), MeasurementStoreE
             "root terminal mismatch between RunnerResult and RunGroup".into(),
         ));
     }
+    let agent_ids = input
+        .group
+        .agents
+        .iter()
+        .map(|agent| agent.thread_id.as_str())
+        .collect::<BTreeSet<_>>();
+    let mut activity_slots = BTreeSet::new();
+    for activity in &input.tool_activities {
+        if activity.source_call_key.trim().is_empty() {
+            return Err(MeasurementStoreError::Invalid(
+                "tool activity source_call_key cannot be empty".into(),
+            ));
+        }
+        if !agent_ids.contains(activity.thread_id.as_str()) {
+            return Err(MeasurementStoreError::Invalid(format!(
+                "tool activity thread {} is not present in RunGroup",
+                activity.thread_id
+            )));
+        }
+        if !activity_slots.insert((activity.thread_id.as_str(), activity.agent_ordinal)) {
+            return Err(MeasurementStoreError::Invalid(format!(
+                "duplicate tool activity ordinal {} for thread {}",
+                activity.agent_ordinal, activity.thread_id
+            )));
+        }
+        for (name, value) in [
+            ("kind", activity.kind.as_str()),
+            ("category", activity.category.as_str()),
+            ("surface", activity.surface.as_str()),
+            ("status", activity.status.as_str()),
+        ] {
+            if value.trim().is_empty() {
+                return Err(MeasurementStoreError::Invalid(format!(
+                    "tool activity {name} cannot be empty"
+                )));
+            }
+        }
+        if let Some(value) = activity.operation_fingerprint.as_deref() {
+            validate_private_id("operation_fingerprint", value, "op")?;
+        }
+        if let Some(value) = activity.workdir_fingerprint.as_deref() {
+            validate_private_id("workdir_fingerprint", value, "cwd")?;
+        }
+    }
+
     if let Some(profile) = input.profile.as_ref() {
         let errors = profile.validation_errors();
         if !errors.is_empty() {
@@ -893,6 +1125,7 @@ mod tests {
             result: result(private_path),
             group: group(private_path),
             profile: Some(profile()),
+            tool_activities: Vec::new(),
         }
     }
 
@@ -945,6 +1178,92 @@ mod tests {
         assert!(!haystack.contains(&private_path));
         assert!(!haystack.contains("private-user"));
         assert!(!haystack.contains("Secret Project"));
+
+        let _ = fs::remove_file(path);
+    }
+
+    #[test]
+    fn tool_activity_is_idempotent_and_does_not_persist_raw_command_or_workdir() {
+        let path = temp_db("tool-activity-privacy");
+        let _ = fs::remove_file(&path);
+        let synthetic_secret = ["sk", "-", "test-TOKN-SYNTHETIC-ONLY-0123456789"].concat();
+        let private_path = format!(r"C:\{}\activity-user\Secret Project\session.jsonl", "Users");
+        let private_command = format!(
+            r"Get-Content C:\{}\activity-user\Secret Project\secret-notes.txt; Write-Output {}",
+            "Users", synthetic_secret
+        );
+        let private_workdir = format!(r"C:\{}\activity-user\Secret Project", "Users");
+
+        let mut input = input(&private_path);
+        let operation_fingerprint = private_id(
+            "op",
+            &format!("{}:file_read:{private_command}", input.project_id),
+        );
+        let workdir_fingerprint =
+            private_id("cwd", &format!("{}:{private_workdir}", input.project_id));
+        input.tool_activities.push(ToolActivityStoreInput {
+            source_call_key: "call-private#0".into(),
+            thread_id: "thread-root".into(),
+            agent_ordinal: 0,
+            kind: "exec_command".into(),
+            tool_name: Some("exec_command".into()),
+            category: "file_read".into(),
+            surface: "session_rollout".into(),
+            requester_type: None,
+            status: "completed".into(),
+            started_seq: None,
+            ended_seq: None,
+            invocation_payload_bytes: None,
+            result_payload_bytes: None,
+            result_output_chars: None,
+            max_output_tokens: Some(4_000),
+            original_token_count: None,
+            operation_fingerprint: Some(operation_fingerprint),
+            workdir_fingerprint: Some(workdir_fingerprint),
+            parse_error_present: false,
+        });
+
+        let db = Database::open(&path).expect("open db");
+        let first = db.save_measurement(&input).expect("first save");
+        let second = db.save_measurement(&input).expect("second save");
+
+        assert_eq!(first, second);
+        assert_eq!(first.tool_activity_count, 1);
+        assert_eq!(db.tool_activity_count().unwrap(), 1);
+        assert_eq!(
+            db.tool_activity_schema_version().unwrap().as_deref(),
+            Some("1")
+        );
+
+        let history = db
+            .tool_activity_history(Some(&input.project_id), Some(&input.workspace_id), 10)
+            .expect("tool activity history");
+        assert_eq!(history.schema_version, TOOL_ACTIVITY_HISTORY_SCHEMA_VERSION);
+        assert_eq!(history.activities.len(), 1);
+        assert_eq!(history.activities[0].category, "file_read");
+        assert_eq!(history.activities[0].thread_id, "thread-root");
+        assert_eq!(history.activities[0].agent_ordinal, 0);
+        assert!(
+            history.activities[0]
+                .operation_fingerprint
+                .as_deref()
+                .is_some_and(|value| value.starts_with("op-"))
+        );
+        assert!(
+            history.activities[0]
+                .workdir_fingerprint
+                .as_deref()
+                .is_some_and(|value| value.starts_with("cwd-"))
+        );
+
+        drop(db);
+        let bytes = fs::read(&path).expect("read sqlite");
+        let haystack = String::from_utf8_lossy(&bytes);
+        assert!(!haystack.contains(&private_command));
+        assert!(!haystack.contains(&private_workdir));
+        assert!(!haystack.contains("secret-notes.txt"));
+        assert!(!haystack.contains("activity-user"));
+        assert!(!haystack.contains(&synthetic_secret));
 
         let _ = fs::remove_file(path);
     }

@@ -1,7 +1,7 @@
 use std::path::Path;
 
 use anyhow::Context;
-use tokn_analysis::build_context_ledger;
+use tokn_analysis::build_activity_timeline;
 use tokn_storage::Database;
 
 use super::common::{open_db, validate_private_filter_id};
@@ -25,9 +25,9 @@ pub fn run(
         Some(path) => Database::open(path)?,
         None => open_db()?,
     };
-    let snapshot = db.historical_snapshot(project_id, workspace_id, limit)?;
-    let ledger = build_context_ledger(&snapshot)?;
-    let json = serde_json::to_string_pretty(&ledger)?;
+    let history = db.tool_activity_history(project_id, workspace_id, limit)?;
+    let timeline = build_activity_timeline(&history)?;
+    let json = serde_json::to_string_pretty(&timeline)?;
 
     if let Some(path) = output_json {
         if let Some(parent) = path.parent()
@@ -50,35 +50,35 @@ mod tests {
     use super::*;
 
     #[test]
-    fn empty_store_emits_explicit_unknown_and_not_captured_statuses() {
+    fn empty_store_emits_empty_activity_timeline() {
         let path = std::env::temp_dir().join(format!(
-            "tokn-context-ledger-empty-{}.sqlite3",
+            "tokn-activity-timeline-empty-{}.sqlite3",
             std::process::id()
         ));
         let output = std::env::temp_dir().join(format!(
-            "tokn-context-ledger-empty-{}.json",
+            "tokn-activity-timeline-empty-{}.json",
             std::process::id()
         ));
         let _ = std::fs::remove_file(&path);
         let _ = std::fs::remove_file(&output);
 
-        run(None, None, 50, Some(&path), Some(&output)).expect("context ledger");
+        run(None, None, 50, Some(&path), Some(&output)).expect("activity timeline");
         let value: serde_json::Value =
             serde_json::from_slice(&std::fs::read(&output).expect("read output"))
                 .expect("parse output");
 
         assert_eq!(value["schema_version"].as_u64(), Some(1));
-        assert_eq!(
-            value["turn_granularity_status"].as_str(),
-            Some("NOT_CAPTURED")
-        );
-        assert_eq!(
-            value["current_retained_context_status"].as_str(),
-            Some("UNKNOWN")
-        );
+        assert_eq!(value["source_history_schema_version"].as_u64(), Some(1));
         assert_eq!(value["runs"].as_array().map(Vec::len), Some(0));
+        assert_eq!(value["exact_repetitions"].as_array().map(Vec::len), Some(0));
 
         let _ = std::fs::remove_file(path);
         let _ = std::fs::remove_file(output);
+    }
+
+    #[test]
+    fn rejects_invalid_limit_before_opening_store() {
+        assert!(run(None, None, 0, None, None).is_err());
+        assert!(run(None, None, MAX_HISTORY_RUNS + 1, None, None).is_err());
     }
 }

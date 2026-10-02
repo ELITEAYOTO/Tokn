@@ -151,3 +151,8 @@ Avant de creer un nouveau document :
 4. l'ajouter ici uniquement s'il devient une reference durable.
 
 Les chats ne sont jamais la source de verite du projet.
+
+## Audit / design review 2026-10-02
+
+- `audits/2026-10-02-CLAUDE-HANDOFF-REVIEW.md` - current-code review of the Claude handoff and accepted/deferred recommendations.
+- Long-term Context Compiler / shadow guardrails are folded into ROADMAP, TARGET-ARCHITECTURE and CONTEXT-EFFICIENCY-STRATEGY instead of duplicating a second canonical design document.

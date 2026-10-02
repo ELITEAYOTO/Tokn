@@ -291,3 +291,34 @@ Delivered:
 - complete fixture pipeline now reports COMPLETE with no pending steps.
 
 P8 is DONE: the Runner contract, complete evidence lifecycle, fail-closed behavior and recovery acceptance tests pass. The historical Experiment 001 golden replay is a P9 release-validation gate.
+
+## Update 2026-10-02 - M4 activity slice accepted
+
+GitHub validation for branch `m4-activity-history` at `fa1d831` is PASS:
+- publication privacy PASS;
+- rustfmt / Clippy -D warnings / workspace tests PASS;
+- release build + provenance PASS;
+- MCP smoke PASS;
+- Experiment 001 golden replay PASS;
+- Experiment 002 source-selection regression PASS;
+- documentation consistency PASS.
+
+Accepted M4 additions:
+- ToolActivityHistory V1 additive schema;
+- privacy-safe project-scoped operation/workdir fingerprints;
+- ActivityTimeline V1 per agent;
+- exact repeated-operation observations across runs/threads;
+- no raw command/workdir/parse-error persistence;
+- synthetic-secret persistence regression;
+- `tokn-observe activity-timeline` CLI.
+
+Next M4 work:
+- automatic ModelRuntimeProfile compatibility for cross-run comparison;
+- rate-limit snapshot ingestion with window/limit identity;
+- shared/duplicate evidence parent/subagent;
+- compaction/rediscovery only when directly observable;
+- explicit cross-run comparison primitives.
+
+Before Experiment 003: characterize run-to-run variance, predeclare multidimensional quality gates, and measure Tokn overhead for any injected/default-active integration.
+
+Before public binary distribution: threat model, retention/purge/export, dependency audit/SBOM, signing/update integrity and hostile parser/privacy corpus.

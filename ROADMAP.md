@@ -151,8 +151,8 @@ Reste M4 :
 - granularite par tour seulement si un futur contrat la capture directement ;
 - rate-limit snapshots over time ;
 - timeline de phases ;
-- file/tool activity graph ;
-- repeated reads/searches/retries ;
+- file/tool activity graph : ACCEPTED FOUNDATION ;
+- repeated reads/searches/retries : exact-repeat foundation ACCEPTED ;
 - parent/subagent shared evidence ;
 - compaction events quand observables ;
 - duplicate evidence ;
@@ -224,3 +224,24 @@ Une phase est DONE uniquement si :
 - documentation synchronisee ;
 - aucune affirmation plus forte que la preuve ;
 - aucune regression des golden facts.
+
+## M4.5 - Shadow Retrieval / Edit Strategy
+
+Statut : PLANNED / OBSERVATION-ONLY.
+
+After M4 evidence is reliable and before active optimization, Tokn may build:
+- local repo/symbol index, content hashes and Git incremental invalidation;
+- Shadow Context Retrieval Engine (lexical/BM25 first, then AST/graph, semantic search only if measured useful);
+- Shadow Edit Strategy Analyzer (apply_patch vs deterministic script/refactor behavior) without changing Astra behavior;
+- context package candidates with provenance, freshness and expand/fallback paths.
+
+Shadow mode must not block reads, Python, subagents or tests. It estimates what Tokn would have supplied/done while Codex continues normally.
+
+Guardrails:
+- Astra keeps semantic decisions; Tokn handles deterministic, verifiable mechanics;
+- every active Context Compiler path keeps expand/fallback;
+- memory requires provenance + freshness + invalidation;
+- tool-output compression and parent/subagent shared context require A/B because omission risk is non-trivial;
+- no hard context cap, reasoning reduction or arbitrary output cap as default optimization.
+
+Experiment 003+ remains the causal gate. M8 activation is allowed only for categories that repeatedly win without quality loss.

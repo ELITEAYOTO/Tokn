@@ -114,3 +114,12 @@ P8 Runner DONE
 -> recurring findings
 -> causal experiments
 -> optimizer candidates.
+
+## Future Context Broker boundary - 2026-10-02
+
+Future active path, only after evidence gates:
+Runtime -> thin Tokn integration -> Context Broker -> retrieval/index/memory -> bounded Context Package -> Runtime.
+
+The Broker is not a second reasoning agent. It ranks and packages deterministic evidence. The runtime/model keeps semantic responsibility and can always expand or fall back to normal repository access.
+
+Provider/runtime adapters must remain separate from provider-neutral domain contracts. OpenAI token accounting V1 must not be copied blindly to Anthropic/Cowork; a future Token Semantics V2 is required before runtime #2.
