@@ -399,3 +399,23 @@ Next inside M4:
 4. add compaction/rediscovery observations where directly supported ;
 5. add explicit multi-run comparison primitives ;
 6. only after those observations are reliable, begin M5 Findings.
+
+## 2026-10-02 insertion - shadow before active optimizer
+
+Current M4 activity foundation is accepted. Next: automatic runtime-profile compatibility, rate-limit snapshots, shared/duplicate evidence and rediscovery primitives.
+
+Before Findings become interventions, introduce an observation-only shadow layer where useful:
+- repo/symbol index + Git/hash invalidation;
+- shadow context retrieval;
+- shadow edit-strategy classification.
+
+Before causal optimization:
+- pilot run-to-run variance;
+- quality acceptance defined before the run;
+- automatic compatible runtime/model/config evidence;
+- one primary intervention;
+- measure Tokn's own injected/default-active overhead.
+
+Before public distribution: threat model, retention/purge/export, dependency audit + SBOM, signing/update integrity.
+
+Runtime #2 comes after stable Codex V1 and requires provider-neutral token semantics plus real sanitized Claude/Cowork evidence.

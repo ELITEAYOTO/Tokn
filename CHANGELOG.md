@@ -743,3 +743,13 @@ P6 remains IN PROGRESS until one controlled real PreToolUse callback proves the 
 - target `codex-cli 0.161.0-alpha.2` directly invoked `tokn_status` and `tokn_context_ledger` through app-server on an isolated idle zero-turn thread ;
 - full fmt/clippy/tests, release build, MCP smoke, Experiment 001 replay, Experiment 002 regression and documentation checks passed on the validation branch ;
 - M4 is IN PROGRESS: tool/file activity, repeated reads/searches/retries, shared/duplicate evidence, compaction/rediscovery and explicit cross-run comparison remain before Findings.
+
+## 2026-10-02 - M4 activity history foundation
+
+- added privacy-safe ToolActivityHistory V1 and ActivityTimeline V1;
+- added exact repeated-operation observations without waste/savings claims;
+- added activity-timeline CLI;
+- added privacy regression for private paths/commands and a runtime-constructed synthetic secret;
+- fixed legacy uncached reporting to frozen V1 semantics;
+- documented shadow Context Retrieval / Edit Strategy direction and long-term Context Compiler guardrails;
+- reviewed external Claude architecture advice against the current repository rather than adopting it blindly.

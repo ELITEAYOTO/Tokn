@@ -172,3 +172,29 @@ An optimization candidate may reach Experiment Lab only when:
 7. Only after repeated wins, consider active Context Compiler / Project Memory.
 
 Plugin packaging is distribution/activation infrastructure, not an optimization by itself.
+
+## Context Compiler guardrails - 2026-10-02
+
+Tokn should evolve from observer to selective context compiler only through:
+observe -> classify -> shadow -> findings -> causal experiment -> advisor -> selective automation.
+
+Tokn may take over deterministic/repetitive/verifiable mechanics (search, symbol lookup, hashes, deduplication, Git invalidation, mechanical transforms after Astra has decided the semantic change). Astra retains architecture, debugging judgement, semantic edits and final validation.
+
+Priority candidates to study:
+- repeated reads/searches and repository orientation;
+- repo/symbol index + Git incremental invalidation;
+- context hashes / already-known ranges;
+- post-edit redundant reads;
+- edit amplification and retry chains;
+- tool-output footprint;
+- parent/subagent duplicate evidence;
+- stable instruction/tool-schema footprint.
+
+Not default optimization targets:
+- lower reasoning effort;
+- arbitrary output/context caps;
+- fewer subagents merely because they cost tokens;
+- skipping final verification/tests;
+- blocking Python or direct reads.
+
+Any active retrieval must support expand/fallback. Any Project Memory fact must carry content/state provenance, freshness and invalidation.

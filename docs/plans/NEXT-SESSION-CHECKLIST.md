@@ -112,3 +112,16 @@ Ces sujets restent apres V0.1 et doivent venir d'un finding mesure.
 
 P7-P9 sont offline/replay.
 Aucun quota Astra n'est requis.
+
+## M4 continuation after activity timeline acceptance
+
+Do not rebuild the accepted activity foundation.
+
+Next concrete work:
+1. automatic ModelRuntimeProfile compatibility reducer;
+2. rate-limit snapshot ingestion;
+3. shared/duplicate evidence parent/subagent;
+4. compaction/rediscovery only when directly observed;
+5. explicit cross-run comparison.
+
+After M4, prefer shadow retrieval/edit analysis before any active Context Compiler behavior.

@@ -135,3 +135,20 @@ Per-turn history requires a future directly evidenced contract if the product tr
 needs it. It must not be backfilled heuristically into V1.
 
 M5 Findings starts only after these historical observations are sufficiently reliable.
+
+## Accepted Tool Activity V1 slice - 2026-10-02
+
+ToolActivityHistory V1 is now an additive historical contract for M4.
+
+It persists only analysis-safe metadata and privacy-preserving fingerprints. It does not persist raw command text, raw workdir/path text, raw tool output or parse-error text.
+
+ActivityTimeline V1:
+- orders observations deterministically inside each agent;
+- reports source-sequence coverage when available;
+- does not invent a global parent/subagent order;
+- groups exact repeated operation fingerprints with occurrence/run/thread counts;
+- emits no efficiency score, savings claim or optimization recommendation.
+
+CLI: `tokn-observe activity-timeline`.
+
+Remaining M4 work is cross-run compatibility/rate-limit/shared-evidence/rediscovery analysis, not per-turn token invention.
