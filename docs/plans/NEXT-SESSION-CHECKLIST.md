@@ -40,10 +40,11 @@ Le core deja valide ne doit pas etre refait :
 - Codex 0.161.0-alpha.2 direct tool-call PASS sur thread idle / 0 turns ;
 - per-turn = `NOT_CAPTURED` et current retained context = `UNKNOWN`.
 
+Context/Result Identity Foundation V0 : ACCEPTED FOUNDATION.
+
 Prochain scope :
-- Context/Result Identity Foundation V0 ;
-- `SourceStableId` separe de `ContentFingerprint` privacy-safe quand directement observable ;
-- provenance + source version + freshness/invalidation sans stockage brut par defaut ;
+- SourceStableId seulement quand une identite logique stable est directement observable ;
+- source version + freshness/invalidation sans stockage brut par defaut ;
 - compaction/rediscovery uniquement quand directement observable ;
 - comparaison explicite multi-run avec coverage/comparability explicites.
 
@@ -120,11 +121,11 @@ Do not rebuild the accepted activity foundation.
 
 Automatic ModelRuntimeProfile compatibility reducer: ACCEPTED FOUNDATION.
 Rate-limit snapshot ingestion + RateLimitHistory V1: ACCEPTED FOUNDATION.
-Cross-Agent Evidence V1 exact-operation overlap: ACCEPTED FOUNDATION.
-Result identity remains `NOT_CAPTURED`; operation overlap is not duplicate evidence.
+Cross-Agent Evidence V2 exact-operation + result-identity comparison: ACCEPTED FOUNDATION.
+Exact content/result identity is now `OBSERVED` only for unambiguous one-operation/one-result evidence; ambiguous or unavailable cases remain explicit.
 
 Next concrete work:
-1. Context/Result Identity Foundation V0 with runtime-neutral naming; separate stable source identity from privacy-safe content/result fingerprint;
+1. stable logical source identity only where directly observable;
 2. provenance/source version/freshness/invalidation with `UNKNOWN`/`NOT_CAPTURED` preserved;
 3. compaction/rediscovery only when directly observed;
 4. explicit cross-run comparison with compatible evidence scope.

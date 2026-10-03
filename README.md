@@ -109,7 +109,7 @@ Il ne prouve ni que le contexte est utile, ni que le cache est optimal.
 
 Ordre actuel :
 - M4 Historical Analyzer + Context Ledger ;
-- M4/M4.5 Context/Result Identity + Context Twin seed, puis Shadow Retrieval/Edit ;
+- M4 exact Context/Result Identity foundation ACCEPTED ; M4.5 Context Twin/source identity + Shadow Retrieval/Edit ensuite ;
 - M5 Findings + Opportunity Analyzer ;
 - M6 counterfactual/policy lab puis Experiment 003 causal A/B ;
 - M7 Advisor ;

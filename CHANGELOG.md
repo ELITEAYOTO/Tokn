@@ -1,3 +1,13 @@
+## 2026-10-03 - M4 Context / Result Identity Foundation V0
+
+- added runtime-neutral identity coverage (`OBSERVED`, `PARTIAL`, `NOT_CAPTURED`, `UNKNOWN`);
+- upgraded ToolActivityHistory/Store activity identity surface to V2 with separate stable-source and exact-content identity fields;
+- Codex computes project-scoped exact result fingerprints only while raw output is transiently available; raw outputs are not persisted;
+- ambiguous multi-operation Code Mode results remain `NOT_CAPTURED`; unavailable source evidence remains `UNKNOWN`;
+- upgraded Cross-Agent Evidence to V2 with `SAME` / `DIFFERENT` only under complete observed result identity;
+- kept duplicate-waste/savings interpretation explicitly out of scope;
+- branch validation passed privacy, rustfmt, strict Clippy, workspace tests, release/provenance, MCP smoke, Experiment 001 golden, Experiment 002 regression and documentation consistency.
+
 # Tokn — Journal de développement
 
 Ce fichier trace les modifications significatives avec date et heure locale.

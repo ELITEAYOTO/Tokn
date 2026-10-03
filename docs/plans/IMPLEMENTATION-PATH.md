@@ -2,7 +2,7 @@
 
 Status: ACTIVE EXECUTION PLAN
 Date: 2026-10-03
-Current state: P0-P9 DONE / Experiment 002 ACCEPTED / Measurement Contract V1 FROZEN / Store foundation DONE / Local MCP transport prototype ACCEPTED / Historical Analyzer + Context Ledger IN PROGRESS
+Current state: P0-P9 DONE / Experiment 002 ACCEPTED / Measurement Contract V1 FROZEN / Store foundation DONE / Local MCP transport prototype ACCEPTED / Historical Analyzer + Context Ledger IN PROGRESS / Context-Result Identity V0 ACCEPTED
 
 ## Purpose
 
@@ -300,7 +300,7 @@ Phase G evidence status:
 - parent/subagent exact-operation overlap analysis: ACCEPTED FOUNDATION;
 - compaction events when observable: remaining;
 - repeated reads/searches/retries: exact-repeat foundation accepted, richer analysis remaining;
-- duplicate evidence: remaining until result identity is directly captured/proven;
+- exact result identity: foundation accepted; duplicate evidence remains allowed only when complete observed identity proves equality;
 - rediscovery and explicit cross-run comparison primitives.
 
 ## Phase H - Findings + Opportunity Analyzer V0
@@ -441,15 +441,15 @@ Completed in the current slice:
 7. CLI + read-only MCP exposure, including direct target-Codex tool-call validation.
 
 Next inside M4:
-1. add Context/Result Identity Foundation V0 before classifying cross-agent overlap as duplicate evidence ;
-2. store only privacy-safe identity/provenance/freshness metadata and keep raw outputs non-durable by default ;
-3. keep phase/compaction observations evidence-bounded and only where directly supported ;
+1. Context/Result Identity Foundation V0 is ACCEPTED; keep duplicate-evidence classification gated on complete observed identity ;
+2. add stable logical source identity only where directly observable, keeping raw outputs non-durable by default ;
+3. keep freshness/invalidation and phase/compaction observations evidence-bounded and only where directly supported ;
 4. add rediscovery observations and explicit multi-run comparison primitives ;
-5. only after those observations are reliable, enter M4.5 then M5 Findings + Opportunity Analyzer.
+5. only after those observations are reliable, continue M4.5 then M5 Findings + Opportunity Analyzer.
 
 ## 2026-10-02 insertion - shadow before active optimizer
 
-Current M4 activity foundation, runtime-profile compatibility reducer, rate-limit history and Cross-Agent Evidence V1 are accepted. Next: result-identity evidence, compaction/rediscovery and explicit cross-run primitives.
+Current M4 activity foundation, runtime-profile compatibility reducer, rate-limit history and Cross-Agent Evidence V2 with exact result identity are accepted. Next: stable source identity where observable, compaction/rediscovery and explicit cross-run primitives.
 
 Before Findings become interventions, introduce an observation-only shadow layer where useful:
 - repo/symbol index + Git/hash invalidation;

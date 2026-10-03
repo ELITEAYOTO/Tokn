@@ -69,6 +69,9 @@ Assert-Contains "docs/design/TARGET-ARCHITECTURE.md" "Runtime -> Runtime Adapter
 Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "SourceStableId"
 Assert-Contains "docs/design/MODEL-RUNTIME-PROFILE.md" "Token Semantics V2"
 Assert-Contains "docs/design/TOKN-STORE-V2.md" "## Current next boundary"
+Assert-Contains "docs/design/CONTEXT-RESULT-IDENTITY.md" "Status: M4 ACCEPTED FOUNDATION / M4.5 SEED"
+Assert-Contains "docs/design/CROSS-AGENT-EVIDENCE.md" "# Cross-Agent Evidence V2"
+Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "Context/Result Identity Foundation V0 : ACCEPTED FOUNDATION."
 
 $activeDocs = @(
     "README.md",
@@ -87,6 +90,8 @@ $activeDocs = @(
     "docs/design/PLUGIN-ENGINE-INTEGRATION.md",
     "docs/design/TARGET-ARCHITECTURE.md",
     "docs/design/MULTI-RUNTIME-CORE-AND-DATA-ARCHITECTURE.md",
+    "docs/design/CONTEXT-RESULT-IDENTITY.md",
+    "docs/design/CROSS-AGENT-EVIDENCE.md",
     "docs/decisions/ADR-006-MULTI-RUNTIME-CORE-ADAPTER-BOUNDARY.md",
     "docs/INDEX.md"
 )
@@ -112,7 +117,10 @@ $stale = @(
     "Historical Analyzer est NEXT",
     "Historical Analyzer + Context Ledger : NEXT",
     "Context Ledger is NEXT",
-    "P0-P7 DONE / P8 NEXT"
+    "P0-P7 DONE / P8 NEXT",
+    "Cross-Agent Evidence V1",
+    'result identity remains NOT_CAPTURED',
+    "result identity still NOT_CAPTURED"
 )
 
 foreach ($file in $activeDocs) {

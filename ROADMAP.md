@@ -158,12 +158,13 @@ Reste M4 :
 - automatic ModelRuntimeProfile compatibility reducer : ACCEPTED FOUNDATION ;
 - parent/subagent exact operation overlap : ACCEPTED FOUNDATION ;
 - compaction events quand observables ;
-- duplicate evidence : result identity still NOT_CAPTURED / remaining ;
-- rediscovery et comparaison explicite entre runs.
+- exact result/content identity foundation : ACCEPTED when directly observable ;
+- duplicate evidence may be reported only when complete observed result identity agrees ;
+- SourceStableId logical identity, freshness/invalidation, rediscovery and explicit cross-run comparison remain.
 
 ## M4.5 - Context Identity + Shadow Foundations
 
-Statut : PLANNED / OBSERVATION-ONLY.
+Statut : FOUNDATION STARTED / OBSERVATION-ONLY.
 
 Purpose: bridge M4 evidence to later optimization without changing Astra behavior.
 
