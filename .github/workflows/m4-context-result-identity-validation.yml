@@ -1,0 +1,70 @@
+name: M4 Context Result Identity Validation
+
+on:
+  push:
+    branches: [m4-context-result-identity]
+  pull_request:
+    branches: [m4-context-result-identity]
+
+permissions:
+  contents: write
+
+jobs:
+  validate:
+    name: V0.1 validation
+    runs-on: windows-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust 1.97.1
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: 1.97.1
+          components: rustfmt, clippy
+
+      - name: Cache Rust build
+        uses: Swatinem/rust-cache@v2
+
+      - name: Rustfmt context identity branch
+        shell: pwsh
+        run: |
+          cargo fmt --all
+          git diff --quiet
+          if ($LASTEXITCODE -ne 0) {
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add apps crates
+            git commit -m "style: rustfmt context result identity slice"
+            git push origin HEAD:m4-context-result-identity
+          }
+
+      - name: Publication privacy
+        shell: pwsh
+        run: ./scripts/validation/check-repo-publication.ps1
+
+      - name: Format, clippy and tests
+        shell: pwsh
+        run: ./scripts/test.ps1
+
+      - name: Release build with provenance
+        shell: pwsh
+        run: ./scripts/build-release.ps1
+
+      - name: Local MCP prototype smoke
+        shell: pwsh
+        run: ./scripts/validation/check-mcp-prototype.ps1
+
+      - name: Experiment 001 golden replay
+        shell: pwsh
+        run: ./scripts/validation/replay-exp001-golden.ps1
+
+      - name: Experiment 002 source-selection regression
+        shell: pwsh
+        run: ./scripts/validation/check-exp002-source-selection.ps1
+
+      - name: Documentation consistency
+        shell: pwsh
+        run: ./scripts/validation/check-doc-consistency.ps1
