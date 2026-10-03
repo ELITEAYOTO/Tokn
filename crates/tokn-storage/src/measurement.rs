@@ -5,9 +5,10 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use rusqlite::{OptionalExtension, params};
 use thiserror::Error;
 use tokn_domain::{
-    HISTORICAL_SNAPSHOT_SCHEMA_VERSION, HistoricalAgentRecord, HistoricalProvenanceRecord,
-    HistoricalRateLimitSnapshotRecord, HistoricalRunRecord, HistoricalRuntimeProfileRecord,
-    HistoricalSnapshot, HistoricalToolActivityRecord, HistoricalWorkspaceRecord,
+    EvidenceIdentityCoverage, HISTORICAL_SNAPSHOT_SCHEMA_VERSION, HistoricalAgentRecord,
+    HistoricalProvenanceRecord, HistoricalRateLimitSnapshotRecord, HistoricalRunRecord,
+    HistoricalRuntimeProfileRecord, HistoricalSnapshot, HistoricalToolActivityRecord,
+    HistoricalWorkspaceRecord,
     MEASUREMENT_CONTRACT_ID, MEASUREMENT_CONTRACT_VERSION, MeasurementContractManifest,
     ModelRuntimeProfile, RATE_LIMIT_HISTORY_SCHEMA_VERSION, RateLimitHistory, RunGroup,
     RunnerQualityStatus, RunnerResult, TOOL_ACTIVITY_HISTORY_SCHEMA_VERSION, TokenTotals,
@@ -69,6 +70,10 @@ pub struct ToolActivityStoreInput {
     pub original_token_count: Option<u64>,
     pub operation_fingerprint: Option<String>,
     pub workdir_fingerprint: Option<String>,
+    pub source_stable_id: Option<String>,
+    pub source_identity_coverage: EvidenceIdentityCoverage,
+    pub content_fingerprint: Option<String>,
+    pub content_identity_coverage: EvidenceIdentityCoverage,
     pub parse_error_present: bool,
 }
 
@@ -138,6 +143,15 @@ pub fn private_id(prefix: &str, material: &str) -> String {
 
 pub fn fingerprint_bytes(bytes: &[u8]) -> String {
     blake3::hash(bytes).to_hex().to_string()
+}
+
+pub fn scoped_fingerprint_bytes(prefix: &str, scope_key: &str, domain: &str, bytes: &[u8]) -> String {
+    let key = blake3::derive_key("tokn.project-scoped-content-fingerprint.v1", scope_key.as_bytes());
+    let mut hasher = blake3::Hasher::new_keyed(&key);
+    hasher.update(domain.as_bytes());
+    hasher.update(&[0]);
+    hasher.update(bytes);
+    format!("{prefix}-v1-{}", hasher.finalize().to_hex())
 }
 
 impl Database {
@@ -353,10 +367,12 @@ impl Database {
                     category, surface, requester_type, status, started_seq, ended_seq,
                     invocation_payload_bytes, result_payload_bytes, result_output_chars,
                     max_output_tokens, original_token_count, operation_fingerprint,
-                    workdir_fingerprint, parse_error_present, created_at_unix
+                    workdir_fingerprint, source_stable_id, source_identity_coverage,
+                    content_fingerprint, content_identity_coverage,
+                    parse_error_present, created_at_unix
                  ) VALUES (
                     ?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15,?16,
-                    ?17,?18,?19,?20,?21
+                    ?17,?18,?19,?20,?21,?22,?23,?24,?25
                  )",
                 params![
                     activity_id,
@@ -378,6 +394,10 @@ impl Database {
                     activity.original_token_count.map(to_i64).transpose()?,
                     activity.operation_fingerprint,
                     activity.workdir_fingerprint,
+                    activity.source_stable_id,
+                    activity.source_identity_coverage.as_str(),
+                    activity.content_fingerprint,
+                    activity.content_identity_coverage.as_str(),
                     if activity.parse_error_present {
                         1_i64
                     } else {
@@ -686,7 +706,9 @@ impl Database {
                 activity.invocation_payload_bytes, activity.result_payload_bytes,
                 activity.result_output_chars, activity.max_output_tokens,
                 activity.original_token_count, activity.operation_fingerprint,
-                activity.workdir_fingerprint, activity.parse_error_present,
+                activity.workdir_fingerprint, activity.source_stable_id,
+                activity.source_identity_coverage, activity.content_fingerprint,
+                activity.content_identity_coverage, activity.parse_error_present,
                 selected.created_at_unix
              FROM tool_activity_v1 AS activity
              INNER JOIN selected_runs AS selected ON selected.run_id = activity.run_id
@@ -727,8 +749,12 @@ impl Database {
                         original_token_count: row_optional_u64(row, 18)?,
                         operation_fingerprint: row.get(19)?,
                         workdir_fingerprint: row.get(20)?,
-                        parse_error_present: row.get::<_, i64>(21)? != 0,
-                        run_created_at_unix: row.get(22)?,
+                        source_stable_id: row.get(21)?,
+                        source_identity_coverage: parse_identity_coverage(row.get::<_, String>(22)?)?,
+                        content_fingerprint: row.get(23)?,
+                        content_identity_coverage: parse_identity_coverage(row.get::<_, String>(24)?)?,
+                        parse_error_present: row.get::<_, i64>(25)? != 0,
+                        run_created_at_unix: row.get(26)?,
                     })
                 },
             )?
@@ -1169,6 +1195,20 @@ fn validate_private_id(name: &str, value: &str, prefix: &str) -> Result<(), Meas
     Ok(())
 }
 
+fn parse_identity_coverage(value: String) -> rusqlite::Result<EvidenceIdentityCoverage> {
+    EvidenceIdentityCoverage::parse(&value).ok_or_else(|| {
+        rusqlite::Error::FromSqlConversionFailure(
+            0,
+            rusqlite::types::Type::Text,
+            std::io::Error::new(
+                std::io::ErrorKind::InvalidData,
+                format!("unknown evidence identity coverage: {value}"),
+            )
+            .into(),
+        )
+    })
+}
+
 fn row_u64(row: &rusqlite::Row<'_>, index: usize) -> rusqlite::Result<u64> {
     let value: i64 = row.get(index)?;
     u64::try_from(value).map_err(|_| rusqlite::Error::IntegralValueOutOfRange(index, value))
@@ -1211,6 +1251,22 @@ mod tests {
             "tokn-measurement-{name}-{}.sqlite3",
             std::process::id()
         ))
+    }
+
+    #[test]
+    fn scoped_content_fingerprint_is_stable_within_project_and_separated_across_projects() {
+        let raw = b"privacy-sensitive fixture output";
+        let first = scoped_fingerprint_bytes("cnt", "project-a", "tool-result-output-v1", raw);
+        let repeat = scoped_fingerprint_bytes("cnt", "project-a", "tool-result-output-v1", raw);
+        let other_project =
+            scoped_fingerprint_bytes("cnt", "project-b", "tool-result-output-v1", raw);
+        let other_domain = scoped_fingerprint_bytes("cnt", "project-a", "other-domain", raw);
+
+        assert_eq!(first, repeat);
+        assert_ne!(first, other_project);
+        assert_ne!(first, other_domain);
+        assert!(first.starts_with("cnt-v1-"));
+        assert!(!first.contains("privacy-sensitive"));
     }
 
     fn totals() -> TokenTotals {
@@ -1438,6 +1494,7 @@ mod tests {
             "Users", synthetic_secret
         );
         let private_workdir = format!(r"C:\{}\activity-user\Secret Project", "Users");
+        let raw_result = format!("private-result-{synthetic_secret}");
 
         let mut input = input(&private_path);
         let operation_fingerprint = private_id(
@@ -1446,6 +1503,12 @@ mod tests {
         );
         let workdir_fingerprint =
             private_id("cwd", &format!("{}:{private_workdir}", input.project_id));
+        let content_fingerprint = scoped_fingerprint_bytes(
+            "cnt",
+            "fixture-project-key",
+            "tool-result-output-v1",
+            raw_result.as_bytes(),
+        );
         input.tool_activities.push(ToolActivityStoreInput {
             source_call_key: "call-private#0".into(),
             thread_id: "thread-root".into(),
@@ -1465,6 +1528,10 @@ mod tests {
             original_token_count: None,
             operation_fingerprint: Some(operation_fingerprint),
             workdir_fingerprint: Some(workdir_fingerprint),
+            source_stable_id: None,
+            source_identity_coverage: EvidenceIdentityCoverage::NotCaptured,
+            content_fingerprint: Some(content_fingerprint.clone()),
+            content_identity_coverage: EvidenceIdentityCoverage::Observed,
             parse_error_present: false,
         });
 
@@ -1477,7 +1544,7 @@ mod tests {
         assert_eq!(db.tool_activity_count().unwrap(), 1);
         assert_eq!(
             db.tool_activity_schema_version().unwrap().as_deref(),
-            Some("1")
+            Some("2")
         );
 
         let history = db
@@ -1500,6 +1567,18 @@ mod tests {
                 .as_deref()
                 .is_some_and(|value| value.starts_with("cwd-"))
         );
+        assert_eq!(
+            history.activities[0].content_fingerprint.as_deref(),
+            Some(content_fingerprint.as_str())
+        );
+        assert_eq!(
+            history.activities[0].content_identity_coverage,
+            EvidenceIdentityCoverage::Observed
+        );
+        assert_eq!(
+            history.activities[0].source_identity_coverage,
+            EvidenceIdentityCoverage::NotCaptured
+        );
 
         drop(db);
         let bytes = fs::read(&path).expect("read sqlite");
@@ -1509,6 +1588,7 @@ mod tests {
         assert!(!haystack.contains("secret-notes.txt"));
         assert!(!haystack.contains("activity-user"));
         assert!(!haystack.contains(&synthetic_secret));
+        assert!(!haystack.contains(&raw_result));
 
         let _ = fs::remove_file(path);
     }

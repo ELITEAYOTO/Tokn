@@ -3,17 +3,19 @@ use std::fmt;
 
 use serde::{Deserialize, Serialize};
 use tokn_domain::{
-    HISTORICAL_SNAPSHOT_SCHEMA_VERSION, HistoricalAgentRecord, HistoricalSnapshot,
-    TOOL_ACTIVITY_HISTORY_SCHEMA_VERSION, ToolActivityHistory,
+    EvidenceIdentityCoverage, HISTORICAL_SNAPSHOT_SCHEMA_VERSION, HistoricalAgentRecord,
+    HistoricalSnapshot, TOOL_ACTIVITY_HISTORY_SCHEMA_VERSION, ToolActivityHistory,
 };
 
-pub const CROSS_AGENT_EVIDENCE_SCHEMA_VERSION: u64 = 1;
+pub const CROSS_AGENT_EVIDENCE_SCHEMA_VERSION: u64 = 2;
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
-pub enum ResultIdentityCoverage {
+pub enum ResultIdentityMatch {
+    Same,
+    Different,
     #[default]
-    NotCaptured,
+    Unknown,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -53,7 +55,9 @@ pub struct CrossAgentOperationOverlap {
     pub thread_count: u64,
     pub participants: Vec<CrossAgentParticipant>,
     pub relations: Vec<CrossAgentPairRelation>,
-    pub result_identity_coverage: ResultIdentityCoverage,
+    pub result_identity_coverage: EvidenceIdentityCoverage,
+    pub result_identity_match: ResultIdentityMatch,
+    pub distinct_result_fingerprint_count: u64,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -151,8 +155,18 @@ pub fn build_cross_agent_evidence(
             run_created_at_unix: activity.run_created_at_unix,
             occurrences: 0,
             per_thread: BTreeMap::new(),
+            result_fingerprints: BTreeSet::new(),
+            result_fingerprint_occurrences: 0,
+            result_identity_coverages: Vec::new(),
         });
         entry.occurrences += 1;
+        if let Some(result_fingerprint) = activity.content_fingerprint.as_ref() {
+            entry.result_fingerprints.insert(result_fingerprint.clone());
+            entry.result_fingerprint_occurrences += 1;
+        }
+        entry
+            .result_identity_coverages
+            .push(activity.content_identity_coverage);
         *entry
             .per_thread
             .entry(activity.thread_id.clone())
@@ -191,6 +205,7 @@ pub fn build_cross_agent_evidence(
             }
         }
 
+        let (result_identity_coverage, result_identity_match) = summarize_result_identity(&group);
         overlaps.push(CrossAgentOperationOverlap {
             run_id,
             project_id: group.project_id,
@@ -202,7 +217,9 @@ pub fn build_cross_agent_evidence(
             thread_count: participants.len() as u64,
             participants,
             relations,
-            result_identity_coverage: ResultIdentityCoverage::NotCaptured,
+            result_identity_coverage,
+            result_identity_match,
+            distinct_result_fingerprint_count: group.result_fingerprints.len() as u64,
         });
     }
 
@@ -232,6 +249,47 @@ struct OperationGroup {
     run_created_at_unix: i64,
     occurrences: u64,
     per_thread: BTreeMap<String, u64>,
+    result_fingerprints: BTreeSet<String>,
+    result_fingerprint_occurrences: u64,
+    result_identity_coverages: Vec<EvidenceIdentityCoverage>,
+}
+
+fn summarize_result_identity(
+    group: &OperationGroup,
+) -> (EvidenceIdentityCoverage, ResultIdentityMatch) {
+    let observed = group
+        .result_identity_coverages
+        .iter()
+        .filter(|coverage| **coverage == EvidenceIdentityCoverage::Observed)
+        .count();
+    let has_partial = group
+        .result_identity_coverages
+        .contains(&EvidenceIdentityCoverage::Partial);
+    let has_unknown = group
+        .result_identity_coverages
+        .contains(&EvidenceIdentityCoverage::Unknown);
+    let complete = observed == group.occurrences as usize
+        && group.result_fingerprint_occurrences == group.occurrences
+        && observed > 0;
+
+    if complete {
+        let result_match = if group.result_fingerprints.len() == 1 {
+            ResultIdentityMatch::Same
+        } else {
+            ResultIdentityMatch::Different
+        };
+        return (EvidenceIdentityCoverage::Observed, result_match);
+    }
+    if observed > 0 || has_partial {
+        return (EvidenceIdentityCoverage::Partial, ResultIdentityMatch::Unknown);
+    }
+    if has_unknown {
+        return (EvidenceIdentityCoverage::Unknown, ResultIdentityMatch::Unknown);
+    }
+    (
+        EvidenceIdentityCoverage::NotCaptured,
+        ResultIdentityMatch::Unknown,
+    )
 }
 
 fn relation_kind(
@@ -338,6 +396,25 @@ mod tests {
         }
     }
 
+    fn activity_with_result(
+        run_id: &str,
+        thread_id: &str,
+        ordinal: u64,
+        operation_fingerprint: &str,
+        content_fingerprint: Option<&str>,
+        coverage: EvidenceIdentityCoverage,
+    ) -> HistoricalToolActivityRecord {
+        let mut item = activity(
+            run_id,
+            thread_id,
+            ordinal,
+            Some(operation_fingerprint),
+        );
+        item.content_fingerprint = content_fingerprint.map(str::to_string);
+        item.content_identity_coverage = coverage;
+        item
+    }
+
     fn snapshot(agents: Vec<HistoricalAgentRecord>) -> HistoricalSnapshot {
         HistoricalSnapshot {
             schema_version: HISTORICAL_SNAPSHOT_SCHEMA_VERSION,
@@ -377,13 +454,114 @@ mod tests {
         assert_eq!(overlap.thread_count, 2);
         assert_eq!(
             overlap.result_identity_coverage,
-            ResultIdentityCoverage::NotCaptured
+            EvidenceIdentityCoverage::NotCaptured
         );
+        assert_eq!(overlap.result_identity_match, ResultIdentityMatch::Unknown);
+        assert_eq!(overlap.distinct_result_fingerprint_count, 0);
         assert_eq!(overlap.relations.len(), 1);
         assert_eq!(
             overlap.relations[0].relation,
             CrossAgentRelationKind::DirectParentChild
         );
+    }
+
+    #[test]
+    fn reports_same_result_only_when_all_occurrences_have_same_observed_identity() {
+        let report = build_cross_agent_evidence(
+            &snapshot(vec![agent("root", None, 0), agent("child", Some("root"), 1)]),
+            &history(vec![
+                activity_with_result(
+                    "run-1",
+                    "root",
+                    0,
+                    "op-same",
+                    Some("cnt-v1-a"),
+                    EvidenceIdentityCoverage::Observed,
+                ),
+                activity_with_result(
+                    "run-1",
+                    "child",
+                    0,
+                    "op-same",
+                    Some("cnt-v1-a"),
+                    EvidenceIdentityCoverage::Observed,
+                ),
+            ]),
+        )
+        .unwrap();
+
+        let overlap = &report.overlaps[0];
+        assert_eq!(overlap.result_identity_coverage, EvidenceIdentityCoverage::Observed);
+        assert_eq!(overlap.result_identity_match, ResultIdentityMatch::Same);
+        assert_eq!(overlap.distinct_result_fingerprint_count, 1);
+    }
+
+    #[test]
+    fn reports_different_result_when_complete_identity_disagrees() {
+        let report = build_cross_agent_evidence(
+            &snapshot(vec![agent("root", None, 0), agent("child", Some("root"), 1)]),
+            &history(vec![
+                activity_with_result(
+                    "run-1", "root", 0, "op-same", Some("cnt-v1-a"),
+                    EvidenceIdentityCoverage::Observed,
+                ),
+                activity_with_result(
+                    "run-1", "child", 0, "op-same", Some("cnt-v1-b"),
+                    EvidenceIdentityCoverage::Observed,
+                ),
+            ]),
+        )
+        .unwrap();
+
+        let overlap = &report.overlaps[0];
+        assert_eq!(overlap.result_identity_coverage, EvidenceIdentityCoverage::Observed);
+        assert_eq!(overlap.result_identity_match, ResultIdentityMatch::Different);
+        assert_eq!(overlap.distinct_result_fingerprint_count, 2);
+    }
+
+    #[test]
+    fn incomplete_result_identity_is_partial_and_never_claims_match() {
+        let report = build_cross_agent_evidence(
+            &snapshot(vec![agent("root", None, 0), agent("child", Some("root"), 1)]),
+            &history(vec![
+                activity_with_result(
+                    "run-1", "root", 0, "op-same", Some("cnt-v1-a"),
+                    EvidenceIdentityCoverage::Observed,
+                ),
+                activity_with_result(
+                    "run-1", "child", 0, "op-same", None,
+                    EvidenceIdentityCoverage::NotCaptured,
+                ),
+            ]),
+        )
+        .unwrap();
+
+        let overlap = &report.overlaps[0];
+        assert_eq!(overlap.result_identity_coverage, EvidenceIdentityCoverage::Partial);
+        assert_eq!(overlap.result_identity_match, ResultIdentityMatch::Unknown);
+        assert_eq!(overlap.distinct_result_fingerprint_count, 1);
+    }
+
+    #[test]
+    fn unavailable_result_identity_is_unknown() {
+        let report = build_cross_agent_evidence(
+            &snapshot(vec![agent("root", None, 0), agent("child", Some("root"), 1)]),
+            &history(vec![
+                activity_with_result(
+                    "run-1", "root", 0, "op-same", None,
+                    EvidenceIdentityCoverage::Unknown,
+                ),
+                activity_with_result(
+                    "run-1", "child", 0, "op-same", None,
+                    EvidenceIdentityCoverage::NotCaptured,
+                ),
+            ]),
+        )
+        .unwrap();
+
+        let overlap = &report.overlaps[0];
+        assert_eq!(overlap.result_identity_coverage, EvidenceIdentityCoverage::Unknown);
+        assert_eq!(overlap.result_identity_match, ResultIdentityMatch::Unknown);
     }
 
     #[test]

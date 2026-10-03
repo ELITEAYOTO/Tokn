@@ -209,8 +209,12 @@ fn apply_tool_activity_migrations(conn: &Connection) -> rusqlite::Result<()> {
     };
 
     match current.as_deref() {
-        Some("1") => Ok(()),
-        None => conn.execute_batch(include_str!("../migrations/0003_tool_activity.sql")),
+        Some("2") => Ok(()),
+        Some("1") => conn.execute_batch(include_str!("../migrations/0004_context_identity.sql")),
+        None => {
+            conn.execute_batch(include_str!("../migrations/0003_tool_activity.sql"))?;
+            conn.execute_batch(include_str!("../migrations/0004_context_identity.sql"))
+        }
         Some(_) => Err(rusqlite::Error::InvalidQuery),
     }
 }
@@ -373,6 +377,45 @@ mod tests {
         ));
         let _ = fs::remove_file(path);
     }
+    #[test]
+    fn migrates_tool_activity_v1_to_context_identity_v2() {
+        let path = std::env::temp_dir().join(format!(
+            "tokn-storage-activity-v1-v2-{}.sqlite3",
+            std::process::id()
+        ));
+        let _ = fs::remove_file(&path);
+
+        {
+            let conn = Connection::open(&path).unwrap();
+            conn.execute_batch(include_str!("../migrations/0001_initial.sql"))
+                .unwrap();
+            conn.execute_batch(include_str!("../migrations/0002_measurement_store.sql"))
+                .unwrap();
+            conn.execute_batch(include_str!("../migrations/0003_tool_activity.sql"))
+                .unwrap();
+        }
+
+        let db = Database::open(&path).unwrap();
+        assert_eq!(db.tool_activity_schema_version().unwrap().as_deref(), Some("2"));
+        drop(db);
+
+        let conn = Connection::open(&path).unwrap();
+        let mut stmt = conn.prepare("PRAGMA table_info(tool_activity_v1)").unwrap();
+        let names = stmt
+            .query_map([], |row| row.get::<_, String>(1))
+            .unwrap()
+            .collect::<rusqlite::Result<Vec<_>>>()
+            .unwrap();
+        assert!(names.iter().any(|name| name == "source_stable_id"));
+        assert!(names.iter().any(|name| name == "source_identity_coverage"));
+        assert!(names.iter().any(|name| name == "content_fingerprint"));
+        assert!(names.iter().any(|name| name == "content_identity_coverage"));
+        drop(stmt);
+        drop(conn);
+
+        let _ = fs::remove_file(path);
+    }
+
     #[test]
     fn refuses_unknown_future_tool_activity_version() {
         let path = std::env::temp_dir().join(format!(

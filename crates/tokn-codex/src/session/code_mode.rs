@@ -11,6 +11,26 @@ pub struct SessionToolBatch {
     pub parse_failures: u64,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SessionToolResultOutput {
+    pub call_id: String,
+    pub output: String,
+}
+
+pub fn extract_session_tool_result_output(value: &Value) -> Option<SessionToolResultOutput> {
+    if value.get("type").and_then(Value::as_str) != Some("response_item") {
+        return None;
+    }
+    let payload = value.get("payload")?;
+    if payload.get("type").and_then(Value::as_str) != Some("custom_tool_call_output") {
+        return None;
+    }
+    Some(SessionToolResultOutput {
+        call_id: payload.get("call_id")?.as_str()?.to_string(),
+        output: payload.get("output")?.as_str()?.to_string(),
+    })
+}
+
 pub fn extract_session_tools(value: &Value) -> Option<SessionToolBatch> {
     if value.get("type").and_then(Value::as_str) != Some("response_item") {
         return None;
@@ -425,5 +445,30 @@ mod tests {
         assert_eq!(batch.parse_failures, 1);
         assert_eq!(batch.observations.len(), 1);
         assert!(batch.observations[0].parse_error.is_some());
+    }
+
+    #[test]
+    fn extracts_custom_tool_result_output_without_normalizing_raw_content() {
+        let value = json!({
+            "type": "response_item",
+            "payload": {
+                "type": "custom_tool_call_output",
+                "call_id": "call-1",
+                "output": "fixture result"
+            }
+        });
+
+        let result = extract_session_tool_result_output(&value).expect("tool output");
+        assert_eq!(result.call_id, "call-1");
+        assert_eq!(result.output, "fixture result");
+    }
+
+    #[test]
+    fn ignores_non_tool_output_records() {
+        let value = json!({
+            "type": "response_item",
+            "payload": {"type": "message", "output": "fixture"}
+        });
+        assert!(extract_session_tool_result_output(&value).is_none());
     }
 }

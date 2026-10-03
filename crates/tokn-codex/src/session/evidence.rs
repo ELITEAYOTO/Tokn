@@ -1,3 +1,4 @@
+use std::collections::BTreeMap;
 use std::path::Path;
 
 use anyhow::{Context, Result};
@@ -5,9 +6,21 @@ use tokn_domain::{AgentEvidence, KeyedTokenUsage, TerminalObservation, TerminalS
 use tokn_ingest::{JsonlConfig, read_jsonl};
 
 use super::{
-    extract_rate_limit_snapshot, extract_session_tools, extract_terminal_observation,
-    extract_usage_record,
+    extract_rate_limit_snapshot, extract_session_tool_result_output, extract_session_tools,
+    extract_terminal_observation, extract_usage_record,
 };
+
+
+pub fn read_session_tool_result_outputs(path: &Path) -> Result<BTreeMap<String, Vec<String>>> {
+    let mut outputs = BTreeMap::<String, Vec<String>>::new();
+    read_jsonl(path, &JsonlConfig::default(), |record| {
+        if let Some(result) = extract_session_tool_result_output(&record.value) {
+            outputs.entry(result.call_id).or_default().push(result.output);
+        }
+    })
+    .with_context(|| format!("read session tool outputs {}", path.display()))?;
+    Ok(outputs)
+}
 
 pub fn read_session_evidence(path: &Path) -> Result<AgentEvidence> {
     let mut evidence = AgentEvidence {

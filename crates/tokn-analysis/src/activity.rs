@@ -3,7 +3,8 @@ use std::fmt;
 
 use serde::{Deserialize, Serialize};
 use tokn_domain::{
-    HistoricalToolActivityRecord, TOOL_ACTIVITY_HISTORY_SCHEMA_VERSION, ToolActivityHistory,
+    EvidenceIdentityCoverage, HistoricalToolActivityRecord, TOOL_ACTIVITY_HISTORY_SCHEMA_VERSION,
+    ToolActivityHistory,
 };
 
 pub const ACTIVITY_TIMELINE_SCHEMA_VERSION: u64 = 1;
@@ -250,6 +251,10 @@ mod tests {
             original_token_count: None,
             operation_fingerprint: fingerprint.map(str::to_string),
             workdir_fingerprint: Some("cwd-0123456789abcdef01234567".into()),
+            source_stable_id: None,
+            source_identity_coverage: EvidenceIdentityCoverage::NotCaptured,
+            content_fingerprint: None,
+            content_identity_coverage: EvidenceIdentityCoverage::NotCaptured,
             parse_error_present: false,
             run_created_at_unix: if run_id == "run-2" { 2 } else { 1 },
         }

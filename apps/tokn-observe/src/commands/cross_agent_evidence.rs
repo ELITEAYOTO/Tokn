@@ -69,11 +69,11 @@ mod tests {
             serde_json::from_slice(&std::fs::read(&output).expect("read output"))
                 .expect("parse output");
 
-        assert_eq!(value["schema_version"].as_u64(), Some(1));
+        assert_eq!(value["schema_version"].as_u64(), Some(2));
         assert_eq!(value["source_snapshot_schema_version"].as_u64(), Some(1));
         assert_eq!(
             value["source_activity_history_schema_version"].as_u64(),
-            Some(1)
+            Some(2)
         );
         assert_eq!(value["overlaps"].as_array().map(Vec::len), Some(0));
 
