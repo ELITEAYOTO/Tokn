@@ -129,7 +129,7 @@ Before M4 can be marked DONE:
 - detailed compaction chronology remains `NOT_CAPTURED` until a real diagnostic event can be observed and fixture-tested ;
 - duplicate-evidence finding remains deferred even when exact result identity is observed, because identity alone does not prove redundancy or waste ;
 - rediscovery across runs only when directly observable ;
-- Cross-Run Comparability V0 is the current candidate explicit comparison primitive.
+- Cross-Run Comparability V0 is an accepted explicit comparison primitive; Task Input Identity V0 is an accepted extension for directly captured frozen task-artifact identity.
 
 Per-turn history requires a future directly evidenced contract if the product truly
 needs it. It must not be backfilled heuristically into V1.
@@ -240,6 +240,16 @@ No Store V2 migration or Measurement Contract V1 change is required. Cross-Run C
 
 SourceStableId, source-version and Git fingerprints are project-scoped; when project ids differ Tokn reports project mismatch and does not compare those fingerprints. Source BEFORE PASS requires two non-empty identical observed source sets with equal exact versions. Asymmetric captured sets remain `UNKNOWN`. Git BEFORE PASS requires observed equal HEAD plus both worktrees clean; same HEAD with dirty worktrees remains `UNKNOWN`.
 
-`observed_scope_compatible=true` is deliberately narrower than experiment validity. Every report keeps `causal_claims_status=NOT_ESTABLISHED`: task/prompt identity, external dependencies, single-primary-variable control, quality and terminal compatibility remain separate evidence gates.
+`observed_scope_compatible=true` is deliberately narrower than experiment validity. The Task Input Identity V0 extension adds exact frozen task-artifact equality as a captured-scope gate when directly observed, but runtime delivery, external dependencies, single-primary-variable control, quality and terminal compatibility remain separate evidence gates. Every report keeps `causal_claims_status=NOT_ESTABLISHED`.
 
 Detailed compaction chronology is not implemented from speculation. The Diagnostic parser can count kinds containing `compaction`, but retained real traces and current sanitized fixtures contain no detailed compaction event sample. Diagnostic `seq` is not assumed comparable to session-rollout `seq`; detailed compaction remains `NOT_CAPTURED` until real evidence supports a versioned adapter contract.
+
+## Accepted Task Input Identity V0 slice - 2026-10-03
+
+`store-evidence --task-input <task-file>` can transiently read a frozen task artifact and persist only a project-scoped/domain-separated `tsk-v1-*` exact-byte identity plus byte length. Omitted task input is explicit `NOT_CAPTURED`; raw task text and raw path are not persisted.
+
+`tokn-observe task-input-history` exposes the bounded privacy-safe history. Every returned record keeps `delivery_status=NOT_PROVEN`: observing the frozen artifact does not prove that the runtime/model received those bytes.
+
+Cross-Run Comparability consumes TaskInputHistory as `TASK_INPUT_IDENTITY`: matching complete observed identities pass, different complete observed identities fail, and incomplete/asymmetric capture stays `UNKNOWN`. Across project scopes the fingerprints are not compared. `causal_claims_status` remains `NOT_ESTABLISHED` even when task-artifact identity passes.
+
+This accepted slice uses additive Store migration `0008_task_input_identity.sql`; Measurement Contract V1, RunnerRequest V1 and Evidence Layout V1 remain frozen and unchanged. The canonical full gate, golden replay, documentation consistency and privacy checks passed before promotion.

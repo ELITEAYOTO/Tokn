@@ -43,6 +43,7 @@ impl Database {
         apply_tool_activity_migrations(&conn)?;
         apply_source_version_migrations(&conn)?;
         apply_workspace_git_provenance_migrations(&conn)?;
+        apply_task_input_identity_migrations(&conn)?;
         Ok(Self {
             conn,
             path: path.to_path_buf(),
@@ -261,6 +262,24 @@ fn apply_workspace_git_provenance_migrations(conn: &Connection) -> rusqlite::Res
         None => conn.execute_batch(include_str!(
             "../migrations/0007_workspace_git_provenance.sql"
         )),
+        Some(_) => Err(rusqlite::Error::InvalidQuery),
+    }
+}
+
+fn apply_task_input_identity_migrations(conn: &Connection) -> rusqlite::Result<()> {
+    let current = {
+        let mut stmt = conn.prepare(
+            "SELECT value FROM schema_meta WHERE key='task_input_identity_schema_version'",
+        )?;
+        let mut rows = stmt.query([])?;
+        rows.next()?
+            .map(|row| row.get::<_, String>(0))
+            .transpose()?
+    };
+
+    match current.as_deref() {
+        Some("1") => Ok(()),
+        None => conn.execute_batch(include_str!("../migrations/0008_task_input_identity.sql")),
         Some(_) => Err(rusqlite::Error::InvalidQuery),
     }
 }
@@ -494,6 +513,41 @@ mod tests {
         ));
         let _ = fs::remove_file(path);
     }
+    #[test]
+    fn creates_task_input_identity_schema_v1_and_refuses_future_version() {
+        let path = std::env::temp_dir().join(format!(
+            "tokn-storage-task-input-{}.sqlite3",
+            std::process::id()
+        ));
+        let _ = fs::remove_file(&path);
+
+        let db = Database::open(&path).expect("open db");
+        let version: String = db
+            .connection()
+            .query_row(
+                "SELECT value FROM schema_meta WHERE key='task_input_identity_schema_version'",
+                [],
+                |row| row.get(0),
+            )
+            .expect("schema version");
+        assert_eq!(version, "1");
+        drop(db);
+
+        let conn = Connection::open(&path).expect("reopen raw db");
+        conn.execute(
+            "UPDATE schema_meta SET value='99' WHERE key='task_input_identity_schema_version'",
+            [],
+        )
+        .expect("write future version");
+        drop(conn);
+
+        assert!(matches!(
+            Database::open(&path),
+            Err(rusqlite::Error::InvalidQuery)
+        ));
+        let _ = fs::remove_file(path);
+    }
+
     #[test]
     fn creates_source_version_schema_v1_and_refuses_future_version() {
         let path = std::env::temp_dir().join(format!(

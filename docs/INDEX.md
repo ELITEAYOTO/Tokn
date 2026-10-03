@@ -91,7 +91,9 @@ Un document historique ne doit pas remplacer une source de verite courante.
 - `design/SOURCE-FRESHNESS-EVIDENCE.md`
   Source Freshness Evidence V0 : join observation-only de la chronologie read/mutation/reread, SourceVersion et provenance Git; change/reread peut etre corrobore, mais freshness/invalidation restent `NOT_PROVEN`.
 - `design/CROSS-RUN-COMPARABILITY.md`
-  Cross-Run Comparability V0 : comparaison observation-only de deux runs sur project/contract/runtime/SourceVersion BEFORE/Git BEFORE; fingerprints project-scoped non compares entre projets et causalite toujours `NOT_ESTABLISHED`.
+  Cross-Run Comparability V0 : comparaison observation-only de deux runs sur project/contract/runtime/SourceVersion BEFORE/Git BEFORE, et Task Input Identity quand directement capture; fingerprints project-scoped non compares entre projets et causalite toujours `NOT_ESTABLISHED`.
+- `design/TASK-INPUT-IDENTITY.md`
+  Task Input Identity V0 : fondation M4 acceptee privacy-safe pour l'identite exacte de l'artefact de tache (`tsk-v1-*`); `delivery_status=NOT_PROVEN`, aucune persistance du prompt brut.
 - `design/SESSION-ROLLOUT-ADAPTER.md`
 - `design/AGENT-COST-ATTRIBUTION.md`
 - `design/WORKSPACE-TRACKING.md`

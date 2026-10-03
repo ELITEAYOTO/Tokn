@@ -1,3 +1,15 @@
+## 2026-10-03 - M4 Task Input Identity V0
+
+- added additive Store `task_input_identity_v1` with fail-closed schema versioning, one run-owned observation, explicit coverage and no raw task/path persistence;
+- added `store-evidence --task-input <task-file>` to derive project-scoped/domain-separated `tsk-v1-*` exact-byte identity transiently; omitted task input becomes explicit `NOT_CAPTURED`;
+- added read-only `tokn-observe task-input-history`; every record derives `delivery_status=NOT_PROVEN` so artifact identity cannot be mistaken for runtime/model delivery evidence;
+- extended Cross-Run Comparability V0 with fail-closed `TASK_INPUT_IDENTITY`: equal complete observed task identities PASS, different complete observed identities FAIL, incomplete/asymmetric capture stays `UNKNOWN`, and cross-project fingerprints are never compared;
+- `causal_claims_status` remains `NOT_ESTABLISHED` even when task artifact identity matches; runtime delivery, external dependency equality and single-primary-variable control remain separate gates;
+- Experiment 001 golden replay now exercises observed task identity ingestion/idempotence/query and asserts a raw task marker is absent from SQLite;
+- Measurement Contract V1, RunnerRequest V1, RunnerResult V1 and Evidence Layout V1 remain unchanged.
+
+## 2026-10-03 - M4 Cross-Run Comparability V0
+
 ## 2026-10-03 - M4 Cross-Run Comparability V0
 
 - added an observation-only cross-run comparability reducer over HistoricalSnapshot V1, SourceVersionHistory V1 and WorkspaceGitProvenanceHistory V1;

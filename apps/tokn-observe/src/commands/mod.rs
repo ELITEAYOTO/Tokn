@@ -27,6 +27,7 @@ mod source_mutation_history;
 mod source_mutation_window_history;
 mod source_version_history;
 mod store_evidence;
+mod task_input_history;
 mod workspace_git_provenance_history;
 
 use crate::cli::{Cli, Command};
@@ -176,6 +177,19 @@ pub fn run(cli: Cli) -> anyhow::Result<()> {
             db.as_deref(),
             output_json.as_deref(),
         ),
+        Command::TaskInputHistory {
+            project_id,
+            workspace_id,
+            limit,
+            db,
+            output_json,
+        } => task_input_history::run(
+            project_id.as_deref(),
+            workspace_id.as_deref(),
+            limit,
+            db.as_deref(),
+            output_json.as_deref(),
+        ),
         Command::WorkspaceGitProvenanceHistory {
             project_id,
             workspace_id,
@@ -195,6 +209,7 @@ pub fn run(cli: Cli) -> anyhow::Result<()> {
             workspace_key,
             parent_workspace_key,
             runtime_profile,
+            task_input,
             db,
         } => store_evidence::run(
             &evidence_dir,
@@ -202,6 +217,7 @@ pub fn run(cli: Cli) -> anyhow::Result<()> {
             &workspace_key,
             parent_workspace_key.as_deref(),
             runtime_profile.as_deref(),
+            task_input.as_deref(),
             db.as_deref(),
         ),
         Command::EvaluateValidity { input, output_json } => {

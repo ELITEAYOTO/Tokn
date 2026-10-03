@@ -3,9 +3,10 @@ use std::fmt;
 
 use serde::{Deserialize, Serialize};
 use tokn_domain::{
-    EVIDENCE_LAYOUT_VERSION, HISTORICAL_SNAPSHOT_SCHEMA_VERSION, HistoricalRunRecord,
-    HistoricalSnapshot, MEASUREMENT_CONTRACT_VERSION, SOURCE_VERSION_HISTORY_SCHEMA_VERSION,
-    SourceVersionBoundary, SourceVersionHistory, ValidityCheckStatus,
+    EVIDENCE_LAYOUT_VERSION, EvidenceIdentityCoverage, HISTORICAL_SNAPSHOT_SCHEMA_VERSION,
+    HistoricalRunRecord, HistoricalSnapshot, MEASUREMENT_CONTRACT_VERSION,
+    SOURCE_VERSION_HISTORY_SCHEMA_VERSION, SourceVersionBoundary, SourceVersionHistory,
+    TASK_INPUT_HISTORY_SCHEMA_VERSION, TaskInputHistory, ValidityCheckStatus,
     WORKSPACE_GIT_PROVENANCE_HISTORY_SCHEMA_VERSION, WorkspaceGitProvenanceCoverage,
     WorkspaceGitProvenanceHistory,
 };
@@ -40,6 +41,26 @@ pub struct CrossRunSourceComparison {
     pub observation: CrossRunSourceObservation,
 }
 
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum CrossRunTaskInputObservation {
+    SameIdentityObserved,
+    DifferentIdentityObserved,
+    BaselineOnlyObserved,
+    CandidateOnlyObserved,
+    #[default]
+    Unknown,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct CrossRunTaskInputComparison {
+    pub baseline_coverage: EvidenceIdentityCoverage,
+    pub candidate_coverage: EvidenceIdentityCoverage,
+    pub baseline_fingerprint: Option<String>,
+    pub candidate_fingerprint: Option<String>,
+    pub observation: CrossRunTaskInputObservation,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct CrossRunCheck {
     pub code: String,
@@ -57,6 +78,7 @@ pub struct CrossRunComparisonReport {
     pub causal_claims_status: CrossRunCausalClaimsStatus,
     pub checks: Vec<CrossRunCheck>,
     pub runtime_profile: RuntimeProfileCompatibilityReport,
+    pub task_input: CrossRunTaskInputComparison,
     pub sources_before: Vec<CrossRunSourceComparison>,
 }
 
@@ -74,6 +96,10 @@ pub enum CrossRunComparisonBuildError {
         actual: u64,
         expected: u64,
     },
+    UnsupportedTaskInputHistorySchema {
+        actual: u64,
+        expected: u64,
+    },
     InputScopeMismatch,
     SameRunRequested,
     RunNotFound {
@@ -84,6 +110,9 @@ pub enum CrossRunComparisonBuildError {
         source_stable_id: String,
     },
     DuplicateGitBefore {
+        run_id: String,
+    },
+    DuplicateTaskInput {
         run_id: String,
     },
 }
@@ -102,6 +131,10 @@ impl fmt::Display for CrossRunComparisonBuildError {
             Self::UnsupportedWorkspaceGitHistorySchema { actual, expected } => write!(
                 formatter,
                 "unsupported WorkspaceGitProvenanceHistory schema_version {actual}; expected {expected}"
+            ),
+            Self::UnsupportedTaskInputHistorySchema { actual, expected } => write!(
+                formatter,
+                "unsupported TaskInputHistory schema_version {actual}; expected {expected}"
             ),
             Self::InputScopeMismatch => write!(
                 formatter,
@@ -125,6 +158,12 @@ impl fmt::Display for CrossRunComparisonBuildError {
                 formatter,
                 "duplicate BEFORE workspace Git provenance for run {run_id}"
             ),
+            Self::DuplicateTaskInput { run_id } => {
+                write!(
+                    formatter,
+                    "duplicate task input observation for run {run_id}"
+                )
+            }
         }
     }
 }
@@ -135,10 +174,11 @@ pub fn build_cross_run_comparison(
     snapshot: &HistoricalSnapshot,
     source_versions: &SourceVersionHistory,
     workspace_git: &WorkspaceGitProvenanceHistory,
+    task_inputs: &TaskInputHistory,
     baseline_run_id: &str,
     candidate_run_id: &str,
 ) -> Result<CrossRunComparisonReport, CrossRunComparisonBuildError> {
-    validate_inputs(snapshot, source_versions, workspace_git)?;
+    validate_inputs(snapshot, source_versions, workspace_git, task_inputs)?;
     if baseline_run_id == candidate_run_id {
         return Err(CrossRunComparisonBuildError::SameRunRequested);
     }
@@ -189,6 +229,30 @@ pub fn build_cross_run_comparison(
         message: "BEFORE source sets are comparable only within one project scope; PASS additionally requires non-empty identical source sets with equal exact versions".into(),
     });
 
+    let task_input = if same_project {
+        compare_task_input(task_inputs, baseline_run_id, candidate_run_id)?
+    } else {
+        CrossRunTaskInputComparison {
+            baseline_coverage: EvidenceIdentityCoverage::Unknown,
+            candidate_coverage: EvidenceIdentityCoverage::Unknown,
+            baseline_fingerprint: None,
+            candidate_fingerprint: None,
+            observation: CrossRunTaskInputObservation::Unknown,
+        }
+    };
+    let task_status = match task_input.observation {
+        CrossRunTaskInputObservation::SameIdentityObserved => ValidityCheckStatus::Pass,
+        CrossRunTaskInputObservation::DifferentIdentityObserved => ValidityCheckStatus::Fail,
+        CrossRunTaskInputObservation::BaselineOnlyObserved
+        | CrossRunTaskInputObservation::CandidateOnlyObserved
+        | CrossRunTaskInputObservation::Unknown => ValidityCheckStatus::Unknown,
+    };
+    checks.push(CrossRunCheck {
+        code: "TASK_INPUT_IDENTITY".into(),
+        status: task_status,
+        message: "task artifact identity passes only when both runs directly captured the same project-scoped exact task fingerprint; runtime delivery remains unproven".into(),
+    });
+
     let git_status = if same_project {
         compare_git_before(workspace_git, baseline_run_id, candidate_run_id)?
     } else {
@@ -212,6 +276,7 @@ pub fn build_cross_run_comparison(
         causal_claims_status: CrossRunCausalClaimsStatus::NotEstablished,
         checks,
         runtime_profile,
+        task_input,
         sources_before,
     })
 }
@@ -220,6 +285,7 @@ fn validate_inputs(
     snapshot: &HistoricalSnapshot,
     source_versions: &SourceVersionHistory,
     workspace_git: &WorkspaceGitProvenanceHistory,
+    task_inputs: &TaskInputHistory,
 ) -> Result<(), CrossRunComparisonBuildError> {
     if snapshot.schema_version != HISTORICAL_SNAPSHOT_SCHEMA_VERSION {
         return Err(
@@ -245,10 +311,20 @@ fn validate_inputs(
             },
         );
     }
+    if task_inputs.schema_version != TASK_INPUT_HISTORY_SCHEMA_VERSION {
+        return Err(
+            CrossRunComparisonBuildError::UnsupportedTaskInputHistorySchema {
+                actual: task_inputs.schema_version,
+                expected: TASK_INPUT_HISTORY_SCHEMA_VERSION,
+            },
+        );
+    }
     let scope_matches = snapshot.project_filter == source_versions.project_filter
         && snapshot.project_filter == workspace_git.project_filter
+        && snapshot.project_filter == task_inputs.project_filter
         && snapshot.workspace_filter == source_versions.workspace_filter
-        && snapshot.workspace_filter == workspace_git.workspace_filter;
+        && snapshot.workspace_filter == workspace_git.workspace_filter
+        && snapshot.workspace_filter == task_inputs.workspace_filter;
     if !scope_matches {
         return Err(CrossRunComparisonBuildError::InputScopeMismatch);
     }
@@ -386,6 +462,67 @@ fn source_before_map(
     Ok(map)
 }
 
+fn compare_task_input(
+    history: &TaskInputHistory,
+    baseline_run_id: &str,
+    candidate_run_id: &str,
+) -> Result<CrossRunTaskInputComparison, CrossRunComparisonBuildError> {
+    let baseline = task_input_for_run(history, baseline_run_id)?;
+    let candidate = task_input_for_run(history, candidate_run_id)?;
+
+    let baseline_coverage = baseline
+        .map(|item| item.coverage)
+        .unwrap_or(EvidenceIdentityCoverage::NotCaptured);
+    let candidate_coverage = candidate
+        .map(|item| item.coverage)
+        .unwrap_or(EvidenceIdentityCoverage::NotCaptured);
+    let baseline_fingerprint = baseline.and_then(|item| {
+        (item.coverage == EvidenceIdentityCoverage::Observed)
+            .then(|| item.task_fingerprint.clone())
+            .flatten()
+    });
+    let candidate_fingerprint = candidate.and_then(|item| {
+        (item.coverage == EvidenceIdentityCoverage::Observed)
+            .then(|| item.task_fingerprint.clone())
+            .flatten()
+    });
+
+    let observation = match (&baseline_fingerprint, &candidate_fingerprint) {
+        (Some(left), Some(right)) if left == right => {
+            CrossRunTaskInputObservation::SameIdentityObserved
+        }
+        (Some(_), Some(_)) => CrossRunTaskInputObservation::DifferentIdentityObserved,
+        (Some(_), None) => CrossRunTaskInputObservation::BaselineOnlyObserved,
+        (None, Some(_)) => CrossRunTaskInputObservation::CandidateOnlyObserved,
+        (None, None) => CrossRunTaskInputObservation::Unknown,
+    };
+
+    Ok(CrossRunTaskInputComparison {
+        baseline_coverage,
+        candidate_coverage,
+        baseline_fingerprint,
+        candidate_fingerprint,
+        observation,
+    })
+}
+
+fn task_input_for_run<'a>(
+    history: &'a TaskInputHistory,
+    run_id: &str,
+) -> Result<Option<&'a tokn_domain::HistoricalTaskInputRecord>, CrossRunComparisonBuildError> {
+    let mut matches = history
+        .observations
+        .iter()
+        .filter(|observation| observation.run_id == run_id);
+    let first = matches.next();
+    if matches.next().is_some() {
+        return Err(CrossRunComparisonBuildError::DuplicateTaskInput {
+            run_id: run_id.to_string(),
+        });
+    }
+    Ok(first)
+}
+
 fn compare_git_before(
     history: &WorkspaceGitProvenanceHistory,
     baseline_run_id: &str,
@@ -454,7 +591,7 @@ fn aggregate_status(checks: &[CrossRunCheck]) -> ValidityCheckStatus {
 mod tests {
     use super::*;
     use tokn_domain::{
-        HistoricalRuntimeProfileRecord, HistoricalSourceVersionRecord,
+        HistoricalRuntimeProfileRecord, HistoricalSourceVersionRecord, HistoricalTaskInputRecord,
         HistoricalWorkspaceGitProvenanceRecord, ModelRuntimeProfile, RuntimeConfigurationProfile,
     };
 
@@ -546,6 +683,45 @@ mod tests {
         }
     }
 
+    fn task_inputs(candidate_fingerprint: &str) -> TaskInputHistory {
+        TaskInputHistory {
+            schema_version: TASK_INPUT_HISTORY_SCHEMA_VERSION,
+            project_filter: Some("prj-fixture".into()),
+            workspace_filter: None,
+            run_limit: 50,
+            observations: vec![
+                task_input_record(
+                    "baseline",
+                    EvidenceIdentityCoverage::Observed,
+                    Some("tsk-v1-task"),
+                ),
+                task_input_record(
+                    "candidate",
+                    EvidenceIdentityCoverage::Observed,
+                    Some(candidate_fingerprint),
+                ),
+            ],
+        }
+    }
+
+    fn task_input_record(
+        run_id: &str,
+        coverage: EvidenceIdentityCoverage,
+        fingerprint: Option<&str>,
+    ) -> HistoricalTaskInputRecord {
+        HistoricalTaskInputRecord {
+            task_input_id: format!("task-{run_id}"),
+            run_id: run_id.into(),
+            project_id: "prj-fixture".into(),
+            workspace_id: format!("wsp-{run_id}"),
+            coverage,
+            task_fingerprint: fingerprint.map(str::to_string),
+            bytes: fingerprint.map(|_| 42),
+            delivery_status: tokn_domain::TaskInputDeliveryStatus::NotProven,
+            run_created_at_unix: 1,
+        }
+    }
+
     fn git(
         candidate_head: &str,
         baseline_dirty: Option<bool>,
@@ -588,6 +764,7 @@ mod tests {
             &snapshot("prj-fixture"),
             &versions("ver-v1-a"),
             &git("git-v1-head", Some(false), Some(false)),
+            &task_inputs("tsk-v1-task"),
             "baseline",
             "candidate",
         )
@@ -607,6 +784,7 @@ mod tests {
             &snapshot("prj-other"),
             &versions("ver-v1-different"),
             &git("git-v1-other", Some(false), Some(false)),
+            &task_inputs("tsk-v1-task"),
             "baseline",
             "candidate",
         )
@@ -633,6 +811,17 @@ mod tests {
                 .status,
             ValidityCheckStatus::Unknown
         );
+        assert_eq!(
+            report
+                .checks
+                .iter()
+                .find(|check| check.code == "TASK_INPUT_IDENTITY")
+                .expect("task check")
+                .status,
+            ValidityCheckStatus::Unknown
+        );
+        assert!(report.task_input.baseline_fingerprint.is_none());
+        assert!(report.task_input.candidate_fingerprint.is_none());
     }
 
     #[test]
@@ -641,6 +830,7 @@ mod tests {
             &snapshot("prj-fixture"),
             &versions("ver-v1-different"),
             &git("git-v1-head", Some(false), Some(false)),
+            &task_inputs("tsk-v1-task"),
             "baseline",
             "candidate",
         )
@@ -663,6 +853,7 @@ mod tests {
             &snapshot("prj-fixture"),
             &history,
             &git("git-v1-head", Some(false), Some(false)),
+            &task_inputs("tsk-v1-task"),
             "baseline",
             "candidate",
         )
@@ -672,11 +863,67 @@ mod tests {
     }
 
     #[test]
+    fn different_observed_task_input_fails_scope_without_enabling_causality() {
+        let report = build_cross_run_comparison(
+            &snapshot("prj-fixture"),
+            &versions("ver-v1-a"),
+            &git("git-v1-head", Some(false), Some(false)),
+            &task_inputs("tsk-v1-other"),
+            "baseline",
+            "candidate",
+        )
+        .expect("report");
+
+        let task_check = report
+            .checks
+            .iter()
+            .find(|check| check.code == "TASK_INPUT_IDENTITY")
+            .expect("task check");
+        assert_eq!(task_check.status, ValidityCheckStatus::Fail);
+        assert_eq!(
+            report.task_input.observation,
+            CrossRunTaskInputObservation::DifferentIdentityObserved
+        );
+        assert_eq!(
+            report.causal_claims_status,
+            CrossRunCausalClaimsStatus::NotEstablished
+        );
+    }
+
+    #[test]
+    fn missing_task_input_is_unknown_not_equal() {
+        let mut tasks = task_inputs("tsk-v1-task");
+        tasks.observations[1] =
+            task_input_record("candidate", EvidenceIdentityCoverage::NotCaptured, None);
+        let report = build_cross_run_comparison(
+            &snapshot("prj-fixture"),
+            &versions("ver-v1-a"),
+            &git("git-v1-head", Some(false), Some(false)),
+            &tasks,
+            "baseline",
+            "candidate",
+        )
+        .expect("report");
+
+        let task_check = report
+            .checks
+            .iter()
+            .find(|check| check.code == "TASK_INPUT_IDENTITY")
+            .expect("task check");
+        assert_eq!(task_check.status, ValidityCheckStatus::Unknown);
+        assert_eq!(
+            report.task_input.observation,
+            CrossRunTaskInputObservation::BaselineOnlyObserved
+        );
+    }
+
+    #[test]
     fn same_git_head_with_dirty_worktrees_is_unknown() {
         let report = build_cross_run_comparison(
             &snapshot("prj-fixture"),
             &versions("ver-v1-a"),
             &git("git-v1-head", Some(true), Some(true)),
+            &task_inputs("tsk-v1-task"),
             "baseline",
             "candidate",
         )
@@ -696,6 +943,7 @@ mod tests {
             &snapshot("prj-fixture"),
             &versions("ver-v1-a"),
             &git("git-v1-other", Some(false), Some(false)),
+            &task_inputs("tsk-v1-task"),
             "baseline",
             "candidate",
         )
@@ -709,12 +957,26 @@ mod tests {
         let versions = versions("ver-v1-a");
         let git = git("git-v1-head", Some(false), Some(false));
         assert_eq!(
-            build_cross_run_comparison(&snapshot, &versions, &git, "baseline", "baseline")
-                .expect_err("same run"),
+            build_cross_run_comparison(
+                &snapshot,
+                &versions,
+                &git,
+                &task_inputs("tsk-v1-task"),
+                "baseline",
+                "baseline",
+            )
+            .expect_err("same run"),
             CrossRunComparisonBuildError::SameRunRequested
         );
         assert!(matches!(
-            build_cross_run_comparison(&snapshot, &versions, &git, "baseline", "missing"),
+            build_cross_run_comparison(
+                &snapshot,
+                &versions,
+                &git,
+                &task_inputs("tsk-v1-task"),
+                "baseline",
+                "missing",
+            ),
             Err(CrossRunComparisonBuildError::RunNotFound { .. })
         ));
     }
@@ -728,6 +990,7 @@ mod tests {
                 &unsupported_snapshot,
                 &versions("ver-v1-a"),
                 &git("git-v1-head", Some(false), Some(false)),
+                &task_inputs("tsk-v1-task"),
                 "baseline",
                 "candidate"
             ),
@@ -735,6 +998,20 @@ mod tests {
         ));
 
         let snapshot = snapshot("prj-fixture");
+        let mut tasks = task_inputs("tsk-v1-task");
+        tasks.schema_version = 99;
+        assert!(matches!(
+            build_cross_run_comparison(
+                &snapshot,
+                &versions("ver-v1-a"),
+                &git("git-v1-head", Some(false), Some(false)),
+                &tasks,
+                "baseline",
+                "candidate"
+            ),
+            Err(CrossRunComparisonBuildError::UnsupportedTaskInputHistorySchema { .. })
+        ));
+
         let mut versions = versions("ver-v1-a");
         versions.project_filter = None;
         assert_eq!(
@@ -742,6 +1019,7 @@ mod tests {
                 &snapshot,
                 &versions,
                 &git("git-v1-head", Some(false), Some(false)),
+                &task_inputs("tsk-v1-task"),
                 "baseline",
                 "candidate"
             )

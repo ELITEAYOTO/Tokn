@@ -132,11 +132,12 @@ Workspace Git Provenance V0 + WorkspaceGitProvenanceHistory V1: ACCEPTED FOUNDAT
 Source Mutation Window V0: ACCEPTED CHRONOLOGY FOUNDATION. Same-thread exact read-before -> completed mutation -> exact read-after can report exact content equality/difference only under complete unambiguous sequence/identity evidence; intervening or cross-thread same-source mutation makes the window `UNKNOWN`, and causality always remains `NOT_PROVEN`.
 Source Freshness Evidence V0: ACCEPTED CORROBORATION FOUNDATION / OBSERVATION-ONLY. It joins Source Mutation Window + SourceVersion BEFORE/AFTER + Workspace Git provenance, reports only observed change/reread corroboration, never compares ContentFingerprint to SourceVersionFingerprint directly, and keeps freshness/invalidation `NOT_PROVEN`.
 Cross-Run Comparability V0: ACCEPTED OBSERVATION FOUNDATION / OBSERVATION-ONLY. It compares explicit baseline/candidate runs only on captured project/contract/runtime/SourceVersion BEFORE/Git BEFORE state; project-scoped fingerprints are never compared across projects and causal claims remain `NOT_ESTABLISHED`.
+Task Input Identity V0: ACCEPTED OBSERVATION FOUNDATION. `store-evidence --task-input` derives project-scoped `tsk-v1-*` exact artifact identity without persisting raw task/path; `task-input-history` exposes `delivery_status=NOT_PROVEN`, and Cross-Run adds a fail-closed `TASK_INPUT_IDENTITY` axis while causal claims remain `NOT_ESTABLISHED`.
 Detailed compaction chronology: `NOT_CAPTURED` until a real diagnostic event sample exists; diagnostic-trace seq and session-rollout seq are not assumed comparable.
 Stability/benchmark readiness: local Rust toolchain + dev-check + package hardening + Benchmark Baseline Protocol V1 are ACCEPTED/PREPARED; this does not claim token savings.
 
 Next concrete work:
-1. keep task identity/single-variable causal controls separate from the accepted cross-run scope primitive;
+1. keep runtime task-delivery evidence and single-variable causal control separate from accepted artifact identity; do not upgrade `delivery_status=NOT_PROVEN` without direct evidence;
 2. capture compaction/rediscovery only when directly observed and fixtureable;
 3. broader source kinds only when stable identity is directly provable;
 4. only then evaluate whether evidence is sufficient for a stronger stale/fresh contract.

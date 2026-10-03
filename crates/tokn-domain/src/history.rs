@@ -6,6 +6,7 @@ pub const HISTORICAL_SNAPSHOT_SCHEMA_VERSION: u64 = 1;
 pub const TOOL_ACTIVITY_HISTORY_SCHEMA_VERSION: u64 = 3;
 pub const RATE_LIMIT_HISTORY_SCHEMA_VERSION: u64 = 1;
 pub const SOURCE_VERSION_HISTORY_SCHEMA_VERSION: u64 = 1;
+pub const TASK_INPUT_HISTORY_SCHEMA_VERSION: u64 = 1;
 pub const WORKSPACE_GIT_PROVENANCE_HISTORY_SCHEMA_VERSION: u64 = 1;
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
@@ -153,6 +154,47 @@ impl Default for SourceVersionHistory {
             workspace_filter: None,
             run_limit: 0,
             versions: Vec::new(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum TaskInputDeliveryStatus {
+    #[default]
+    NotProven,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct HistoricalTaskInputRecord {
+    pub task_input_id: String,
+    pub run_id: String,
+    pub project_id: String,
+    pub workspace_id: String,
+    pub coverage: EvidenceIdentityCoverage,
+    pub task_fingerprint: Option<String>,
+    pub bytes: Option<u64>,
+    pub delivery_status: TaskInputDeliveryStatus,
+    pub run_created_at_unix: i64,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct TaskInputHistory {
+    pub schema_version: u64,
+    pub project_filter: Option<String>,
+    pub workspace_filter: Option<String>,
+    pub run_limit: u64,
+    pub observations: Vec<HistoricalTaskInputRecord>,
+}
+
+impl Default for TaskInputHistory {
+    fn default() -> Self {
+        Self {
+            schema_version: TASK_INPUT_HISTORY_SCHEMA_VERSION,
+            project_filter: None,
+            workspace_filter: None,
+            run_limit: 0,
+            observations: Vec::new(),
         }
     }
 }

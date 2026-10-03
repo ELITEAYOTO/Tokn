@@ -6,7 +6,7 @@ Binaire/Cargo : **V0.1 / 0.1.0**
 
 ## Resume
 
-**P0-P9 DONE. Experiment 002 est ACCEPTED. Measurement Contract V1 est FROZEN. Store foundation est DONE. Local MCP transport prototype est ACCEPTED. Historical Analyzer + Context Ledger est IN PROGRESS ; Context/Result Identity V0, Cross-Agent Evidence V2, Source Mutation Observation V0, Run-Boundary Source Version V0 et Workspace Git Provenance V0 sont ACCEPTED FOUNDATIONS ; Source Freshness Evidence V0 est ACCEPTED CORROBORATION FOUNDATION ; Cross-Run Comparability V0 est ACCEPTED OBSERVATION FOUNDATION.**
+**P0-P9 DONE. Experiment 002 est ACCEPTED. Measurement Contract V1 est FROZEN. Store foundation est DONE. Local MCP transport prototype est ACCEPTED. Historical Analyzer + Context Ledger est IN PROGRESS ; Context/Result Identity V0, Cross-Agent Evidence V2, Source Mutation Observation V0, Run-Boundary Source Version V0 et Workspace Git Provenance V0 sont ACCEPTED FOUNDATIONS ; Source Freshness Evidence V0 est ACCEPTED CORROBORATION FOUNDATION ; Cross-Run Comparability V0 est ACCEPTED OBSERVATION FOUNDATION ; Task Input Identity V0 est ACCEPTED OBSERVATION FOUNDATION.**
 
 Le projet est revenu sur une direction unique :
 mesurer l'efficacite du contexte sans reduire la capacite d'Astra.
@@ -248,10 +248,10 @@ Limites explicites du contrat V1 :
 
 ## Prochaine action
 
-Continuer **M4** avec Cross-Run Comparability V0, qui compare deux runs explicitement nommes uniquement sur les conditions effectivement capturees : project scope, versions de contrat, runtime/profile, SourceVersion BEFORE et Git BEFORE.
+Task Input Identity V0 est maintenant **ACCEPTED OBSERVATION FOUNDATION** : l'identite exacte de l'artefact de tache est projetee en `tsk-v1-*` project-scopee via `store-evidence --task-input`, sans persister le prompt brut ni son chemin. `task-input-history` expose explicitement `delivery_status=NOT_PROVEN`. La prochaine frontiere causale reste une preuve directe de livraison runtime + controle d'une variable primaire, pas une extrapolation depuis l'identite d'artefact.
 La compaction detaillee reste `NOT_CAPTURED` : le parser diagnostic sait compter un kind contenant `compaction`, mais aucune trace reelle locale ni fixture sanitisee conservee ne fournit actuellement un evenement detaille permettant un contrat fiable. Ne pas relier artificiellement le `seq` diagnostic au `seq` rollout.
 
-Meme quand le scope observe est compatible, `causal_claims_status=NOT_ESTABLISHED` : l'identite de tache/prompt, les dependances externes et le controle d'une variable primaire restent hors de ce reducer. Source Freshness Evidence garde en parallele `freshness_status=NOT_PROVEN` et `invalidation_status=NOT_PROVEN`.
+Cross-Run ajoute `TASK_INPUT_IDENTITY`, mais meme quand tous les axes observes passent, `causal_claims_status=NOT_ESTABLISHED` : l'identite d'artefact ne prouve pas la livraison runtime, les dependances externes ni le controle d'une variable primaire. Source Freshness Evidence garde en parallele `freshness_status=NOT_PROVEN` et `invalidation_status=NOT_PROVEN`.
 Ne pas persister les tool outputs bruts par defaut uniquement pour obtenir une identite.
 Ne pas creer artificiellement du per-turn a partir des agregats V1.
 Ne pas commencer M5 Findings + Opportunity Analyzer tant que ces observations historiques ne sont pas fiables.

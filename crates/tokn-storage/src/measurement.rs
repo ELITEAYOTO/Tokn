@@ -8,12 +8,13 @@ use tokn_domain::{
     EvidenceIdentityCoverage, HISTORICAL_SNAPSHOT_SCHEMA_VERSION, HistoricalAgentRecord,
     HistoricalProvenanceRecord, HistoricalRateLimitSnapshotRecord, HistoricalRunRecord,
     HistoricalRuntimeProfileRecord, HistoricalSnapshot, HistoricalSourceVersionRecord,
-    HistoricalToolActivityRecord, HistoricalWorkspaceGitProvenanceRecord,
-    HistoricalWorkspaceRecord, MEASUREMENT_CONTRACT_ID, MEASUREMENT_CONTRACT_VERSION,
-    MeasurementContractManifest, ModelRuntimeProfile, RATE_LIMIT_HISTORY_SCHEMA_VERSION,
-    RateLimitHistory, RunGroup, RunnerQualityStatus, RunnerResult,
-    SOURCE_VERSION_HISTORY_SCHEMA_VERSION, SourceVersionBoundary, SourceVersionHistory,
-    TOOL_ACTIVITY_HISTORY_SCHEMA_VERSION, TokenTotals, ToolActivityHistory,
+    HistoricalTaskInputRecord, HistoricalToolActivityRecord,
+    HistoricalWorkspaceGitProvenanceRecord, HistoricalWorkspaceRecord, MEASUREMENT_CONTRACT_ID,
+    MEASUREMENT_CONTRACT_VERSION, MeasurementContractManifest, ModelRuntimeProfile,
+    RATE_LIMIT_HISTORY_SCHEMA_VERSION, RateLimitHistory, RunGroup, RunnerQualityStatus,
+    RunnerResult, SOURCE_VERSION_HISTORY_SCHEMA_VERSION, SourceVersionBoundary,
+    SourceVersionHistory, TASK_INPUT_HISTORY_SCHEMA_VERSION, TOOL_ACTIVITY_HISTORY_SCHEMA_VERSION,
+    TaskInputDeliveryStatus, TaskInputHistory, TokenTotals, ToolActivityHistory,
     WORKSPACE_GIT_PROVENANCE_HISTORY_SCHEMA_VERSION, WorkspaceGitProvenanceCoverage,
     WorkspaceGitProvenanceHistory,
 };
@@ -50,6 +51,7 @@ pub struct MeasurementStoreInput {
     pub result: RunnerResult,
     pub group: RunGroup,
     pub profile: Option<ModelRuntimeProfile>,
+    pub task_input: TaskInputStoreInput,
     pub tool_activities: Vec<ToolActivityStoreInput>,
     pub rate_limit_snapshots: Vec<RateLimitStoreInput>,
     pub source_versions: Vec<SourceVersionStoreInput>,
@@ -107,6 +109,23 @@ pub struct SourceVersionStoreInput {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+pub struct TaskInputStoreInput {
+    pub coverage: EvidenceIdentityCoverage,
+    pub task_fingerprint: Option<String>,
+    pub bytes: Option<u64>,
+}
+
+impl Default for TaskInputStoreInput {
+    fn default() -> Self {
+        Self {
+            coverage: EvidenceIdentityCoverage::NotCaptured,
+            task_fingerprint: None,
+            bytes: None,
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct WorkspaceGitProvenanceStoreInput {
     pub boundary: SourceVersionBoundary,
     pub coverage: WorkspaceGitProvenanceCoverage,
@@ -126,6 +145,7 @@ pub struct MeasurementStoreSummary {
     pub tool_activity_count: u64,
     pub rate_limit_snapshot_count: u64,
     pub source_version_count: u64,
+    pub task_input_count: u64,
     pub workspace_git_provenance_count: u64,
 }
 
@@ -187,6 +207,18 @@ pub fn scoped_fingerprint_bytes(
     hasher.update(&[0]);
     hasher.update(bytes);
     format!("{prefix}-v1-{}", hasher.finalize().to_hex())
+}
+
+pub fn scoped_task_input_bytes(scope_key: &str, bytes: &[u8]) -> String {
+    let key = blake3::derive_key(
+        "tokn.project-scoped-task-input-identity.v1",
+        scope_key.as_bytes(),
+    );
+    let mut hasher = blake3::Hasher::new_keyed(&key);
+    hasher.update(b"task-input-artifact-bytes-v1");
+    hasher.update(&[0]);
+    hasher.update(bytes);
+    format!("tsk-v1-{}", hasher.finalize().to_hex())
 }
 
 pub fn scoped_source_id_bytes(scope_key: &str, locator: &[u8]) -> String {
@@ -391,6 +423,10 @@ impl Database {
             params![input.result.run_id],
         )?;
         tx.execute(
+            "DELETE FROM task_input_identity_v1 WHERE run_id = ?1",
+            params![input.result.run_id],
+        )?;
+        tx.execute(
             "DELETE FROM agents_v2 WHERE run_id = ?1",
             params![input.result.run_id],
         )?;
@@ -585,6 +621,30 @@ impl Database {
             )?;
         }
 
+        let task_input_id = private_id(
+            "tskobs",
+            &format!(
+                "{}|{}|{:?}|{:?}",
+                input.result.run_id,
+                input.task_input.coverage.as_str(),
+                input.task_input.task_fingerprint,
+                input.task_input.bytes
+            ),
+        );
+        tx.execute(
+            "INSERT INTO task_input_identity_v1(
+                task_input_id, run_id, coverage, task_fingerprint, bytes, created_at_unix
+             ) VALUES (?1,?2,?3,?4,?5,?6)",
+            params![
+                task_input_id,
+                input.result.run_id,
+                input.task_input.coverage.as_str(),
+                input.task_input.task_fingerprint,
+                input.task_input.bytes.map(to_i64).transpose()?,
+                now
+            ],
+        )?;
+
         tx.execute(
             "INSERT INTO provenance_v2(
                 source_id, run_id, source_kind, source_fingerprint, snapshot_bytes,
@@ -621,6 +681,7 @@ impl Database {
             tool_activity_count: input.tool_activities.len() as u64,
             rate_limit_snapshot_count: input.rate_limit_snapshots.len() as u64,
             source_version_count: input.source_versions.len() as u64,
+            task_input_count: 1,
             workspace_git_provenance_count: input.workspace_git_provenance.len() as u64,
         })
     }
@@ -761,6 +822,83 @@ impl Database {
                         snapshot_observed_at: row.get(7)?,
                         bytes: row_u64(row, 8)?,
                         run_created_at_unix: row.get(9)?,
+                    })
+                },
+            )?
+            .collect::<rusqlite::Result<Vec<_>>>()?;
+
+        Ok(history)
+    }
+
+    pub fn task_input_identity_schema_version(&self) -> rusqlite::Result<Option<String>> {
+        self.connection()
+            .query_row(
+                "SELECT value FROM schema_meta WHERE key='task_input_identity_schema_version'",
+                [],
+                |row| row.get(0),
+            )
+            .optional()
+    }
+
+    pub fn task_input_count(&self) -> rusqlite::Result<i64> {
+        self.connection()
+            .query_row("SELECT COUNT(*) FROM task_input_identity_v1", [], |row| {
+                row.get(0)
+            })
+    }
+
+    pub fn task_input_history(
+        &self,
+        project_filter: Option<&str>,
+        workspace_filter: Option<&str>,
+        run_limit: usize,
+    ) -> Result<TaskInputHistory, MeasurementStoreError> {
+        let mut history = TaskInputHistory {
+            schema_version: TASK_INPUT_HISTORY_SCHEMA_VERSION,
+            project_filter: project_filter.map(str::to_string),
+            workspace_filter: workspace_filter.map(str::to_string),
+            run_limit: u64::try_from(run_limit).unwrap_or(u64::MAX),
+            ..Default::default()
+        };
+        if run_limit == 0 {
+            return Ok(history);
+        }
+
+        let mut stmt = self.connection().prepare(
+            "WITH selected_runs AS (
+                SELECT run_id, project_id, workspace_id, created_at_unix
+                FROM measurement_runs_v2
+                WHERE (?1 IS NULL OR project_id = ?1)
+                  AND (?2 IS NULL OR workspace_id = ?2)
+                ORDER BY created_at_unix DESC, run_id ASC
+                LIMIT ?3
+             )
+             SELECT task.task_input_id, task.run_id, selected.project_id,
+                selected.workspace_id, task.coverage, task.task_fingerprint, task.bytes,
+                selected.created_at_unix
+             FROM task_input_identity_v1 AS task
+             INNER JOIN selected_runs AS selected ON selected.run_id = task.run_id
+             ORDER BY selected.created_at_unix DESC, task.run_id ASC",
+        )?;
+
+        history.observations = stmt
+            .query_map(
+                params![
+                    project_filter,
+                    workspace_filter,
+                    i64::try_from(run_limit).unwrap_or(i64::MAX)
+                ],
+                |row| {
+                    Ok(HistoricalTaskInputRecord {
+                        task_input_id: row.get(0)?,
+                        run_id: row.get(1)?,
+                        project_id: row.get(2)?,
+                        workspace_id: row.get(3)?,
+                        coverage: parse_identity_coverage(row.get::<_, String>(4)?)?,
+                        task_fingerprint: row.get(5)?,
+                        bytes: row_optional_u64(row, 6)?,
+                        delivery_status: TaskInputDeliveryStatus::NotProven,
+                        run_created_at_unix: row.get(7)?,
                     })
                 },
             )?
@@ -1486,6 +1624,36 @@ fn validate_input(input: &MeasurementStoreInput) -> Result<(), MeasurementStoreE
         }
     }
 
+    match input.task_input.coverage {
+        EvidenceIdentityCoverage::Observed => {
+            let fingerprint = input
+                .task_input
+                .task_fingerprint
+                .as_deref()
+                .ok_or_else(|| {
+                    MeasurementStoreError::Invalid(
+                        "OBSERVED task input identity requires task_fingerprint".into(),
+                    )
+                })?;
+            validate_scoped_fingerprint("task input task_fingerprint", fingerprint, "tsk")?;
+            if input.task_input.bytes.is_none() {
+                return Err(MeasurementStoreError::Invalid(
+                    "OBSERVED task input identity requires byte length".into(),
+                ));
+            }
+        }
+        EvidenceIdentityCoverage::Partial
+        | EvidenceIdentityCoverage::NotCaptured
+        | EvidenceIdentityCoverage::Unknown => {
+            if input.task_input.task_fingerprint.is_some() || input.task_input.bytes.is_some() {
+                return Err(MeasurementStoreError::Invalid(
+                    "non-observed task input identity cannot carry fingerprint or byte length"
+                        .into(),
+                ));
+            }
+        }
+    }
+
     let mut git_provenance_boundaries = BTreeSet::new();
     for provenance in &input.workspace_git_provenance {
         if !git_provenance_boundaries.insert(provenance.boundary.as_str()) {
@@ -1869,11 +2037,61 @@ mod tests {
             result: result(private_path),
             group: group(private_path),
             profile: Some(profile()),
+            task_input: TaskInputStoreInput::default(),
             tool_activities: Vec::new(),
             rate_limit_snapshots: Vec::new(),
             source_versions: Vec::new(),
             workspace_git_provenance: Vec::new(),
         }
+    }
+
+    #[test]
+    fn task_input_identity_is_private_queryable_and_idempotent() {
+        let path = temp_db("task-input-identity");
+        let _ = fs::remove_file(&path);
+        let raw_task = b"privacy-sensitive exact task fixture";
+        let mut input = input(r"C:\fixture\session.jsonl");
+        input.task_input = TaskInputStoreInput {
+            coverage: EvidenceIdentityCoverage::Observed,
+            task_fingerprint: Some(scoped_task_input_bytes("fixture-scope", raw_task)),
+            bytes: Some(raw_task.len() as u64),
+        };
+
+        let db = Database::open(&path).expect("open db");
+        let first = db.save_measurement(&input).expect("first save");
+        let second = db.save_measurement(&input).expect("second save");
+        assert_eq!(first, second);
+        assert_eq!(first.task_input_count, 1);
+        assert_eq!(db.task_input_count().unwrap(), 1);
+        assert_eq!(
+            db.task_input_identity_schema_version().unwrap().as_deref(),
+            Some("1")
+        );
+
+        let history = db.task_input_history(None, None, 50).unwrap();
+        assert_eq!(history.observations.len(), 1);
+        let observed = &history.observations[0];
+        assert_eq!(observed.coverage, EvidenceIdentityCoverage::Observed);
+        assert_eq!(observed.delivery_status, TaskInputDeliveryStatus::NotProven);
+        assert_eq!(observed.bytes, Some(raw_task.len() as u64));
+        assert!(
+            observed
+                .task_fingerprint
+                .as_deref()
+                .is_some_and(|value| value.starts_with("tsk-v1-"))
+        );
+        assert_ne!(
+            scoped_task_input_bytes("fixture-scope", raw_task),
+            scoped_task_input_bytes("other-scope", raw_task)
+        );
+        drop(db);
+        let persisted = fs::read(&path).expect("read sqlite file");
+        assert!(
+            !persisted
+                .windows(raw_task.len())
+                .any(|window| window == raw_task)
+        );
+        let _ = fs::remove_file(path);
     }
 
     #[test]

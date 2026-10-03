@@ -33,7 +33,7 @@ Runner evidence adapter:
 
 CLI shape:
 
-`tokn-observe store-evidence <evidence_dir> --project-key <logical-key> --workspace-key <logical-key> [--parent-workspace-key <logical-key>] [--runtime-profile <profile.json>] [--db <path>]`
+`tokn-observe store-evidence <evidence_dir> --project-key <logical-key> --workspace-key <logical-key> [--parent-workspace-key <logical-key>] [--runtime-profile <profile.json>] [--task-input <task-file>] [--db <path>]`
 
 The Runner contract is not modified.
 Store ingestion consumes the immutable evidence folder after Runner completion.
@@ -129,6 +129,15 @@ Stores privacy-safe file-version observations at Runner run boundaries:
 
 The raw workspace-relative path and raw snapshot SHA-256 are not persisted. `(run_id, source_stable_id, boundary)` is unique.
 
+### task_input_identity_v1
+
+Stores one run-owned task-artifact identity observation:
+- coverage (`OBSERVED`, `PARTIAL`, `NOT_CAPTURED`, `UNKNOWN`);
+- optional project-scoped/domain-separated `tsk-v1-*` exact-byte fingerprint;
+- optional byte length.
+
+`store-evidence --task-input <task-file>` reads the task bytes transiently and persists only the scoped fingerprint/length. The raw task and its path are not stored. If the option is omitted, newly ingested runs receive explicit `NOT_CAPTURED` coverage. Query-time `TaskInputHistory V1` adds `delivery_status=NOT_PROVEN`, because artifact identity is not proof of runtime/model delivery.
+
 ### workspace_git_provenance_v1
 
 Stores workspace-level Git boundary provenance:
@@ -145,7 +154,7 @@ The raw Git HEAD SHA is not persisted in SQLite. `(run_id, boundary)` is unique.
 Not yet implemented in the Store foundation:
 - Findings persistence;
 - Experiment Lab persistence;
-- broader historical query/index APIs beyond the accepted Context Ledger, Tool Activity, RateLimitHistory, SourceVersionHistory and WorkspaceGitProvenanceHistory surfaces;
+- broader historical query/index APIs beyond the accepted Context Ledger, Tool Activity, RateLimitHistory, SourceVersionHistory, WorkspaceGitProvenanceHistory and accepted TaskInputHistory surfaces;
 - Context Ledger tables;
 - cross-run finding aggregation.
 
@@ -224,7 +233,8 @@ Experiment 001 golden replay now validates:
 3. Store V2 ingests the evidence with a sanitized ModelRuntimeProfile fixture;
 4. the exact same evidence can be ingested a second time;
 5. project/workspace/source/profile IDs remain deterministic;
-6. the SQLite file does not contain the raw golden workspace or session path.
+6. Task Input Identity V0 is ingested twice idempotently and queried as `OBSERVED` with a `tsk-v1-*` fingerprint;
+7. the SQLite file does not contain the raw golden workspace/session path or the unique raw task marker.
 
 Unit tests additionally validate:
 - V2 measurement idempotence;
@@ -235,7 +245,7 @@ Unit tests additionally validate:
 
 ## Current next boundary
 
-The local MCP transport prototype is already accepted. Store V2 now feeds M4 historical analysis and the next Context/Result Identity foundation.
+The local MCP transport prototype and Context/Result Identity foundation are already accepted. Store V2 now feeds M4 historical analysis; Task Input Identity V0 is an accepted additive evidence surface, with runtime delivery explicitly `NOT_PROVEN`. The next causal boundary is direct runtime task-delivery evidence plus single-primary-variable control, not a stronger claim from artifact identity alone.
 
 Multi-runtime storage rule:
 - do not rewrite Store V2 speculatively;
