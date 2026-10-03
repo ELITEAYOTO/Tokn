@@ -252,7 +252,7 @@ Le gate `docs/design/M4-EXIT-GATE.md` classe le coeur M4 comme **ACCEPTED**. Les
 
 ## Prochaine action
 
-Le design + contrat de mesure du **Shadow Repository Index V0** sont ACCEPTED. Les premiers prerequis d'implementation sont maintenant en place : SourceStableId canonique dans `tokn-domain::identity` avec golden `src-v1-*` preserve, `IndexContentHash` project-scoped `ixc-v1-*` separe, et cache root local sous `observer_shadow_index_root()` avec segment projet borne. Le moteur `DIRECT_SCAN_V0`, l'enumeration corpus et le capability probe FTS5 restent `NOT STARTED`; aucun backend persistant n'est selectionne et aucune injection active de contexte n'existe.
+Le design + contrat de mesure du **Shadow Repository Index V0** sont ACCEPTED. Les prerequis d'identite/cache sont en place et `DIRECT_SCAN_V0` est maintenant **ACCEPTED REFERENCE FOUNDATION** : enumeration Git top-level tracked + non-ignored untracked, chemins verifies sous la racine autorisee, exclusions explicites binary/non-UTF8/size, manifest sans source brute, `src-v1-*` + `ixc-v1-*`, query bornee et revalidation exacte du hash courant avec `REFRESH_REQUIRED` en cas de divergence. Le capability probe FTS5 reste `NOT STARTED`; aucun backend persistant n'est selectionne et aucune injection active de contexte n'existe.
 
 Cross-Run Source Re-read Evidence V0 reste **ACCEPTED CHRONOLOGY FOUNDATION** : `run_created_at_unix` n'est jamais une chronologie runtime et rediscovery/redundancy/freshness restent `NOT_PROVEN`. Task Input Identity V0 garde `delivery_status=NOT_PROVEN`. La compaction detaillee et la phase timeline restent `NOT_CAPTURED` tant qu'aucune preuve directe fixtureable n'existe.
 

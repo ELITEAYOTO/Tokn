@@ -1,6 +1,6 @@
 # Shadow Repository Index V0
 
-Status: M4.5 ACCEPTED DESIGN / PREREQUISITES IMPLEMENTED / DIRECT_SCAN NOT STARTED
+Status: M4.5 ACCEPTED DESIGN / PREREQUISITES IMPLEMENTED / DIRECT_SCAN ACCEPTED REFERENCE FOUNDATION
 Date: 2026-10-03
 
 ## Purpose
@@ -148,7 +148,20 @@ Reference baseline:
 - deterministic file-level matching semantics;
 - used to establish quality and latency baselines.
 
-It should not shell out to an external search binary in the final contract unless explicitly treated as a separate benchmark candidate.
+Accepted reference implementation (`tokn-platform::direct_scan`):
+- requires the authorized root to be the Git top-level directory;
+- corpus = `git ls-files --cached --others --exclude-standard --full-name -z`;
+- path material must stay relative, contain no traversal/control/backslash/drive-prefix material and canonicalize inside the authorized root;
+- per-file candidate is accepted only when it is a regular file, <= configured max size, NUL-free and valid UTF-8;
+- hard operational ceilings: 100,000 discovered files, 16 MiB Git file-list output, 16 MiB configured max per file;
+- manifest retains only workspace-relative path + `src-v1-*` + `ixc-v1-*` + byte count, never source text;
+- query limit is >=1 result, <=4096 query bytes and <=64 unique whitespace terms;
+- matching lowercases query/path/content, then requires every unique term to occur in path or current content;
+- deterministic ranking: path-term hit count descending, content-term hit count descending, then relative path ascending;
+- every query reopens each eligible current file and recomputes `ixc-v1-*`; any mismatch/unreadable/now-ineligible entry fails closed instead of returning a stale candidate (`REFRESH_REQUIRED` for hash divergence);
+- returned hits contain no source text.
+
+It should not shell out to an external search binary in the final contract unless explicitly treated as a separate benchmark candidate. `git` is used only for bounded corpus enumeration under the Git-backed V0 contract.
 
 ### SQLITE_FTS5_UNICODE61_V0
 

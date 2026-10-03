@@ -21,6 +21,8 @@ Initial indexed candidates may include:
 
 A candidate name identifies a measurement condition, not a product commitment.
 
+DIRECT_SCAN_V0 accepted reference semantics are executable in `tokn-platform::direct_scan`: bounded Git-backed corpus enumeration, explicit skip reasons, no retained source-text corpus, deterministic all-terms substring matching/ranking and exact current `ixc-v1-*` verification before a candidate is returned. The benchmark policy may choose stricter limits than the implementation hard ceilings (100k files / 16 MiB Git list / 16 MiB per file), but never looser limits.
+
 ## Freeze before execution
 
 Every benchmark run must freeze before looking at candidate results:
@@ -246,7 +248,7 @@ Current prerequisite state:
 1. protocol and schema: **ACCEPTED**;
 2. SourceStableId derivation reuse: **RESOLVED** in `tokn-domain::identity`, byte-compatible with existing `src-v1-*`;
 3. local shadow cache root: **RESOLVED** under `observer_shadow_index_root()` / safe per-project cache segment;
-4. FTS capability probing with fail-closed fallback: **NOT STARTED**;
-5. direct-scan reference semantics + sanitized corpus/gold fixtures: **NOT STARTED / NEXT**.
+4. direct-scan reference semantics + sanitized Git fixture: **ACCEPTED REFERENCE FOUNDATION / FULL GATES PASS**;
+5. FTS capability probing + indexed candidate benchmark: **NEXT / NOT STARTED**, with DIRECT_SCAN retained as the fallback/reference.
 
 Even after an index backend becomes eligible, active runtime context injection remains a separate future gate.

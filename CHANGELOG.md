@@ -1,3 +1,12 @@
+## 2026-10-04 - M4.5 DIRECT_SCAN_V0 candidate reference
+
+- implemented bounded Git-backed DIRECT_SCAN_V0 corpus enumeration in `tokn-platform` without a persistent index or retained source-text corpus;
+- accepts tracked + non-ignored untracked regular UTF-8/non-binary files under the exact Git top-level root, with explicit skip reasons and path-escape protection;
+- added hard operational ceilings (100k files, 16 MiB Git list, 16 MiB/file) plus bounded query bytes/terms;
+- manifests retain only relative locator, `src-v1-*`, `ixc-v1-*` and byte count; queries reopen current files and fail closed on hash divergence with `REFRESH_REQUIRED`;
+- froze deterministic all-terms substring matching/ranking and sanitized temporary-Git tests;
+- no FTS5 backend/capability probe, Store/Measurement migration, MCP/runtime hook, source-text persistence or context injection.
+
 ## 2026-10-04 - M4.5 Shadow Index implementation prerequisites
 
 - promoted the accepted `scoped_source_id_bytes()` derivation into provider-neutral `tokn-domain::identity` while retaining a `tokn-storage` compatibility re-export;

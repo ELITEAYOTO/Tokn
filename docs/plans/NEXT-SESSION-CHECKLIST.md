@@ -48,13 +48,13 @@ M4 exit boundary :
 - runtime delivery, interpreted rediscovery/redundancy/freshness restent `NOT_PROVEN` ;
 - Cross-Run Comparability, Task Input Identity et Source Re-read Evidence restent des primitives d'observation, pas des findings.
 
-Premier scope M4.5 : **ACCEPTED DESIGN / IMPLEMENTATION PREREQUISITES IN PLACE**.
+Premier scope M4.5 : **ACCEPTED DESIGN / DIRECT_SCAN ACCEPTED REFERENCE FOUNDATION**.
 - `SHADOW-REPOSITORY-INDEX.md` fige l'index file-level DERIVED/local/rebuildable, separe du Store ;
 - `SHADOW-INDEX-PROTOCOL-V0.md` + ShadowIndexMeasurement V1 figent quality/latency/build/refresh/privacy avant choix backend ;
 - SourceStableId `src-v1-*` est maintenant canonique dans `tokn-domain::identity` avec golden de compatibilite ;
 - `IndexContentHash` `ixc-v1-*` est un domaine project-scoped distinct pour les bytes fichier entiers ;
 - `observer_shadow_index_root()` + safe per-project segment definissent le cache local sans choisir de fichier/backend ;
-- DIRECT_SCAN_V0 est la prochaine implementation de reference ; SQLite FTS5 unicode61/trigram restent seulement des candidats ;
+- DIRECT_SCAN_V0 est **ACCEPTED REFERENCE FOUNDATION** : Git top-level, tracked + non-ignored untracked, manifest sans texte brut, limites operationnelles explicites, matching/ranking deterministe et verification `ixc-v1-*` avant resultat ; SQLite FTS5 unicode61/trigram restent seulement des candidats ;
 - aucune injection active de contexte et aucune economie revendiquee.
 
 Aucune heuristique de finding tant que ces observations historiques ne sont pas fiables.
@@ -150,8 +150,8 @@ Stability/benchmark readiness: local Rust toolchain + dev-check + package harden
 Next concrete work:
 1. SourceStableId shared derivation outside `tokn-storage`: **DONE**, exact `src-v1-*` golden preserved;
 2. local shadow cache root outside tracked/package artifacts: **DONE**, safe per-project segment only;
-3. implement/test DIRECT_SCAN_V0 reference semantics on a sanitized file corpus with bounded Git-backed enumeration, binary/size policy and path-escape protection;
-4. add SQLite FTS5 capability probing only after the direct-scan reference exists, then benchmark candidates under the frozen protocol;
+3. DIRECT_SCAN_V0 reference semantics: **ACCEPTED REFERENCE FOUNDATION / FULL GATES PASS** on a sanitized temporary Git corpus;
+4. next bounded slice: add SQLite FTS5 capability probing with fail-closed DIRECT_SCAN fallback, then benchmark indexed candidates under the frozen protocol;
 5. keep all active context injection disabled and add future M4 phase/compaction/delivery evidence only when directly observable and fixtureable.
 
 Parallel descriptive work allowed now: prepare/collect 6-10 frozen native baseline tasks using `docs/benchmarks/BASELINE-PROTOCOL-V1.md`, starting with a >=3-run variance pilot per task and no active Tokn intervention.
