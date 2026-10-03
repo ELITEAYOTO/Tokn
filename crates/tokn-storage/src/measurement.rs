@@ -7,11 +7,12 @@ use thiserror::Error;
 use tokn_domain::{
     EvidenceIdentityCoverage, HISTORICAL_SNAPSHOT_SCHEMA_VERSION, HistoricalAgentRecord,
     HistoricalProvenanceRecord, HistoricalRateLimitSnapshotRecord, HistoricalRunRecord,
-    HistoricalRuntimeProfileRecord, HistoricalSnapshot, HistoricalToolActivityRecord,
-    HistoricalWorkspaceRecord, MEASUREMENT_CONTRACT_ID, MEASUREMENT_CONTRACT_VERSION,
-    MeasurementContractManifest, ModelRuntimeProfile, RATE_LIMIT_HISTORY_SCHEMA_VERSION,
-    RateLimitHistory, RunGroup, RunnerQualityStatus, RunnerResult,
-    TOOL_ACTIVITY_HISTORY_SCHEMA_VERSION, TokenTotals, ToolActivityHistory,
+    HistoricalRuntimeProfileRecord, HistoricalSnapshot, HistoricalSourceVersionRecord,
+    HistoricalToolActivityRecord, HistoricalWorkspaceRecord, MEASUREMENT_CONTRACT_ID,
+    MEASUREMENT_CONTRACT_VERSION, MeasurementContractManifest, ModelRuntimeProfile,
+    RATE_LIMIT_HISTORY_SCHEMA_VERSION, RateLimitHistory, RunGroup, RunnerQualityStatus,
+    RunnerResult, SOURCE_VERSION_HISTORY_SCHEMA_VERSION, SourceVersionBoundary,
+    SourceVersionHistory, TOOL_ACTIVITY_HISTORY_SCHEMA_VERSION, TokenTotals, ToolActivityHistory,
 };
 
 use crate::Database;
@@ -48,6 +49,7 @@ pub struct MeasurementStoreInput {
     pub profile: Option<ModelRuntimeProfile>,
     pub tool_activities: Vec<ToolActivityStoreInput>,
     pub rate_limit_snapshots: Vec<RateLimitStoreInput>,
+    pub source_versions: Vec<SourceVersionStoreInput>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -92,6 +94,15 @@ pub struct RateLimitStoreInput {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SourceVersionStoreInput {
+    pub source_stable_id: String,
+    pub boundary: SourceVersionBoundary,
+    pub version_fingerprint: String,
+    pub snapshot_observed_at: Option<String>,
+    pub bytes: u64,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct MeasurementStoreSummary {
     pub run_id: String,
     pub project_id: String,
@@ -101,6 +112,7 @@ pub struct MeasurementStoreSummary {
     pub agent_count: u64,
     pub tool_activity_count: u64,
     pub rate_limit_snapshot_count: u64,
+    pub source_version_count: u64,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -173,6 +185,18 @@ pub fn scoped_source_id_bytes(scope_key: &str, locator: &[u8]) -> String {
     hasher.update(&[0]);
     hasher.update(locator);
     format!("src-v1-{}", hasher.finalize().to_hex())
+}
+
+pub fn scoped_source_version_bytes(scope_key: &str, snapshot_sha256: &[u8]) -> String {
+    let key = blake3::derive_key(
+        "tokn.project-scoped-source-version.v1",
+        scope_key.as_bytes(),
+    );
+    let mut hasher = blake3::Hasher::new_keyed(&key);
+    hasher.update(b"workspace-snapshot-sha256-v1");
+    hasher.update(&[0]);
+    hasher.update(snapshot_sha256);
+    format!("ver-v1-{}", hasher.finalize().to_hex())
 }
 
 impl Database {
@@ -336,6 +360,10 @@ impl Database {
             params![input.result.run_id],
         )?;
         tx.execute(
+            "DELETE FROM source_versions_v1 WHERE run_id = ?1",
+            params![input.result.run_id],
+        )?;
+        tx.execute(
             "DELETE FROM agents_v2 WHERE run_id = ?1",
             params![input.result.run_id],
         )?;
@@ -471,6 +499,35 @@ impl Database {
             )?;
         }
 
+        for version in &input.source_versions {
+            let version_id = private_id(
+                "svr",
+                &format!(
+                    "{}|{}|{}|{}",
+                    input.result.run_id,
+                    version.source_stable_id,
+                    version.boundary.as_str(),
+                    version.version_fingerprint
+                ),
+            );
+            tx.execute(
+                "INSERT INTO source_versions_v1(
+                    version_id, run_id, source_stable_id, boundary, version_fingerprint,
+                    snapshot_observed_at, bytes, created_at_unix
+                 ) VALUES (?1,?2,?3,?4,?5,?6,?7,?8)",
+                params![
+                    version_id,
+                    input.result.run_id,
+                    version.source_stable_id,
+                    version.boundary.as_str(),
+                    version.version_fingerprint,
+                    version.snapshot_observed_at,
+                    to_i64(version.bytes)?,
+                    now
+                ],
+            )?;
+        }
+
         tx.execute(
             "INSERT INTO provenance_v2(
                 source_id, run_id, source_kind, source_fingerprint, snapshot_bytes,
@@ -506,6 +563,7 @@ impl Database {
             agent_count: input.group.agents.len() as u64,
             tool_activity_count: input.tool_activities.len() as u64,
             rate_limit_snapshot_count: input.rate_limit_snapshots.len() as u64,
+            source_version_count: input.source_versions.len() as u64,
         })
     }
 
@@ -571,6 +629,86 @@ impl Database {
             .query_row("SELECT COUNT(*) FROM rate_limit_snapshots_v2", [], |row| {
                 row.get(0)
             })
+    }
+
+    pub fn source_version_schema_version(&self) -> rusqlite::Result<Option<String>> {
+        self.connection()
+            .query_row(
+                "SELECT value FROM schema_meta WHERE key='source_version_schema_version'",
+                [],
+                |row| row.get(0),
+            )
+            .optional()
+    }
+
+    pub fn source_version_count(&self) -> rusqlite::Result<i64> {
+        self.connection()
+            .query_row("SELECT COUNT(*) FROM source_versions_v1", [], |row| {
+                row.get(0)
+            })
+    }
+
+    pub fn source_version_history(
+        &self,
+        project_filter: Option<&str>,
+        workspace_filter: Option<&str>,
+        run_limit: usize,
+    ) -> Result<SourceVersionHistory, MeasurementStoreError> {
+        let mut history = SourceVersionHistory {
+            schema_version: SOURCE_VERSION_HISTORY_SCHEMA_VERSION,
+            project_filter: project_filter.map(str::to_string),
+            workspace_filter: workspace_filter.map(str::to_string),
+            run_limit: u64::try_from(run_limit).unwrap_or(u64::MAX),
+            ..Default::default()
+        };
+        if run_limit == 0 {
+            return Ok(history);
+        }
+
+        let mut stmt = self.connection().prepare(
+            "WITH selected_runs AS (
+                SELECT run_id, project_id, workspace_id, created_at_unix
+                FROM measurement_runs_v2
+                WHERE (?1 IS NULL OR project_id = ?1)
+                  AND (?2 IS NULL OR workspace_id = ?2)
+                ORDER BY created_at_unix DESC, run_id ASC
+                LIMIT ?3
+             )
+             SELECT version.version_id, version.run_id, selected.project_id,
+                selected.workspace_id, version.source_stable_id, version.boundary,
+                version.version_fingerprint, version.snapshot_observed_at, version.bytes,
+                selected.created_at_unix
+             FROM source_versions_v1 AS version
+             INNER JOIN selected_runs AS selected ON selected.run_id = version.run_id
+             ORDER BY selected.created_at_unix DESC, version.run_id ASC,
+                version.source_stable_id ASC, version.boundary ASC",
+        )?;
+
+        history.versions = stmt
+            .query_map(
+                params![
+                    project_filter,
+                    workspace_filter,
+                    i64::try_from(run_limit).unwrap_or(i64::MAX)
+                ],
+                |row| {
+                    Ok(HistoricalSourceVersionRecord {
+                        version_id: row.get(0)?,
+                        run_id: row.get(1)?,
+                        project_id: row.get(2)?,
+                        workspace_id: row.get(3)?,
+                        source_stable_id: row.get(4)?,
+                        boundary: parse_source_version_boundary(row.get::<_, String>(5)?)?,
+                        version_fingerprint: row.get(6)?,
+                        snapshot_observed_at: row.get(7)?,
+                        bytes: row_u64(row, 8)?,
+                        run_created_at_unix: row.get(9)?,
+                    })
+                },
+            )?
+            .collect::<rusqlite::Result<Vec<_>>>()?;
+
+        Ok(history)
     }
 
     pub fn rate_limit_history(
@@ -1175,6 +1313,38 @@ fn validate_input(input: &MeasurementStoreInput) -> Result<(), MeasurementStoreE
         }
     }
 
+    let mut source_version_slots = BTreeSet::new();
+    for version in &input.source_versions {
+        validate_scoped_fingerprint(
+            "source_version source_stable_id",
+            &version.source_stable_id,
+            "src",
+        )?;
+        validate_scoped_fingerprint(
+            "source_version version_fingerprint",
+            &version.version_fingerprint,
+            "ver",
+        )?;
+        if version
+            .snapshot_observed_at
+            .as_deref()
+            .is_some_and(|value| value.trim().is_empty())
+        {
+            return Err(MeasurementStoreError::Invalid(
+                "source version snapshot_observed_at cannot be empty".into(),
+            ));
+        }
+        if !source_version_slots
+            .insert((version.source_stable_id.as_str(), version.boundary.as_str()))
+        {
+            return Err(MeasurementStoreError::Invalid(format!(
+                "duplicate source version boundary {} for {}",
+                version.boundary.as_str(),
+                version.source_stable_id
+            )));
+        }
+    }
+
     for snapshot in &input.rate_limit_snapshots {
         if snapshot.observed_at.trim().is_empty() {
             return Err(MeasurementStoreError::Invalid(
@@ -1281,6 +1451,21 @@ fn validate_scoped_fingerprint(
         )));
     }
     Ok(())
+}
+
+fn parse_source_version_boundary(value: String) -> rusqlite::Result<SourceVersionBoundary> {
+    match value.as_str() {
+        "BEFORE" => Ok(SourceVersionBoundary::Before),
+        "AFTER" => Ok(SourceVersionBoundary::After),
+        _ => Err(rusqlite::Error::FromSqlConversionFailure(
+            0,
+            rusqlite::types::Type::Text,
+            Box::new(std::io::Error::new(
+                std::io::ErrorKind::InvalidData,
+                format!("unknown source version boundary: {value}"),
+            )),
+        )),
+    }
 }
 
 fn parse_identity_coverage(value: String) -> rusqlite::Result<EvidenceIdentityCoverage> {
@@ -1484,6 +1669,7 @@ mod tests {
             profile: Some(profile()),
             tool_activities: Vec::new(),
             rate_limit_snapshots: Vec::new(),
+            source_versions: Vec::new(),
         }
     }
 
@@ -1581,6 +1767,83 @@ mod tests {
         let haystack = String::from_utf8_lossy(&bytes);
         assert!(!haystack.contains("rate-user"));
         assert!(!haystack.contains("Secret Project"));
+        let _ = fs::remove_file(path);
+    }
+
+    #[test]
+    fn source_versions_are_idempotent_filterable_and_privacy_scoped() {
+        let path = temp_db("source-version-history");
+        let _ = fs::remove_file(&path);
+        let private_path = format!(r"C:\{}\version-user\Secret Project\session.jsonl", "Users");
+        let mut input = input(&private_path);
+        let source_id = scoped_source_id_bytes("fixture-project-key", b"file:src/example.rs");
+        let raw_snapshot_hash = "TOKN-SYNTHETIC-SHA256-SECRET-abcdef";
+        input.source_versions.push(SourceVersionStoreInput {
+            source_stable_id: source_id.clone(),
+            boundary: SourceVersionBoundary::Before,
+            version_fingerprint: scoped_source_version_bytes(
+                "fixture-project-key",
+                raw_snapshot_hash.as_bytes(),
+            ),
+            snapshot_observed_at: Some("2026-10-03T10:00:00Z".into()),
+            bytes: 42,
+        });
+        input.source_versions.push(SourceVersionStoreInput {
+            source_stable_id: source_id.clone(),
+            boundary: SourceVersionBoundary::After,
+            version_fingerprint: scoped_source_version_bytes(
+                "fixture-project-key",
+                b"TOKN-SYNTHETIC-SHA256-CHANGED-fedcba",
+            ),
+            snapshot_observed_at: Some("2026-10-03T10:30:00Z".into()),
+            bytes: 43,
+        });
+
+        let db = Database::open(&path).expect("open db");
+        let first = db.save_measurement(&input).expect("first save");
+        let second = db.save_measurement(&input).expect("second save");
+        assert_eq!(first, second);
+        assert_eq!(first.source_version_count, 2);
+        assert_eq!(db.source_version_count().unwrap(), 2);
+        assert_eq!(
+            db.source_version_schema_version().unwrap().as_deref(),
+            Some("1")
+        );
+
+        let history = db
+            .source_version_history(Some(&input.project_id), Some(&input.workspace_id), 10)
+            .expect("source version history");
+        assert_eq!(
+            history.schema_version,
+            SOURCE_VERSION_HISTORY_SCHEMA_VERSION
+        );
+        assert_eq!(history.versions.len(), 2);
+        assert!(
+            history
+                .versions
+                .iter()
+                .all(|item| item.source_stable_id == source_id)
+        );
+        assert!(
+            history
+                .versions
+                .iter()
+                .any(|item| item.boundary == SourceVersionBoundary::Before)
+        );
+        assert!(
+            history
+                .versions
+                .iter()
+                .any(|item| item.boundary == SourceVersionBoundary::After)
+        );
+
+        drop(db);
+        let bytes = fs::read(&path).expect("read sqlite");
+        let haystack = String::from_utf8_lossy(&bytes);
+        assert!(!haystack.contains(raw_snapshot_hash));
+        assert!(!haystack.contains("version-user"));
+        assert!(!haystack.contains("Secret Project"));
+        assert!(!haystack.contains("src/example.rs"));
         let _ = fs::remove_file(path);
     }
 

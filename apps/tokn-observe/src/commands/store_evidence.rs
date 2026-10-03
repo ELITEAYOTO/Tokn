@@ -2,14 +2,20 @@ use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Path, PathBuf};
 
 use anyhow::Context;
-use tokn_codex::session::{extract_file_source_locator, read_session_tool_result_outputs};
+use tokn_analysis::ProjectSnapshot;
+use tokn_codex::session::{
+    extract_file_source_locator, file_source_locator_from_relative_path,
+    read_session_tool_result_outputs,
+};
 use tokn_domain::{
     AgentEvidence, EvidenceIdentityCoverage, MeasurementContractManifest, ModelRuntimeProfile,
-    RunGroup, RunnerResult, RunnerSourceReport, SourceKind,
+    PROJECT_SNAPSHOT_SCHEMA_VERSION, RunGroup, RunnerResult, RunnerSourceReport, SourceKind,
+    SourceVersionBoundary,
 };
 use tokn_storage::{
-    Database, MeasurementStoreInput, RateLimitStoreInput, ToolActivityStoreInput,
-    fingerprint_bytes, private_id, scoped_fingerprint_bytes, scoped_source_id_bytes,
+    Database, MeasurementStoreInput, RateLimitStoreInput, SourceVersionStoreInput,
+    ToolActivityStoreInput, fingerprint_bytes, private_id, scoped_fingerprint_bytes,
+    scoped_source_id_bytes, scoped_source_version_bytes,
 };
 
 use super::common::{db_path, open_db};
@@ -73,6 +79,11 @@ pub fn run(
         &session_members,
     );
     let rate_limit_snapshots = build_rate_limit_snapshots(&session_members);
+    let source_versions = build_source_versions(
+        evidence_dir,
+        project_key,
+        result.selected_workspace.as_deref(),
+    )?;
     let workspace_id = private_id("wsp", &format!("{project_key}:{workspace_key}"));
     let parent_workspace_id =
         parent_workspace_key.map(|key| private_id("wsp", &format!("{project_key}:{key}")));
@@ -93,6 +104,7 @@ pub fn run(
         profile,
         tool_activities,
         rate_limit_snapshots,
+        source_versions,
     };
 
     let db = match db_override {
@@ -111,6 +123,7 @@ pub fn run(
         "  rate_limit_snapshots: {}",
         summary.rate_limit_snapshot_count
     );
+    println!("  source_versions: {}", summary.source_version_count);
     println!("  source_id: {}", summary.source_id);
     println!(
         "  profile_id: {}",
@@ -237,6 +250,69 @@ fn build_tool_activities(
     }
 
     out
+}
+
+fn build_source_versions(
+    evidence_dir: &Path,
+    project_key: &str,
+    selected_workspace: Option<&str>,
+) -> anyhow::Result<Vec<SourceVersionStoreInput>> {
+    let mut out = Vec::new();
+    let mut seen = BTreeSet::new();
+
+    for (boundary, name) in [
+        (
+            SourceVersionBoundary::Before,
+            "workspace-before-snapshot.json",
+        ),
+        (
+            SourceVersionBoundary::After,
+            "workspace-after-snapshot.json",
+        ),
+    ] {
+        let path = evidence_dir.join(name);
+        if !path.is_file() {
+            continue;
+        }
+        let snapshot: ProjectSnapshot = read_json(&path)?;
+        if snapshot.schema_version != PROJECT_SNAPSHOT_SCHEMA_VERSION {
+            anyhow::bail!(
+                "unsupported project snapshot schema_version {} in {}; expected {}",
+                snapshot.schema_version,
+                path.display(),
+                PROJECT_SNAPSHOT_SCHEMA_VERSION
+            );
+        }
+        for file in snapshot.files {
+            if file.sha256.trim().is_empty() {
+                anyhow::bail!("empty file sha256 in {}", path.display());
+            }
+            let source = file_source_locator_from_relative_path(&file.path, selected_workspace);
+            let Some(locator) = source.locator.as_deref() else {
+                continue;
+            };
+            let source_stable_id = scoped_source_id_bytes(project_key, locator.as_bytes());
+            if !seen.insert((boundary.as_str(), source_stable_id.clone())) {
+                anyhow::bail!(
+                    "duplicate source version boundary {} for {}",
+                    boundary.as_str(),
+                    source_stable_id
+                );
+            }
+            out.push(SourceVersionStoreInput {
+                source_stable_id,
+                boundary,
+                version_fingerprint: scoped_source_version_bytes(
+                    project_key,
+                    file.sha256.as_bytes(),
+                ),
+                snapshot_observed_at: snapshot.created_at.clone(),
+                bytes: file.bytes,
+            });
+        }
+    }
+
+    Ok(out)
 }
 
 fn build_rate_limit_snapshots(members: &[AgentEvidence]) -> Vec<RateLimitStoreInput> {
@@ -617,6 +693,76 @@ mod tests {
             EvidenceIdentityCoverage::Unknown
         );
         assert!(activities[0].content_fingerprint.is_none());
+    }
+
+    #[test]
+    fn source_version_projection_matches_boundaries_without_raw_snapshot_material() {
+        let dir = std::env::temp_dir().join(format!(
+            "tokn-source-version-projection-{}",
+            std::process::id()
+        ));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).expect("create temp evidence");
+        let private_relative = "private-dir/secret-source.rs";
+        let raw_before = "TOKN-SYNTHETIC-BEFORE-SHA-001";
+        let raw_after = "TOKN-SYNTHETIC-AFTER-SHA-002";
+        for (name, created_at, sha) in [
+            (
+                "workspace-before-snapshot.json",
+                "2026-10-03T10:00:00Z",
+                raw_before,
+            ),
+            (
+                "workspace-after-snapshot.json",
+                "2026-10-03T10:30:00Z",
+                raw_after,
+            ),
+        ] {
+            let snapshot = serde_json::json!({
+                "schema_version": PROJECT_SNAPSHOT_SCHEMA_VERSION,
+                "created_at": created_at,
+                "project_root": "E:\\fixture\\PROJECT",
+                "excluded_top_level": [],
+                "file_count": 1,
+                "total_bytes": 42,
+                "files": [{
+                    "path": private_relative,
+                    "sha256": sha,
+                    "bytes": 42,
+                    "last_write_utc": created_at
+                }]
+            });
+            std::fs::write(
+                dir.join(name),
+                serde_json::to_vec_pretty(&snapshot).expect("serialize snapshot"),
+            )
+            .expect("write snapshot");
+        }
+
+        let versions =
+            build_source_versions(&dir, "fixture-project-key", Some(r"E:\fixture\PROJECT"))
+                .expect("source versions");
+        assert_eq!(versions.len(), 2);
+        assert_eq!(versions[0].source_stable_id, versions[1].source_stable_id);
+        assert_ne!(
+            versions[0].version_fingerprint,
+            versions[1].version_fingerprint
+        );
+        assert!(
+            versions
+                .iter()
+                .all(|item| item.source_stable_id.starts_with("src-v1-"))
+        );
+        assert!(
+            versions
+                .iter()
+                .all(|item| item.version_fingerprint.starts_with("ver-v1-"))
+        );
+        let debug = format!("{versions:?}");
+        assert!(!debug.contains(private_relative));
+        assert!(!debug.contains(raw_before));
+        assert!(!debug.contains(raw_after));
+        let _ = std::fs::remove_dir_all(dir);
     }
 
     #[test]

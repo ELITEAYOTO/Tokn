@@ -22,6 +22,7 @@ mod sessions;
 mod simulate_caps;
 mod source_identity_history;
 mod source_mutation_history;
+mod source_version_history;
 mod store_evidence;
 
 use crate::cli::{Cli, Command};
@@ -111,6 +112,19 @@ pub fn run(cli: Cli) -> anyhow::Result<()> {
             db,
             output_json,
         } => source_mutation_history::run(
+            project_id.as_deref(),
+            workspace_id.as_deref(),
+            limit,
+            db.as_deref(),
+            output_json.as_deref(),
+        ),
+        Command::SourceVersionHistory {
+            project_id,
+            workspace_id,
+            limit,
+            db,
+            output_json,
+        } => source_version_history::run(
             project_id.as_deref(),
             workspace_id.as_deref(),
             limit,

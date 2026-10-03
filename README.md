@@ -109,7 +109,7 @@ Il ne prouve ni que le contexte est utile, ni que le cache est optimal.
 
 Ordre actuel :
 - M4 Historical Analyzer + Context Ledger ;
-- M4 exact Context/Result Identity + SourceStableId file V0 + observed content evolution + source mutation timing ACCEPTED ; M4.5 freshness/Context Twin + Shadow Retrieval/Edit ensuite ;
+- M4 exact Context/Result Identity + SourceStableId file V0 + observed content evolution + source mutation timing + run-boundary SourceVersionHistory V1 ACCEPTED ; M4.5 freshness/Context Twin + Shadow Retrieval/Edit ensuite ;
 - M5 Findings + Opportunity Analyzer ;
 - M6 counterfactual/policy lab puis Experiment 003 causal A/B ;
 - M7 Advisor ;
@@ -167,5 +167,15 @@ The accepted mutation-timing slice extends ToolActivityHistory to V3 with option
 - `tool_status=completed` is preserved but does not prove that the file changed; `effect_status` remains `NOT_VERIFIED`;
 - no raw path, raw command output or durable tool-result content is added by this slice;
 - no freshness, staleness, invalidation-effect or safe-reuse claim follows from operation timing alone.
+
+## M4 run-boundary source version evidence - 2026-10-03
+
+SourceVersionHistory V1 records privacy-safe source versions directly observed in Runner workspace snapshots.
+- BEFORE/AFTER file versions are derived from workspace snapshot SHA-256 evidence, never from mutation intent;
+- the same workspace-relative logical file reuses the project-scoped SourceStableId;
+- durable `ver-v1-*` fingerprints are project-scoped and domain-separated; raw relative paths and raw snapshot SHA-256 values are not persisted;
+- missing one boundary stays `UNKNOWN`; Tokn does not infer ADDED/REMOVED;
+- `tokn-observe source-version-history` exposes the observed boundary records; the analysis reducer can classify `UNCHANGED_OBSERVED`, `CHANGED_OBSERVED` or `UNKNOWN`;
+- no Git-commit provenance, mutation causality, freshness/staleness, invalidation effect or safe-reuse claim is implied.
 
 Long-term direction remains observation-first. Multi-runtime support is an architectural target, not a current support claim. Before runtime #2: Runtime Adapter Contract V1, Token Semantics V2, Capability Manifest V1 and sanitized conformance fixtures. See docs/design/MULTI-RUNTIME-CORE-AND-DATA-ARCHITECTURE.md and ADR-006.

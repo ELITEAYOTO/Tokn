@@ -6,7 +6,7 @@ Binaire/Cargo : **V0.1 / 0.1.0**
 
 ## Resume
 
-**P0-P9 DONE. Experiment 002 est ACCEPTED. Measurement Contract V1 est FROZEN. Store foundation est DONE. Local MCP transport prototype est ACCEPTED. Historical Analyzer + Context Ledger est IN PROGRESS ; Context/Result Identity V0, Cross-Agent Evidence V2 et Source Mutation Observation V0 sont ACCEPTED FOUNDATIONS.**
+**P0-P9 DONE. Experiment 002 est ACCEPTED. Measurement Contract V1 est FROZEN. Store foundation est DONE. Local MCP transport prototype est ACCEPTED. Historical Analyzer + Context Ledger est IN PROGRESS ; Context/Result Identity V0, Cross-Agent Evidence V2, Source Mutation Observation V0 et Run-Boundary Source Version V0 sont ACCEPTED FOUNDATIONS.**
 
 Le projet est revenu sur une direction unique :
 mesurer l'efficacite du contexte sans reduire la capacite d'Astra.
@@ -245,8 +245,8 @@ Limites explicites du contrat V1 :
 
 ## Prochaine action
 
-Continuer **M4** a partir des fondations d'identite et de mutation-operation maintenant acceptees :
-source version/hash/commit et provenance seulement quand directement observables, puis semantiques de fraicheur/invalidation fail-closed, compaction/rediscovery et comparaison cross-run explicite.
+Continuer **M4** a partir des fondations d'identite, de mutation-operation et de version source aux frontieres du run maintenant acceptees :
+provenance additionnelle (dont Git commit seulement quand directement observable), puis semantiques de fraicheur/invalidation fail-closed, compaction/rediscovery et comparaison cross-run explicite.
 
 La mutation-operation peut maintenant etre datee quand le rollout fournit un timestamp, mais son effet reste `NOT_VERIFIED`. Cette fondation doit preparer un Context Twin V0 sans pretendre connaitre la memoire interne d'Astra.
 Ne pas persister les tool outputs bruts par defaut uniquement pour obtenir une identite.
@@ -331,10 +331,14 @@ Accepted M4 additions:
 - Source Mutation Observation V0: conservative `Set-Content` / `Add-Content` target identity plus rollout timing when directly observed;
 - SourceMutationHistory V1 preserves `tool_status` but keeps `effect_status=NOT_VERIFIED`;
 - `tokn-observe source-mutation-history` read-only JSON surface;
+- Run-Boundary Source Version V0 from Runner BEFORE/AFTER workspace snapshots;
+- SourceVersionHistory V1 stores project-scoped `ver-v1-*` fingerprints keyed by the same SourceStableId, never raw paths or raw snapshot SHA-256 values;
+- source boundary reducer reports `UNCHANGED_OBSERVED` / `CHANGED_OBSERVED` only with both boundaries, otherwise `UNKNOWN`;
+- `tokn-observe source-version-history` read-only JSON surface;
 - `tokn-observe cross-agent-evidence` read-only JSON analysis surface.
 
 Next M4 work:
-- source version/hash/commit, provenance and verified mutation effect only when directly observable;
+- Git-commit/additional provenance and verified mutation effect only when directly observable;
 - freshness/invalidation semantics that preserve `UNKNOWN` / `NOT_CAPTURED` instead of inferring staleness;
 - broader source kinds plus compaction/rediscovery only when directly observable;
 - explicit cross-run comparison primitives.

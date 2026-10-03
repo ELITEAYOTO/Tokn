@@ -72,7 +72,7 @@ Its content evolution values are:
 ## Next boundary
 
 Still required before a real freshness/rediscovery finding:
-- source version / hash / Git commit when directly observable;
+- run-boundary source version/hash is now accepted from Runner snapshots; Git commit/additional provenance only when directly observable;
 - verified mutation effect and freshness/invalidation semantics rather than operation intent alone;
 - broader runtime-neutral source kinds such as symbol/range identities only when provable;
 - compaction/context-management evidence where observable;
