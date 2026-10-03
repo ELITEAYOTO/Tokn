@@ -69,5 +69,7 @@ Rust validation covers idempotent persistence/history, project-scoped `git-v1-*`
 
 ## Next boundary
 
-Freshness/invalidation still requires a fail-closed relation between read evidence, exact SourceVersion observations, verified change/effect evidence and later rediscovery.
-Workspace Git provenance is now one input to that future reducer, not the reducer itself.
+Source Freshness Evidence V0 now consumes Workspace Git provenance as independent run-boundary corroboration beside Source Mutation Window and exact SourceVersion evidence.
+It reports only `HEAD_CHANGED_OBSERVED` / `HEAD_UNCHANGED_OBSERVED` / `UNKNOWN` plus observed dirty booleans; Git state never upgrades `freshness_status` or `invalidation_status` from `NOT_PROVEN`.
+
+Directly observable compaction/rediscovery and explicit cross-run provenance compatibility remain required before any stronger stale/fresh contract.

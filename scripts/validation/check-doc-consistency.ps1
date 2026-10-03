@@ -74,8 +74,13 @@ Assert-Contains "docs/design/SOURCE-IDENTITY-CONTENT-EVOLUTION.md" "Status: M4 A
 Assert-Contains "docs/design/SOURCE-MUTATION-OBSERVATION.md" "## Source Mutation Window V0"
 Assert-Contains "docs/design/SOURCE-MUTATION-OBSERVATION.md" 'Every window keeps `causality_status = NOT_PROVEN`.'
 Assert-Contains "docs/design/WORKSPACE-GIT-PROVENANCE.md" "Status: ACCEPTED FOUNDATION / OBSERVATION-ONLY (2026-10-03)."
+Assert-Contains "docs/design/SOURCE-FRESHNESS-EVIDENCE.md" "Status: M4 ACCEPTED CORROBORATION FOUNDATION / OBSERVATION-ONLY"
+Assert-Contains "docs/design/SOURCE-FRESHNESS-EVIDENCE.md" 'freshness_status = NOT_PROVEN'
+Assert-Contains "docs/design/SOURCE-FRESHNESS-EVIDENCE.md" 'invalidation_status = NOT_PROVEN'
+Assert-Contains "docs/design/SOURCE-FRESHNESS-EVIDENCE.md" '`tokn-observe source-freshness-evidence`'
 Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "Workspace Git Provenance V0 + WorkspaceGitProvenanceHistory V1: ACCEPTED FOUNDATION."
 Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "Source Mutation Window V0: ACCEPTED CHRONOLOGY FOUNDATION."
+Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "Source Freshness Evidence V0:"
 Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "SourceStableId file V0 + SourceIdentityHistory V1: ACCEPTED FOUNDATION."
 Assert-Contains "docs/design/CROSS-AGENT-EVIDENCE.md" "# Cross-Agent Evidence V2"
 Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "Context/Result Identity Foundation V0 : ACCEPTED FOUNDATION."
@@ -110,6 +115,7 @@ $activeDocs = @(
     "docs/design/TARGET-ARCHITECTURE.md",
     "docs/design/MULTI-RUNTIME-CORE-AND-DATA-ARCHITECTURE.md",
     "docs/design/WORKSPACE-GIT-PROVENANCE.md",
+    "docs/design/SOURCE-FRESHNESS-EVIDENCE.md",
     "docs/design/CONTEXT-RESULT-IDENTITY.md",
     "docs/design/CROSS-AGENT-EVIDENCE.md",
     "docs/decisions/ADR-006-MULTI-RUNTIME-CORE-ADAPTER-BOUNDARY.md",

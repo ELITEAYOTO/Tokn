@@ -105,11 +105,13 @@ An observed mutation operation does not prove:
 - that a reread is redundant or avoidable.
 ## Next boundary
 
-Before Tokn can emit a real freshness or invalidation finding, it still needs to join the accepted evidence conservatively:
-- Source Mutation Window V0 provides a same-thread chronological read/mutation/read observation, but its causality remains `NOT_PROVEN`;
-- exact SourceVersion BEFORE/AFTER plus workspace Git HEAD/dirty provenance are accepted boundary evidence and must stay source/provenance scoped;
-- later rediscovery must be directly observable before Tokn can describe a stale-evidence/rediscovery sequence;
-- broader runtime-neutral source kinds are allowed only when stable identity is provable;
-- explicit cross-run compatibility and provenance rules remain required.
+Source Freshness Evidence V0 now joins this chronology with exact SourceVersion BEFORE/AFTER and workspace Git HEAD/dirty provenance as an observation-only corroboration layer.
+It can report observed change+reread sequences and boundary corroboration, but keeps both `freshness_status` and `invalidation_status` at `NOT_PROVEN`.
 
-Until then, mutation timing/window evidence remains observation-only. No optimizer, memory injection, cache/reuse decision or savings claim is authorized by this V0 contract.
+Before Tokn can emit a real stale/fresh or invalidation finding it still needs:
+- directly observable compaction/rediscovery evidence when available;
+- explicit cross-run compatibility and provenance rules;
+- broader runtime-neutral source kinds only when stable identity is provable;
+- evidence tying supplied/used context to a later source state, rather than assuming model retention from prior delivery.
+
+No optimizer, memory injection, cache/reuse decision or savings claim is authorized by this V0 contract.

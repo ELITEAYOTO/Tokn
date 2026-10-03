@@ -161,7 +161,7 @@ Re-ingestion replaces the run-owned snapshot set deterministically, duplicate ag
 
 CLI: `tokn-observe rate-limit-history`.
 
-Automatic runtime compatibility, rate-limit history, Cross-Agent Evidence V2, exact result identity, conservative SourceStableId file V0, mutation-operation timing, Source Mutation Window V0, run-boundary SourceVersionHistory V1 and Workspace Git Provenance V0 are accepted foundations. Remaining M4 work is fail-closed freshness/invalidation that preserves mutation causality as `NOT_PROVEN`, broader source kinds, rediscovery/compaction and explicit cross-run analysis, not per-turn token invention.
+Automatic runtime compatibility, rate-limit history, Cross-Agent Evidence V2, exact result identity, conservative SourceStableId file V0, mutation-operation timing, Source Mutation Window V0, run-boundary SourceVersionHistory V1 and Workspace Git Provenance V0 are accepted foundations. Source Freshness Evidence V0 is an ACCEPTED CORROBORATION FOUNDATION / observation-only layer and keeps freshness/invalidation `NOT_PROVEN`. Remaining M4 work is directly observable rediscovery/compaction, broader provable source kinds and explicit cross-run analysis, not per-turn token invention or speculative stale-context inference.
 
 ## Accepted Cross-Agent Evidence V2 slice - 2026-10-03
 
@@ -218,3 +218,18 @@ ProjectSnapshot V1 now carries an optional Git evidence block at Runner BEFORE/A
 `workspace_git_provenance_v1` stores at most one record per `(run, boundary)`. Durable evidence contains coverage, dirty state and a project-scoped `git-v1-*` HEAD fingerprint; the raw Git SHA is not persisted in SQLite.
 
 CLI: `tokn-observe workspace-git-provenance-history`. This is workspace-level provenance only: it does not identify which source changed, prove mutation effect, emit freshness/staleness, or authorize invalidation/reuse/savings claims.
+
+## Accepted Source Freshness Evidence V0 corroboration slice - 2026-10-03
+
+`tokn-observe source-freshness-evidence` joins three existing read-only evidence surfaces under identical project/workspace filters and run limit:
+- Source Mutation Window V0 chronology;
+- SourceVersionHistory V1 BEFORE/AFTER comparison for the same SourceStableId;
+- WorkspaceGitProvenanceHistory V1 HEAD/dirty boundary evidence.
+
+The reducer never compares ContentFingerprint and SourceVersionFingerprint directly because they are intentionally separate derivation domains. SourceStableId/run/project/workspace identity is the join key.
+
+Observed outputs distinguish exact change+reread, change+reread plus changed run boundary, same-content reread and UNKNOWN. Workspace Git HEAD comparison is independent corroboration only.
+
+Every record keeps `freshness_status=NOT_PROVEN` and `invalidation_status=NOT_PROVEN`. The slice does not claim model-context retention, staleness, required invalidation, safe reuse or savings.
+
+No Store V2 migration or Measurement Contract V1 change is required. Direct compaction/rediscovery evidence and explicit cross-run comparison remain the next M4 boundary.

@@ -1,3 +1,13 @@
+## 2026-10-03 - M4 Source Freshness Evidence V0
+
+- added an observation-only Source Freshness Evidence V0 reducer joining Source Mutation Window V0, SourceVersionHistory V1 and WorkspaceGitProvenanceHistory V1 without changing Store V2 or Measurement Contract V1;
+- exact in-run content difference plus a changed Runner source boundary is reported as `CHANGE_AND_REREAD_WITH_BOUNDARY_CHANGE_OBSERVED`, while weaker/partial corroboration remains separately classified;
+- ContentFingerprint and SourceVersionFingerprint remain separate identity domains and are never compared directly;
+- workspace Git HEAD comparison and dirty evidence remain independent corroboration and cannot upgrade a source freshness verdict;
+- every record keeps `freshness_status=NOT_PROVEN` and `invalidation_status=NOT_PROVEN`; no retained-context, safe-reuse, mutation-causality or savings claim is introduced;
+- added read-only `tokn-observe source-freshness-evidence`, fail-closed input-scope/schema/duplicate-boundary handling and targeted reducer/CLI regressions;
+- next M4 boundary is directly observable compaction/rediscovery plus explicit cross-run comparison before any real stale/fresh inference.
+
 ## 2026-10-03 - M4 Source Mutation Window V0
 
 - added a fail-closed same-thread mutation chronology reducer over ToolActivityHistory V3: exact same-source read before -> completed targeted mutation -> exact same-source read after;
