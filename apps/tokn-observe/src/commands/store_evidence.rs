@@ -10,13 +10,13 @@ use tokn_codex::session::{
 use tokn_domain::{
     AgentEvidence, EvidenceIdentityCoverage, MeasurementContractManifest, ModelRuntimeProfile,
     PROJECT_SNAPSHOT_SCHEMA_VERSION, RunGroup, RunnerResult, RunnerSourceReport, SourceKind,
-    SourceVersionBoundary, WorkspaceGitProvenanceCoverage,
+    SourceVersionBoundary, WorkspaceGitProvenanceCoverage, scoped_source_id_bytes,
 };
 use tokn_storage::{
     Database, MeasurementStoreInput, RateLimitStoreInput, SourceVersionStoreInput,
     TaskInputStoreInput, ToolActivityStoreInput, WorkspaceGitProvenanceStoreInput,
     fingerprint_bytes, private_id, scoped_fingerprint_bytes, scoped_git_head_bytes,
-    scoped_source_id_bytes, scoped_source_version_bytes, scoped_task_input_bytes,
+    scoped_source_version_bytes, scoped_task_input_bytes,
 };
 
 use super::common::{db_path, open_db};

@@ -99,7 +99,7 @@ Un document historique ne doit pas remplacer une source de verite courante.
 - `design/M4-EXIT-GATE.md`
   Gate de sortie M4 : coeur accepte, extensions phase/compaction/delivery/rediscovery evidence-gated, et conditions d'entree M4.5 sans heuristiques.
 - `design/SHADOW-REPOSITORY-INDEX.md`
-  M4.5 Shadow Repository Index V0 : design measurement-first, file-level, DERIVED/rebuildable, separe du Store, hash/Git invalidation et backend lexical non selectionne.
+  M4.5 Shadow Repository Index V0 : design measurement-first, file-level, DERIVED/rebuildable, separe du Store; prerequis identite/cache local implementes (`src-v1-*`, `ixc-v1-*`, shadow root), DIRECT_SCAN encore non implemente et FTS5 reste candidat seulement.
 - `design/SESSION-ROLLOUT-ADAPTER.md`
 - `design/AGENT-COST-ATTRIBUTION.md`
 - `design/WORKSPACE-TRACKING.md`

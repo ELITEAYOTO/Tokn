@@ -1,3 +1,11 @@
+## 2026-10-04 - M4.5 Shadow Index implementation prerequisites
+
+- promoted the accepted `scoped_source_id_bytes()` derivation into provider-neutral `tokn-domain::identity` while retaining a `tokn-storage` compatibility re-export;
+- locked the historical SourceStableId algorithm with an exact `src-v1-*` golden vector so existing durable identities cannot drift silently;
+- added project-scoped whole-file `IndexContentHash` as a separate `ixc-v1-*` derivation domain, explicitly distinct from source/content/version evidence fingerprints;
+- added a local shadow-cache root under the existing Observer data root plus a bounded safe per-project cache segment;
+- kept backend filename/layout, DIRECT_SCAN corpus retrieval and SQLite FTS5 entirely unimplemented; no Measurement Contract, Store schema, Runner, MCP or runtime behavior change.
+
 ## 2026-10-03 - M4.5 Shadow Repository Index pre-implementation design
 
 - accepted a measurement-first Shadow Repository Index V0 design without implementing active retrieval;

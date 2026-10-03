@@ -242,11 +242,11 @@ This schema is a benchmark contract only. It is not part of Measurement Contract
 
 ## Transition from design to implementation
 
-Implementation may begin only after:
-1. this protocol and schema are accepted;
-2. SourceStableId derivation reuse is resolved without depending on Store internals;
-3. local index storage location/retention is defined;
-4. FTS capability probing has a fail-closed fallback;
-5. the direct-scan reference semantics are specified/testable.
+Current prerequisite state:
+1. protocol and schema: **ACCEPTED**;
+2. SourceStableId derivation reuse: **RESOLVED** in `tokn-domain::identity`, byte-compatible with existing `src-v1-*`;
+3. local shadow cache root: **RESOLVED** under `observer_shadow_index_root()` / safe per-project cache segment;
+4. FTS capability probing with fail-closed fallback: **NOT STARTED**;
+5. direct-scan reference semantics + sanitized corpus/gold fixtures: **NOT STARTED / NEXT**.
 
 Even after an index backend becomes eligible, active runtime context injection remains a separate future gate.

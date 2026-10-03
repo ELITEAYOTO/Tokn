@@ -1,6 +1,6 @@
 # Shadow Repository Index V0
 
-Status: M4.5 ACCEPTED DESIGN / MEASUREMENT-FIRST / IMPLEMENTATION NOT STARTED
+Status: M4.5 ACCEPTED DESIGN / PREREQUISITES IMPLEMENTED / DIRECT_SCAN NOT STARTED
 Date: 2026-10-03
 
 ## Purpose
@@ -96,7 +96,7 @@ Do not collapse retrieval identity into existing evidence fingerprints.
 
 When the same project scope key and workspace-relative file locator are available, the index should reuse the exact accepted SourceStableId derivation so retrieval results can join historical evidence without exposing an absolute path.
 
-Current implementation note: `scoped_source_id_bytes()` lives in `tokn-storage`. Before index implementation, either promote that exact derivation to a runtime-neutral shared identity module or expose it through a dependency direction that does not make the index depend on SQLite/Store internals. The output must remain byte-for-byte compatible with existing `src-v1-*` IDs.
+Implementation prerequisite accepted: `scoped_source_id_bytes()` now lives canonically in `tokn-domain::identity`; `tokn-storage` only re-exports it for compatibility and `store-evidence` consumes the domain primitive directly. The accepted golden vector for `project-a` + `file:src/lib.rs` is locked byte-for-byte, so existing `src-v1-*` identities cannot drift silently.
 
 Do not duplicate the derivation algorithm in a second crate.
 
@@ -107,7 +107,7 @@ The index needs an exact whole-file version identity for rebuild/refresh correct
 - the index hashes whole repository-file bytes;
 - cross-domain equality must never be inferred merely because both are hashes.
 
-V0 should define a separate versioned/domain-separated index content hash before implementation.
+Implementation prerequisite accepted: `scoped_index_content_hash_bytes()` now derives project-scoped whole-file `ixc-v1-*` identities in `tokn-domain::identity` using a dedicated `tokn.project-scoped-index-content-hash.v1` derivation domain plus `repository-file-bytes-v1`. Cross-domain equality with `src-v1-*`, `cnt-v1-*` or `ver-v1-*` remains forbidden.
 
 ### ShadowDocumentId
 
@@ -131,6 +131,8 @@ An FTS term index can reveal vocabulary/identifiers. Workspace-relative locators
 - never store absolute paths or the raw project scope key in the index;
 - make the entire index deletable/rebuildable;
 - document local retention separately from normalized Store privacy guarantees.
+
+Local cache-root prerequisite accepted: `tokn-platform::observer_shadow_index_root()` resolves under the existing Observer data root (`%LOCALAPPDATA%/Tokn/Observer/shadow-index` on Windows), and `observer_shadow_project_root(project_id)` accepts only a safe single cache segment. No backend database filename or SQLite layout is selected yet.
 
 A contentless FTS backend may reduce raw-text duplication, but **must not** be described as cryptographically private or secret-free.
 

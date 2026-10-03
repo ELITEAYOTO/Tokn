@@ -48,11 +48,13 @@ M4 exit boundary :
 - runtime delivery, interpreted rediscovery/redundancy/freshness restent `NOT_PROVEN` ;
 - Cross-Run Comparability, Task Input Identity et Source Re-read Evidence restent des primitives d'observation, pas des findings.
 
-Premier scope M4.5 : **ACCEPTED PRE-IMPLEMENTATION DESIGN**.
+Premier scope M4.5 : **ACCEPTED DESIGN / IMPLEMENTATION PREREQUISITES IN PLACE**.
 - `SHADOW-REPOSITORY-INDEX.md` fige l'index file-level DERIVED/local/rebuildable, separe du Store ;
 - `SHADOW-INDEX-PROTOCOL-V0.md` + ShadowIndexMeasurement V1 figent quality/latency/build/refresh/privacy avant choix backend ;
-- DIRECT_SCAN_V0 est la reference ; SQLite FTS5 unicode61/trigram restent seulement des candidats ;
-- invalidation Git/hash incrementale + verification exacte avant retour de contenu ;
+- SourceStableId `src-v1-*` est maintenant canonique dans `tokn-domain::identity` avec golden de compatibilite ;
+- `IndexContentHash` `ixc-v1-*` est un domaine project-scoped distinct pour les bytes fichier entiers ;
+- `observer_shadow_index_root()` + safe per-project segment definissent le cache local sans choisir de fichier/backend ;
+- DIRECT_SCAN_V0 est la prochaine implementation de reference ; SQLite FTS5 unicode61/trigram restent seulement des candidats ;
 - aucune injection active de contexte et aucune economie revendiquee.
 
 Aucune heuristique de finding tant que ces observations historiques ne sont pas fiables.
@@ -146,9 +148,9 @@ Detailed compaction chronology: `NOT_CAPTURED` until a real diagnostic event sam
 Stability/benchmark readiness: local Rust toolchain + dev-check + package hardening + Benchmark Baseline Protocol V1 are ACCEPTED/PREPARED; this does not claim token savings.
 
 Next concrete work:
-1. resolve exact SourceStableId derivation reuse outside `tokn-storage` without changing any existing `src-v1-*` output; do not duplicate the algorithm;
-2. define local shadow-index storage/retention location outside tracked/package artifacts;
-3. implement/test DIRECT_SCAN_V0 reference semantics on a sanitized file corpus with bounded enumeration and path-escape protection;
+1. SourceStableId shared derivation outside `tokn-storage`: **DONE**, exact `src-v1-*` golden preserved;
+2. local shadow cache root outside tracked/package artifacts: **DONE**, safe per-project segment only;
+3. implement/test DIRECT_SCAN_V0 reference semantics on a sanitized file corpus with bounded Git-backed enumeration, binary/size policy and path-escape protection;
 4. add SQLite FTS5 capability probing only after the direct-scan reference exists, then benchmark candidates under the frozen protocol;
 5. keep all active context injection disabled and add future M4 phase/compaction/delivery evidence only when directly observable and fixtureable.
 
