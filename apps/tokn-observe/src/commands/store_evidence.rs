@@ -1,14 +1,15 @@
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Path, PathBuf};
 
 use anyhow::Context;
+use tokn_codex::session::read_session_tool_result_outputs;
 use tokn_domain::{
-    AgentEvidence, MeasurementContractManifest, ModelRuntimeProfile, RunGroup, RunnerResult,
-    RunnerSourceReport, SourceKind,
+    AgentEvidence, EvidenceIdentityCoverage, MeasurementContractManifest, ModelRuntimeProfile,
+    RunGroup, RunnerResult, RunnerSourceReport, SourceKind,
 };
 use tokn_storage::{
     Database, MeasurementStoreInput, RateLimitStoreInput, ToolActivityStoreInput,
-    fingerprint_bytes, private_id,
+    fingerprint_bytes, private_id, scoped_fingerprint_bytes,
 };
 
 use super::common::{db_path, open_db};
@@ -65,7 +66,7 @@ pub fn run(
         .transpose()?;
 
     let project_id = private_id("prj", project_key);
-    let tool_activities = build_tool_activities(&project_id, &session_members);
+    let tool_activities = build_tool_activities(&project_id, project_key, &session_members);
     let rate_limit_snapshots = build_rate_limit_snapshots(&session_members);
     let workspace_id = private_id("wsp", &format!("{project_key}:{workspace_key}"));
     let parent_workspace_id =
@@ -129,11 +130,20 @@ pub fn run(
 
 fn build_tool_activities(
     project_id: &str,
+    project_key: &str,
     members: &[AgentEvidence],
 ) -> Vec<ToolActivityStoreInput> {
     let mut out = Vec::new();
 
     for member in members {
+        let result_outputs = read_session_tool_result_outputs(Path::new(&member.source_path));
+        let mut per_call_operation_count = BTreeMap::<String, usize>::new();
+        for tool in &member.tools {
+            *per_call_operation_count
+                .entry(base_source_call_id(&tool.tool_call_id).to_string())
+                .or_default() += 1;
+        }
+
         for (ordinal, tool) in member.tools.iter().enumerate() {
             let operation_fingerprint = if repeat_relevant_category(&tool.category) {
                 tool.command.as_deref().and_then(|command| {
@@ -157,6 +167,28 @@ fn build_tool_activities(
                 let workdir = workdir.trim();
                 (!workdir.is_empty()).then(|| private_id("cwd", &format!("{project_id}:{workdir}")))
             });
+            let base_call_id = base_source_call_id(&tool.tool_call_id);
+            let (content_fingerprint, content_identity_coverage) = match &result_outputs {
+                Ok(outputs)
+                    if per_call_operation_count.get(base_call_id) == Some(&1)
+                        && outputs
+                            .get(base_call_id)
+                            .is_some_and(|items| items.len() == 1) =>
+                {
+                    let output = &outputs[base_call_id][0];
+                    (
+                        Some(scoped_fingerprint_bytes(
+                            "cnt",
+                            project_key,
+                            "tool-result-output-v1",
+                            output.as_bytes(),
+                        )),
+                        EvidenceIdentityCoverage::Observed,
+                    )
+                }
+                Ok(_) => (None, EvidenceIdentityCoverage::NotCaptured),
+                Err(_) => (None, EvidenceIdentityCoverage::Unknown),
+            };
 
             out.push(ToolActivityStoreInput {
                 source_call_key: tool.tool_call_id.clone(),
@@ -177,6 +209,10 @@ fn build_tool_activities(
                 original_token_count: tool.original_token_count,
                 operation_fingerprint,
                 workdir_fingerprint,
+                source_stable_id: None,
+                source_identity_coverage: EvidenceIdentityCoverage::NotCaptured,
+                content_fingerprint,
+                content_identity_coverage,
                 parse_error_present: tool.parse_error.is_some(),
             });
         }
@@ -227,6 +263,15 @@ fn build_rate_limit_snapshots(members: &[AgentEvidence]) -> Vec<RateLimitStoreIn
     }
 
     out
+}
+
+fn base_source_call_id(tool_call_id: &str) -> &str {
+    if let Some((base, suffix)) = tool_call_id.rsplit_once('#')
+        && suffix.parse::<usize>().is_ok()
+    {
+        return base;
+    }
+    tool_call_id
 }
 
 fn repeat_relevant_category(category: &str) -> bool {
@@ -302,7 +347,7 @@ mod tests {
         }];
 
         let project_id = "prj-0123456789abcdef01234567";
-        let activities = build_tool_activities(project_id, &members);
+        let activities = build_tool_activities(project_id, "fixture-project-key", &members);
 
         assert_eq!(activities.len(), 2);
         assert!(
@@ -339,6 +384,147 @@ mod tests {
         ] {
             assert!(!repeat_relevant_category(category));
         }
+    }
+
+    #[test]
+    fn result_identity_is_project_scoped_and_raw_output_is_not_projected() {
+        let path =
+            std::env::temp_dir().join(format!("tokn-result-identity-{}.jsonl", std::process::id()));
+        let raw_output = "PRIVATE FIXTURE RESULT alpha-123";
+        let record = serde_json::json!({
+            "type": "response_item",
+            "payload": {
+                "type": "custom_tool_call_output",
+                "call_id": "call-identity",
+                "output": raw_output
+            }
+        });
+        std::fs::write(
+            &path,
+            format!("{}\n", serde_json::to_string(&record).unwrap()),
+        )
+        .unwrap();
+
+        let member = AgentEvidence {
+            source_path: path.to_string_lossy().to_string(),
+            thread_id: "thread-root".into(),
+            tools: vec![ToolObservation {
+                tool_call_id: "call-identity#0".into(),
+                kind: "exec_command".into(),
+                category: "file_read".into(),
+                surface: "session_rollout".into(),
+                status: "completed".into(),
+                ..Default::default()
+            }],
+            ..Default::default()
+        };
+        let project_id = "prj-0123456789abcdef01234567";
+        let first =
+            build_tool_activities(project_id, "project-key-a", std::slice::from_ref(&member));
+        let second =
+            build_tool_activities(project_id, "project-key-a", std::slice::from_ref(&member));
+        let other_project = build_tool_activities(project_id, "project-key-b", &[member]);
+
+        assert_eq!(
+            first[0].content_identity_coverage,
+            EvidenceIdentityCoverage::Observed
+        );
+        assert_eq!(first[0].content_fingerprint, second[0].content_fingerprint);
+        assert_ne!(
+            first[0].content_fingerprint,
+            other_project[0].content_fingerprint
+        );
+        assert!(
+            first[0]
+                .content_fingerprint
+                .as_deref()
+                .is_some_and(|value| value.starts_with("cnt-v1-"))
+        );
+        assert_eq!(
+            first[0].source_identity_coverage,
+            EvidenceIdentityCoverage::NotCaptured
+        );
+        assert!(first[0].source_stable_id.is_none());
+        assert!(!format!("{first:?}").contains(raw_output));
+
+        let _ = std::fs::remove_file(path);
+    }
+
+    #[test]
+    fn ambiguous_multi_operation_output_stays_not_captured() {
+        let path = std::env::temp_dir().join(format!(
+            "tokn-result-identity-ambiguous-{}.jsonl",
+            std::process::id()
+        ));
+        let record = serde_json::json!({
+            "type": "response_item",
+            "payload": {
+                "type": "custom_tool_call_output",
+                "call_id": "call-many",
+                "output": "aggregate output"
+            }
+        });
+        std::fs::write(
+            &path,
+            format!("{}\n", serde_json::to_string(&record).unwrap()),
+        )
+        .unwrap();
+        let member = AgentEvidence {
+            source_path: path.to_string_lossy().to_string(),
+            thread_id: "thread-root".into(),
+            tools: vec![
+                ToolObservation {
+                    tool_call_id: "call-many#0".into(),
+                    category: "file_read".into(),
+                    ..Default::default()
+                },
+                ToolObservation {
+                    tool_call_id: "call-many#1".into(),
+                    category: "search".into(),
+                    ..Default::default()
+                },
+            ],
+            ..Default::default()
+        };
+
+        let activities = build_tool_activities(
+            "prj-0123456789abcdef01234567",
+            "fixture-project-key",
+            &[member],
+        );
+        assert_eq!(activities.len(), 2);
+        assert!(activities.iter().all(|item| {
+            item.content_fingerprint.is_none()
+                && item.content_identity_coverage == EvidenceIdentityCoverage::NotCaptured
+        }));
+        let _ = std::fs::remove_file(path);
+    }
+
+    #[test]
+    fn missing_source_file_keeps_result_identity_unknown() {
+        let member = AgentEvidence {
+            source_path: std::env::temp_dir()
+                .join("tokn-definitely-missing-result-source.jsonl")
+                .to_string_lossy()
+                .to_string(),
+            thread_id: "thread-root".into(),
+            tools: vec![ToolObservation {
+                tool_call_id: "call-missing#0".into(),
+                category: "file_read".into(),
+                ..Default::default()
+            }],
+            ..Default::default()
+        };
+        let activities = build_tool_activities(
+            "prj-0123456789abcdef01234567",
+            "fixture-project-key",
+            &[member],
+        );
+        assert_eq!(
+            activities[0].content_identity_coverage,
+            EvidenceIdentityCoverage::Unknown
+        );
+        assert!(activities[0].content_fingerprint.is_none());
     }
 
     #[test]

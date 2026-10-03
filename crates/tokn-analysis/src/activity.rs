@@ -220,6 +220,7 @@ fn exact_repetitions(activities: &[HistoricalToolActivityRecord]) -> Vec<ExactRe
 #[cfg(test)]
 mod tests {
     use super::*;
+    use tokn_domain::EvidenceIdentityCoverage;
 
     fn activity(
         run_id: &str,
@@ -250,6 +251,10 @@ mod tests {
             original_token_count: None,
             operation_fingerprint: fingerprint.map(str::to_string),
             workdir_fingerprint: Some("cwd-0123456789abcdef01234567".into()),
+            source_stable_id: None,
+            source_identity_coverage: EvidenceIdentityCoverage::NotCaptured,
+            content_fingerprint: None,
+            content_identity_coverage: EvidenceIdentityCoverage::NotCaptured,
             parse_error_present: false,
             run_created_at_unix: if run_id == "run-2" { 2 } else { 1 },
         }
