@@ -192,3 +192,11 @@ For conservative single-target `Set-Content` / `Add-Content` operations, Tokn ca
 SourceMutationHistory V1 emits the run/thread/source identity, observed timing coverage and tool status. It deliberately reports `effect_status=NOT_VERIFIED`: a completed tool call is not proof that durable file content changed.
 
 CLI: `tokn-observe source-mutation-history`. No freshness, staleness, invalidation effect, safe reuse or savings claim follows from this operation evidence alone.
+
+## Accepted Run-Boundary Source Version V0 slice - 2026-10-03
+
+Runner workspace BEFORE/AFTER snapshots directly expose per-file relative path, SHA-256 and byte count. Tokn reuses the workspace-relative logical locator to derive the same project-scoped SourceStableId, then derives a dedicated project-scoped `ver-v1-*` fingerprint from the observed snapshot SHA-256. Raw paths and raw SHA-256 values are not persisted.
+
+`SourceVersionHistory V1` stores at most one BEFORE and one AFTER record per `(run, source)`; the Store and SQLite both reject duplicates. Missing a boundary remains explicit rather than being interpreted as addition or deletion.
+
+The analysis reducer reports `UNCHANGED_OBSERVED` only when both exact boundary fingerprints exist and match, `CHANGED_OBSERVED` when both exist and differ, otherwise `UNKNOWN`. CLI: `tokn-observe source-version-history`. This proves source-state difference across the run boundary only; it does not prove which operation caused it, Git-commit provenance, freshness/staleness, invalidation effect or safe reuse.
