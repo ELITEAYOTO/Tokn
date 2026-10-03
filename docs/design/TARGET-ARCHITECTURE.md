@@ -2,7 +2,7 @@
 
 Status: ACCEPTED DESIGN DIRECTION
 Date: 2026-10-03
-Current state: P0-P9 DONE / Experiment 002 ACCEPTED / Measurement Contract V1 FROZEN / Store V2 foundation DONE / Local MCP transport prototype ACCEPTED / Historical Analyzer + Context Ledger IN PROGRESS
+Current state: P0-P9 DONE / Experiment 002 ACCEPTED / Measurement Contract V1 FROZEN / Store V2 foundation DONE / Local MCP transport prototype ACCEPTED / M4 core ACCEPTED / M4.5 OBSERVATION-ONLY STARTED
 
 ## Principle
 
@@ -120,7 +120,7 @@ P8 Runner DONE
 -> Measurement Contract V1 FROZEN
 -> Store V2 + ModelRuntimeProfile foundation DONE
 -> local Codex MCP transport prototype ACCEPTED
--> Historical Analyzer + Context Ledger IN PROGRESS
+-> M4 core ACCEPTED / M4.5 OBSERVATION-ONLY STARTED
 -> Context Identity / Context Twin seed
 -> Findings + Opportunity Analyzer
 -> Shadow + deterministic counterfactual replay

@@ -6,7 +6,7 @@ Binaire/Cargo : **V0.1 / 0.1.0**
 
 ## Resume
 
-**P0-P9 DONE. Experiment 002 est ACCEPTED. Measurement Contract V1 est FROZEN. Store foundation est DONE. Local MCP transport prototype est ACCEPTED. Historical Analyzer + Context Ledger est IN PROGRESS ; Context/Result Identity V0, Cross-Agent Evidence V2, Source Mutation Observation V0, Run-Boundary Source Version V0 et Workspace Git Provenance V0 sont ACCEPTED FOUNDATIONS ; Source Freshness Evidence V0 est ACCEPTED CORROBORATION FOUNDATION ; Cross-Run Comparability V0 et Task Input Identity V0 sont ACCEPTED OBSERVATION FOUNDATIONS ; Cross-Run Source Re-read Evidence V0 est ACCEPTED CHRONOLOGY FOUNDATION.**
+**P0-P9 DONE. Experiment 002 est ACCEPTED. Measurement Contract V1 est FROZEN. Store foundation est DONE. Local MCP transport prototype est ACCEPTED. M4 Historical Analyzer + Context Ledger est CORE ACCEPTED avec EXTENSIONS EVIDENCE-GATED ; Context/Result Identity V0, Cross-Agent Evidence V2, Source Mutation Observation V0, Run-Boundary Source Version V0 et Workspace Git Provenance V0 sont ACCEPTED FOUNDATIONS ; Source Freshness Evidence V0 est ACCEPTED CORROBORATION FOUNDATION ; Cross-Run Comparability V0 et Task Input Identity V0 sont ACCEPTED OBSERVATION FOUNDATIONS ; Cross-Run Source Re-read Evidence V0 est ACCEPTED CHRONOLOGY FOUNDATION. M4.5 Context Identity + Shadow Foundations est STARTED / OBSERVATION-ONLY.**
 
 Le projet est revenu sur une direction unique :
 mesurer l'efficacite du contexte sans reduire la capacite d'Astra.
@@ -229,7 +229,7 @@ Validation :
 - aucune auth utilisateur copiee ou inspectee ;
 - aucun turn modele ni quota volontairement consomme.
 
-## M4 - Historical Analyzer + Context Ledger - en cours
+## M4 - Historical Analyzer + Context Ledger - core accepte
 
 Slice valide :
 - `HistoricalSnapshot` V1 depuis Store V2, filtrable par project/workspace ;
@@ -245,13 +245,16 @@ Slice valide :
 Limites explicites du contrat V1 :
 - per-turn ledger = `NOT_CAPTURED` ;
 - current retained-context occupancy = `UNKNOWN` ;
+- phase timeline semantique = `NOT_CAPTURED` sans marqueur de phase autoritatif ;
 - aucun finding causal ni optimisation active.
+
+Le gate `docs/design/M4-EXIT-GATE.md` classe le coeur M4 comme **ACCEPTED**. Les signaux non directement observables restent des extensions evidence-gated et ne sont pas remplaces par des heuristiques.
 
 ## Prochaine action
 
-Cross-Run Source Re-read Evidence V0 est maintenant **ACCEPTED CHRONOLOGY FOUNDATION** : il peut decrire une meme SourceStableId relue dans un run distinct uniquement quand les timestamps rollout `observed_at` donnent un ordre strict complet. `run_created_at_unix` est une heure d'ingestion Store et ne doit jamais servir de chronologie runtime. Les statuts rediscovery/redundancy/freshness restent `NOT_PROVEN`.
-Task Input Identity V0 reste **ACCEPTED OBSERVATION FOUNDATION** avec `delivery_status=NOT_PROVEN`; la frontiere causale reste une preuve directe de livraison runtime + controle d'une variable primaire.
-La compaction detaillee reste `NOT_CAPTURED` : le parser diagnostic sait compter un kind contenant `compaction`, mais aucune trace reelle locale ni fixture sanitisee conservee ne fournit actuellement un evenement detaille permettant un contrat fiable. Ne pas relier artificiellement le `seq` diagnostic au `seq` rollout.
+Passer a **M4.5 Context Identity + Shadow Foundations** en observation-only. Premier slice recommande : **Shadow Repository Index V0 design + measurement contract**, rebuildable/local, separe du Store de mesure, avec invalidation Git/hash et sans injection active de contexte.
+
+Cross-Run Source Re-read Evidence V0 reste **ACCEPTED CHRONOLOGY FOUNDATION** : `run_created_at_unix` n'est jamais une chronologie runtime et rediscovery/redundancy/freshness restent `NOT_PROVEN`. Task Input Identity V0 garde `delivery_status=NOT_PROVEN`. La compaction detaillee et la phase timeline restent `NOT_CAPTURED` tant qu'aucune preuve directe fixtureable n'existe.
 
 Cross-Run ajoute `TASK_INPUT_IDENTITY`, mais meme quand tous les axes observes passent, `causal_claims_status=NOT_ESTABLISHED` : l'identite d'artefact ne prouve pas la livraison runtime, les dependances externes ni le controle d'une variable primaire. Source Freshness Evidence garde en parallele `freshness_status=NOT_PROVEN` et `invalidation_status=NOT_PROVEN`.
 Ne pas persister les tool outputs bruts par defaut uniquement pour obtenir une identite.
@@ -351,12 +354,12 @@ Accepted M4 additions:
 - `tokn-observe workspace-git-provenance-history` read-only JSON surface;
 - `tokn-observe cross-agent-evidence` read-only JSON analysis surface.
 
-Next M4 work:
-- Cross-Run Comparability V0 is an ACCEPTED OBSERVATION FOUNDATION for captured scope/provenance; even PASS keeps `causal_claims_status=NOT_ESTABLISHED`;
-- Cross-Run Source Re-read Evidence V0 is ACCEPTED CHRONOLOGY FOUNDATION: only complete parseable rollout timestamps can order same-source reads across runs; Store ingestion time is not runtime order and rediscovery/redundancy/freshness remain `NOT_PROVEN`;
-- detailed compaction chronology remains `NOT_CAPTURED` until a real event sample is available; interpreted rediscovery requires stronger context-delivery/retention evidence;
-- task/context-delivery identity remains required before stronger stale/fresh or causal controls;
-- broader source kinds remain allowed only when stable identity is directly provable.
+M4 core exit state:
+- Cross-Run Comparability V0 remains ACCEPTED and causal claims stay `NOT_ESTABLISHED`;
+- Cross-Run Source Re-read Evidence V0 remains ACCEPTED and rediscovery/redundancy/freshness stay `NOT_PROVEN`;
+- semantic phase timeline and detailed compaction chronology remain `NOT_CAPTURED` until direct fixtureable evidence exists;
+- runtime task delivery remains `NOT_PROVEN`; broader source kinds stay evidence-gated;
+- these missing signals do not block M4.5 and must be added only from direct evidence.
 
 Stability / benchmark readiness 2026-10-03:
 - local Rust 1.97.1 toolchain installed and aligned with CI;

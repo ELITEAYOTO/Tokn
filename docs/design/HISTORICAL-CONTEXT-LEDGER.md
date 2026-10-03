@@ -1,6 +1,6 @@
 # Tokn Historical Context Ledger
 
-Status: M4 IN PROGRESS / CONTEXT LEDGER V1 CORE ACCEPTED
+Status: M4 CORE ACCEPTED / EVIDENCE-GATED EXTENSIONS
 Date: 2026-10-01
 
 ## Purpose
@@ -118,23 +118,20 @@ Future activity history must preserve the same rule.
 If file/tool identity is needed for repeated-read analysis, use an explicitly designed
 privacy-preserving identity instead of persisting raw personal paths by default.
 
-## M4 evidence status and remaining work
+## M4 core exit state
 
-Before M4 can be marked DONE:
-- rate-limit snapshots over time where supported : ACCEPTED FOUNDATION ;
-- tool/file activity timeline : ACCEPTED FOUNDATION ;
-- phase timeline from direct evidence ;
-- parent/subagent exact-operation overlap : ACCEPTED FOUNDATION ;
-- repeated reads/searches/retries : exact-repeat foundation ACCEPTED ;
-- detailed compaction chronology remains `NOT_CAPTURED` until a real diagnostic event can be observed and fixture-tested ;
-- duplicate-evidence finding remains deferred even when exact result identity is observed, because identity alone does not prove redundancy or waste ;
-- Cross-Run Source Re-read Evidence V0 is an accepted chronology primitive for directly observable same-source reads across runs; interpreted rediscovery remains unproven ;
-- Cross-Run Comparability V0 is an accepted explicit comparison primitive; Task Input Identity V0 is an accepted extension for directly captured frozen task-artifact identity.
+M4 core is ACCEPTED. The exact exit rationale and non-claims are frozen in `M4-EXIT-GATE.md`.
 
-Per-turn history requires a future directly evidenced contract if the product truly
-needs it. It must not be backfilled heuristically into V1.
+Accepted core includes rate-limit history, tool/file activity timeline, parent/subagent exact-operation overlap, repeated-operation evidence, exact result/source identity, mutation/source-version/Git chronology, Source Freshness corroboration, Cross-Run Comparability, Task Input Identity and Cross-Run Source Re-read Evidence.
 
-M5 Findings starts only after these historical observations are sufficiently reliable.
+Evidence-gated extensions remain explicit:
+- per-turn history: `NOT_CAPTURED`;
+- semantic phase timeline: `NOT_CAPTURED` because no authoritative phase marker exists in current fixtures/adapters;
+- detailed compaction chronology: `NOT_CAPTURED` until a real event is observed and fixture-tested;
+- runtime task delivery and interpreted rediscovery/redundancy/freshness: `NOT_PROVEN`;
+- broader source kinds: only when stable identity is directly provable.
+
+These gaps do not authorize heuristic backfilling and do not block M4.5 shadow/observation-only work. M5 Findings still must not reinterpret identity/chronology as waste or causality.
 
 ## Accepted Tool Activity V1 slice - 2026-10-02
 
@@ -161,7 +158,7 @@ Re-ingestion replaces the run-owned snapshot set deterministically, duplicate ag
 
 CLI: `tokn-observe rate-limit-history`.
 
-Automatic runtime compatibility, rate-limit history, Cross-Agent Evidence V2, exact result identity, conservative SourceStableId file V0, mutation-operation timing, Source Mutation Window V0, run-boundary SourceVersionHistory V1 and Workspace Git Provenance V0 are accepted foundations. Source Freshness Evidence V0 is an ACCEPTED CORROBORATION FOUNDATION / observation-only layer and keeps freshness/invalidation `NOT_PROVEN`. Remaining M4 work is directly observable rediscovery/compaction, broader provable source kinds and explicit cross-run analysis, not per-turn token invention or speculative stale-context inference.
+Automatic runtime compatibility, rate-limit history, Cross-Agent Evidence V2, exact result identity, conservative SourceStableId file V0, mutation-operation timing, Source Mutation Window V0, run-boundary SourceVersionHistory V1 and Workspace Git Provenance V0 are accepted foundations. Source Freshness Evidence V0 is an ACCEPTED CORROBORATION FOUNDATION / observation-only layer and keeps freshness/invalidation `NOT_PROVEN`. Cross-run comparison, task identity and strict source re-read chronology are also accepted. Remaining phase/compaction/delivery/rediscovery signals are evidence-gated extensions, not reasons to invent per-turn or stale-context semantics.
 
 ## Accepted Cross-Agent Evidence V2 slice - 2026-10-03
 

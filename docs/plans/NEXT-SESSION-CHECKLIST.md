@@ -9,7 +9,7 @@ Experiment 002 : DONE / ACCEPTED
 Measurement Contract V1 : DONE / FROZEN
 Store foundation + ModelRuntimeProfile persistence : DONE
 Local MCP transport prototype : DONE / ACCEPTED
-Historical Analyzer + Context Ledger : IN PROGRESS
+Historical Analyzer + Context Ledger : CORE ACCEPTED / EVIDENCE-GATED EXTENSIONS
 
 Workspace :
 `E:\Tokn\V0-CodexTkn-Consume\tool`
@@ -28,7 +28,7 @@ Ne pas refaire l'enquete P6 ni la recherche plugin/telemetry R1-R8 avant qu'un b
 
 ## Premiere action
 
-Continuer **M4 Historical Analyzer + Context Ledger** en observation-only.
+Commencer **M4.5 Context Identity + Shadow Foundations** en observation-only, sans modifier le comportement d'Astra/runtime.
 
 Le core deja valide ne doit pas etre refait :
 - HistoricalSnapshot V1 + Store history queries ;
@@ -42,13 +42,18 @@ Le core deja valide ne doit pas etre refait :
 
 Context/Result Identity Foundation V0 : ACCEPTED FOUNDATION.
 
-Prochain scope :
-- Cross-Run Comparability V0 et Task Input Identity V0 sont ACCEPTED OBSERVATION FOUNDATIONS ; l'identite exacte de l'artefact de tache est prouvable quand capturee, mais la livraison runtime reste `NOT_PROVEN` ;
-- ne construire une preuve de livraison runtime que depuis un vrai evenement rollout directement observe et fixtureable ; ne pas inventer son schema depuis le harness ou un chemin historique disparu ;
-- garder le controle `single_primary_variable` separe de l'identite/livraison de tache : meme une livraison observee ne suffirait pas a etablir la causalite ;
-- compaction detaillee reste `NOT_CAPTURED` faute d'evenement reel/fixture sanitisee ; rediscovery uniquement quand directement observable ;
-- garder Source Freshness `freshness_status` / `invalidation_status` a `NOT_PROVEN` tant que le contexte fourni/utilise n'est pas directement relie a un etat source ulterieur ;
-- SourceStableId seulement quand une identite logique stable est directement observable.
+M4 exit boundary :
+- `docs/design/M4-EXIT-GATE.md` est ACCEPTED ; le coeur M4 ne doit plus accumuler des heuristiques pour combler des signaux absents ;
+- phase timeline et compaction detaillee restent `NOT_CAPTURED` sans evidence directe fixtureable ;
+- runtime delivery, interpreted rediscovery/redundancy/freshness restent `NOT_PROVEN` ;
+- Cross-Run Comparability, Task Input Identity et Source Re-read Evidence restent des primitives d'observation, pas des findings.
+
+Premier scope M4.5 :
+- definir **Shadow Repository Index V0 design + measurement contract** avant implementation ;
+- index local/rebuildable, separe du Store de mesure ;
+- invalidation Git/hash incrementale ;
+- retrieval lexical mesurable avant FTS5/BM25 avance, AST/LSP ou embeddings ;
+- aucune injection active de contexte et aucune economie revendiquee.
 
 Aucune heuristique de finding tant que ces observations historiques ne sont pas fiables.
 Aucun nouveau quota Astra/Codex n'est requis pour ce travail offline/replay.
@@ -91,9 +96,11 @@ Tests obligatoires :
 ## Apres V0.1
 
 CURRENT :
-Historical Analyzer + Context Ledger (M4 IN PROGRESS).
+M4.5 Context Identity + Shadow Foundations (STARTED / OBSERVATION-ONLY).
 
-Puis, seulement apres M4 :
+M4 core est ACCEPTED ; ses extensions sans preuve directe restent evidence-gated.
+
+Puis, seulement apres une fondation shadow mesurable :
 - findings observation-only (M5) ;
 - Experiment 003 seulement apres un finding reproductible.
 
@@ -139,11 +146,11 @@ Detailed compaction chronology: `NOT_CAPTURED` until a real diagnostic event sam
 Stability/benchmark readiness: local Rust toolchain + dev-check + package hardening + Benchmark Baseline Protocol V1 are ACCEPTED/PREPARED; this does not claim token savings.
 
 Next concrete work:
-1. keep interpreted rediscovery separate from accepted source re-read chronology; do not upgrade rediscovery/redundancy/freshness without direct context-delivery/retention evidence;
-2. keep runtime task-delivery evidence and single-variable causal control separate from accepted artifact identity; do not upgrade `delivery_status=NOT_PROVEN` without direct evidence;
-3. capture detailed compaction only when directly observed and fixtureable;
-4. broader source kinds only when stable identity is directly provable;
-5. only then evaluate whether evidence is sufficient for interpreted rediscovery or a stronger stale/fresh contract.
+1. design Shadow Repository Index V0 as a local/rebuildable M4.5 boundary, separate from durable measurement evidence;
+2. define retrieval-quality/latency/index-size measurements before choosing FTS5/BM25 details;
+3. preserve Git/hash incremental invalidation and provider-neutral Core contracts;
+4. keep all active context injection disabled;
+5. add future M4 phase/compaction/delivery evidence only when directly observable and fixtureable.
 
 Parallel descriptive work allowed now: prepare/collect 6-10 frozen native baseline tasks using `docs/benchmarks/BASELINE-PROTOCOL-V1.md`, starting with a >=3-run variance pilot per task and no active Tokn intervention.
 Repository-admin housekeeping: protect `main` so PR + green CI are required before merge.
