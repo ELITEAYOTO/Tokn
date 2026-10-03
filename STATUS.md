@@ -6,7 +6,7 @@ Binaire/Cargo : **V0.1 / 0.1.0**
 
 ## Resume
 
-**P0-P9 DONE. Experiment 002 est ACCEPTED. Measurement Contract V1 est FROZEN. Store foundation est DONE. Local MCP transport prototype est ACCEPTED. Historical Analyzer + Context Ledger est IN PROGRESS ; le ledger V1 run/agent multi-run, sa CLI et son exposition MCP read-only sont valides.**
+**P0-P9 DONE. Experiment 002 est ACCEPTED. Measurement Contract V1 est FROZEN. Store foundation est DONE. Local MCP transport prototype est ACCEPTED. Historical Analyzer + Context Ledger est IN PROGRESS ; Context/Result Identity V0 et Cross-Agent Evidence V2 sont ACCEPTED FOUNDATIONS.**
 
 Le projet est revenu sur une direction unique :
 mesurer l'efficacite du contexte sans reduire la capacite d'Astra.
@@ -318,14 +318,18 @@ Accepted M4 additions:
 - RateLimitHistory V1 with privacy-minimized limit/window/reset evidence;
 - `tokn-observe rate-limit-history` filtered historical query;
 - no credit balance, plan/account identity or `limit_name` retained in Tokn rate-limit evidence;
-- Cross-Agent Evidence V1 for same-run exact operation overlap across distinct threads;
+- Cross-Agent Evidence V2 for same-run exact operation overlap across distinct threads;
 - parent/child, ancestor/descendant, sibling and unknown-lineage relation reporting;
-- `result_identity_coverage = NOT_CAPTURED` guardrail, so operation overlap is not mislabeled duplicate evidence;
+- ToolActivityHistory schema V2 with separate `source_stable_id` and `content_fingerprint` evidence plus explicit coverage;
+- privacy-safe project-scoped exact result fingerprints only when one observed tool result maps unambiguously to one normalized operation;
+- `OBSERVED` / `PARTIAL` / `NOT_CAPTURED` / `UNKNOWN` result-identity semantics;
+- Cross-Agent result comparison is `SAME` or `DIFFERENT` only under complete observed identity, otherwise `UNKNOWN`;
+- raw tool outputs are never persisted by the identity slice;
 - `tokn-observe cross-agent-evidence` read-only JSON analysis surface.
 
 Next M4 work:
-- result-identity evidence before any duplicate-evidence classification;
-- compaction/rediscovery only when directly observable;
+- SourceStableId extraction only where a stable logical source is directly observable;
+- freshness/invalidation, compaction/rediscovery only when directly observable;
 - explicit cross-run comparison primitives.
 
 Before Experiment 003: characterize run-to-run variance, predeclare multidimensional quality gates, and measure Tokn overhead for any injected/default-active integration.

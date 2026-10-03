@@ -48,6 +48,7 @@ pub fn run(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use tokn_domain::TOOL_ACTIVITY_HISTORY_SCHEMA_VERSION;
 
     #[test]
     fn empty_store_emits_empty_activity_timeline() {
@@ -68,7 +69,10 @@ mod tests {
                 .expect("parse output");
 
         assert_eq!(value["schema_version"].as_u64(), Some(1));
-        assert_eq!(value["source_history_schema_version"].as_u64(), Some(1));
+        assert_eq!(
+            value["source_history_schema_version"].as_u64(),
+            Some(TOOL_ACTIVITY_HISTORY_SCHEMA_VERSION)
+        );
         assert_eq!(value["runs"].as_array().map(Vec::len), Some(0));
         assert_eq!(value["exact_repetitions"].as_array().map(Vec::len), Some(0));
 
