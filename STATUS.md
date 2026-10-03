@@ -41,6 +41,7 @@ Rustup is now installed locally; `rust-toolchain.toml` pins Rust 1.97.1 + rustfm
 
 Maintainability audit : CLEAN / NO MAJOR REFACTOR REQUIRED.
 Git local : `main` aligne sur `origin/main` (GitHub).
+GitHub governance : `main` est actuellement non protegee (`protected=false`) ; le workflow PR + CI + garde SHA est applique par discipline, mais une protection/ruleset GitHub reste a configurer cote administration.
 
 ## V0.1
 

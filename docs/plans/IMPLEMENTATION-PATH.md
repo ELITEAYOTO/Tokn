@@ -2,7 +2,7 @@
 
 Status: ACTIVE EXECUTION PLAN
 Date: 2026-10-03
-Current state: P0-P9 DONE / Experiment 002 ACCEPTED / Measurement Contract V1 FROZEN / Store foundation DONE / Local MCP transport prototype ACCEPTED / Historical Analyzer + Context Ledger IN PROGRESS / Context-Result Identity V0 ACCEPTED / Source Freshness Evidence V0 ACCEPTED CORROBORATION FOUNDATION / Cross-Run Comparability V0 ACCEPTED OBSERVATION FOUNDATION
+Current state: P0-P9 DONE / Experiment 002 ACCEPTED / Measurement Contract V1 FROZEN / Store foundation DONE / Local MCP transport prototype ACCEPTED / Historical Analyzer + Context Ledger IN PROGRESS / Context-Result Identity V0 ACCEPTED / Source Freshness Evidence V0 ACCEPTED CORROBORATION FOUNDATION / Cross-Run Comparability V0 ACCEPTED OBSERVATION FOUNDATION / Task Input Identity V0 ACCEPTED OBSERVATION FOUNDATION
 
 ## Purpose
 
@@ -267,9 +267,9 @@ Observed exit evidence:
 - errors are structured ;
 - release-process smoke passes ;
 - Codex 0.161.0-alpha.2 accepts stdio registration ;
-- Codex app-server launches Tokn and discovers `tokn_status` + `tokn_recent_runs` with `toolsError=null` ;
+- Codex app-server launches Tokn and discovers `tokn_status` + `tokn_recent_runs` + `tokn_context_ledger` with `toolsError=null` ;
 - an ephemeral idle zero-turn Codex thread is created locally ;
-- Codex directly invokes `tokn_status` through `mcpServer/tool/call` ;
+- Codex directly invokes `tokn_status` and `tokn_context_ledger` through `mcpServer/tool/call` ;
 - no user authentication material is copied or inspected ;
 - standalone Runner remains independently usable.
 

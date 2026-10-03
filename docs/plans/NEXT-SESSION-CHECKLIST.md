@@ -43,8 +43,9 @@ Le core deja valide ne doit pas etre refait :
 Context/Result Identity Foundation V0 : ACCEPTED FOUNDATION.
 
 Prochain scope :
-- Cross-Run Comparability V0 est le slice courant : comparaison baseline/candidate explicite sur project/contract/runtime/SourceVersion BEFORE/Git BEFORE ;
-- meme un scope observe compatible garde `causal_claims_status=NOT_ESTABLISHED` tant que task identity et single-primary-variable ne sont pas prouves ;
+- Cross-Run Comparability V0 et Task Input Identity V0 sont ACCEPTED OBSERVATION FOUNDATIONS ; l'identite exacte de l'artefact de tache est prouvable quand capturee, mais la livraison runtime reste `NOT_PROVEN` ;
+- ne construire une preuve de livraison runtime que depuis un vrai evenement rollout directement observe et fixtureable ; ne pas inventer son schema depuis le harness ou un chemin historique disparu ;
+- garder le controle `single_primary_variable` separe de l'identite/livraison de tache : meme une livraison observee ne suffirait pas a etablir la causalite ;
 - compaction detaillee reste `NOT_CAPTURED` faute d'evenement reel/fixture sanitisee ; rediscovery uniquement quand directement observable ;
 - garder Source Freshness `freshness_status` / `invalidation_status` a `NOT_PROVEN` tant que le contexte fourni/utilise n'est pas directement relie a un etat source ulterieur ;
 - SourceStableId seulement quand une identite logique stable est directement observable.

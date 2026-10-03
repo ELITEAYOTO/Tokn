@@ -37,6 +37,7 @@ Write-Host "[PASS] Cargo workspace version = 0.1.0"
 
 Assert-Contains "README.md" "**P0-P9 DONE ; Experiment 002 ACCEPTED ; Measurement Contract V1 FROZEN ; Store foundation DONE ; Local MCP transport prototype ACCEPTED ; Historical Analyzer + Context Ledger IN PROGRESS.**"
 Assert-Contains "STATUS.md" "Historical Analyzer + Context Ledger est IN PROGRESS"
+Assert-Contains "STATUS.md" 'GitHub governance : `main` est actuellement non protegee (`protected=false`)'
 Assert-Contains "ROADMAP.md" "P9 golden replay/release validation : DONE"
 Assert-Contains "docs/plans/V0.1-IMPLEMENTATION-PLAN.md" "Status: **DONE - P0-P9 DONE**"
 Assert-Contains "docs/plans/V0.1-TEST-MATRIX.md" "Status: **P0-P9 PASS / V0.1 DONE**"
@@ -87,6 +88,12 @@ Assert-Contains "docs/design/TASK-INPUT-IDENTITY.md" '`delivery_status = NOT_PRO
 Assert-Contains "docs/design/TASK-INPUT-IDENTITY.md" '`tokn-observe task-input-history`'
 Assert-Contains "docs/design/TASK-INPUT-IDENTITY.md" '`causal_claims_status = NOT_ESTABLISHED`'
 Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "Task Input Identity V0: ACCEPTED OBSERVATION FOUNDATION."
+Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "Cross-Run Comparability V0 et Task Input Identity V0 sont ACCEPTED OBSERVATION FOUNDATIONS"
+Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "ne construire une preuve de livraison runtime que depuis un vrai evenement rollout directement observe et fixtureable"
+Assert-Contains "ROADMAP.md" '`tokn_status` + `tokn_recent_runs` + `tokn_context_ledger`'
+Assert-Contains "docs/plans/IMPLEMENTATION-PATH.md" "Task Input Identity V0 ACCEPTED OBSERVATION FOUNDATION"
+Assert-NotContains "docs/plans/NEXT-SESSION-CHECKLIST.md" "Cross-Run Comparability V0 est le slice courant"
+Assert-NotContains "ROADMAP.md" "decouvre les deux outils"
 Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "Workspace Git Provenance V0 + WorkspaceGitProvenanceHistory V1: ACCEPTED FOUNDATION."
 Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "Source Mutation Window V0: ACCEPTED CHRONOLOGY FOUNDATION."
 Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "Source Freshness Evidence V0:"
