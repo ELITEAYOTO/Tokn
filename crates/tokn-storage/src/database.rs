@@ -227,11 +227,10 @@ fn apply_tool_activity_migrations(conn: &Connection) -> rusqlite::Result<()> {
     }
 }
 
-
 fn apply_source_version_migrations(conn: &Connection) -> rusqlite::Result<()> {
     let current = {
-        let mut stmt =
-            conn.prepare("SELECT value FROM schema_meta WHERE key='source_version_schema_version'")?;
+        let mut stmt = conn
+            .prepare("SELECT value FROM schema_meta WHERE key='source_version_schema_version'")?;
         let mut rows = stmt.query([])?;
         rows.next()?
             .map(|row| row.get::<_, String>(0))
@@ -508,5 +507,4 @@ mod tests {
         ));
         let _ = fs::remove_file(path);
     }
-
 }

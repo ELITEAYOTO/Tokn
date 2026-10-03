@@ -252,7 +252,6 @@ fn build_tool_activities(
     out
 }
 
-
 fn build_source_versions(
     evidence_dir: &Path,
     project_key: &str,
@@ -262,8 +261,14 @@ fn build_source_versions(
     let mut seen = BTreeSet::new();
 
     for (boundary, name) in [
-        (SourceVersionBoundary::Before, "workspace-before-snapshot.json"),
-        (SourceVersionBoundary::After, "workspace-after-snapshot.json"),
+        (
+            SourceVersionBoundary::Before,
+            "workspace-before-snapshot.json",
+        ),
+        (
+            SourceVersionBoundary::After,
+            "workspace-after-snapshot.json",
+        ),
     ] {
         let path = evidence_dir.join(name);
         if !path.is_file() {
@@ -282,8 +287,7 @@ fn build_source_versions(
             if file.sha256.trim().is_empty() {
                 anyhow::bail!("empty file sha256 in {}", path.display());
             }
-            let source =
-                file_source_locator_from_relative_path(&file.path, selected_workspace);
+            let source = file_source_locator_from_relative_path(&file.path, selected_workspace);
             let Some(locator) = source.locator.as_deref() else {
                 continue;
             };
@@ -691,7 +695,6 @@ mod tests {
         assert!(activities[0].content_fingerprint.is_none());
     }
 
-
     #[test]
     fn source_version_projection_matches_boundaries_without_raw_snapshot_material() {
         let dir = std::env::temp_dir().join(format!(
@@ -704,8 +707,16 @@ mod tests {
         let raw_before = "TOKN-SYNTHETIC-BEFORE-SHA-001";
         let raw_after = "TOKN-SYNTHETIC-AFTER-SHA-002";
         for (name, created_at, sha) in [
-            ("workspace-before-snapshot.json", "2026-10-03T10:00:00Z", raw_before),
-            ("workspace-after-snapshot.json", "2026-10-03T10:30:00Z", raw_after),
+            (
+                "workspace-before-snapshot.json",
+                "2026-10-03T10:00:00Z",
+                raw_before,
+            ),
+            (
+                "workspace-after-snapshot.json",
+                "2026-10-03T10:30:00Z",
+                raw_after,
+            ),
         ] {
             let snapshot = serde_json::json!({
                 "schema_version": PROJECT_SNAPSHOT_SCHEMA_VERSION,
@@ -728,17 +739,25 @@ mod tests {
             .expect("write snapshot");
         }
 
-        let versions = build_source_versions(
-            &dir,
-            "fixture-project-key",
-            Some(r"E:\fixture\PROJECT"),
-        )
-        .expect("source versions");
+        let versions =
+            build_source_versions(&dir, "fixture-project-key", Some(r"E:\fixture\PROJECT"))
+                .expect("source versions");
         assert_eq!(versions.len(), 2);
         assert_eq!(versions[0].source_stable_id, versions[1].source_stable_id);
-        assert_ne!(versions[0].version_fingerprint, versions[1].version_fingerprint);
-        assert!(versions.iter().all(|item| item.source_stable_id.starts_with("src-v1-")));
-        assert!(versions.iter().all(|item| item.version_fingerprint.starts_with("ver-v1-")));
+        assert_ne!(
+            versions[0].version_fingerprint,
+            versions[1].version_fingerprint
+        );
+        assert!(
+            versions
+                .iter()
+                .all(|item| item.source_stable_id.starts_with("src-v1-"))
+        );
+        assert!(
+            versions
+                .iter()
+                .all(|item| item.version_fingerprint.starts_with("ver-v1-"))
+        );
         let debug = format!("{versions:?}");
         assert!(!debug.contains(private_relative));
         assert!(!debug.contains(raw_before));

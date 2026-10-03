@@ -9,11 +9,10 @@ use tokn_domain::{
     HistoricalProvenanceRecord, HistoricalRateLimitSnapshotRecord, HistoricalRunRecord,
     HistoricalRuntimeProfileRecord, HistoricalSnapshot, HistoricalSourceVersionRecord,
     HistoricalToolActivityRecord, HistoricalWorkspaceRecord, MEASUREMENT_CONTRACT_ID,
-    MEASUREMENT_CONTRACT_VERSION,
-    MeasurementContractManifest, ModelRuntimeProfile, RATE_LIMIT_HISTORY_SCHEMA_VERSION,
-    RateLimitHistory, RunGroup, RunnerQualityStatus, RunnerResult,
-    SOURCE_VERSION_HISTORY_SCHEMA_VERSION, SourceVersionBoundary, SourceVersionHistory,
-    TOOL_ACTIVITY_HISTORY_SCHEMA_VERSION, TokenTotals, ToolActivityHistory,
+    MEASUREMENT_CONTRACT_VERSION, MeasurementContractManifest, ModelRuntimeProfile,
+    RATE_LIMIT_HISTORY_SCHEMA_VERSION, RateLimitHistory, RunGroup, RunnerQualityStatus,
+    RunnerResult, SOURCE_VERSION_HISTORY_SCHEMA_VERSION, SourceVersionBoundary,
+    SourceVersionHistory, TOOL_ACTIVITY_HISTORY_SCHEMA_VERSION, TokenTotals, ToolActivityHistory,
 };
 
 use crate::Database;
@@ -93,7 +92,6 @@ pub struct RateLimitStoreInput {
     pub secondary_resets_at: Option<String>,
     pub rate_limit_reached_type: Option<String>,
 }
-
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SourceVersionStoreInput {
@@ -188,7 +186,6 @@ pub fn scoped_source_id_bytes(scope_key: &str, locator: &[u8]) -> String {
     hasher.update(locator);
     format!("src-v1-{}", hasher.finalize().to_hex())
 }
-
 
 pub fn scoped_source_version_bytes(scope_key: &str, snapshot_sha256: &[u8]) -> String {
     let key = blake3::derive_key(
@@ -461,7 +458,6 @@ impl Database {
             )?;
         }
 
-
         for snapshot in &input.rate_limit_snapshots {
             let snapshot_id = private_id(
                 "rls",
@@ -502,7 +498,6 @@ impl Database {
                 ],
             )?;
         }
-
 
         for version in &input.source_versions {
             let version_id = private_id(
@@ -636,7 +631,6 @@ impl Database {
             })
     }
 
-
     pub fn source_version_schema_version(&self) -> rusqlite::Result<Option<String>> {
         self.connection()
             .query_row(
@@ -649,7 +643,9 @@ impl Database {
 
     pub fn source_version_count(&self) -> rusqlite::Result<i64> {
         self.connection()
-            .query_row("SELECT COUNT(*) FROM source_versions_v1", [], |row| row.get(0))
+            .query_row("SELECT COUNT(*) FROM source_versions_v1", [], |row| {
+                row.get(0)
+            })
     }
 
     pub fn source_version_history(
@@ -1319,8 +1315,16 @@ fn validate_input(input: &MeasurementStoreInput) -> Result<(), MeasurementStoreE
 
     let mut source_version_slots = BTreeSet::new();
     for version in &input.source_versions {
-        validate_scoped_fingerprint("source_version source_stable_id", &version.source_stable_id, "src")?;
-        validate_scoped_fingerprint("source_version version_fingerprint", &version.version_fingerprint, "ver")?;
+        validate_scoped_fingerprint(
+            "source_version source_stable_id",
+            &version.source_stable_id,
+            "src",
+        )?;
+        validate_scoped_fingerprint(
+            "source_version version_fingerprint",
+            &version.version_fingerprint,
+            "ver",
+        )?;
         if version
             .snapshot_observed_at
             .as_deref()
@@ -1330,7 +1334,9 @@ fn validate_input(input: &MeasurementStoreInput) -> Result<(), MeasurementStoreE
                 "source version snapshot_observed_at cannot be empty".into(),
             ));
         }
-        if !source_version_slots.insert((version.source_stable_id.as_str(), version.boundary.as_str())) {
+        if !source_version_slots
+            .insert((version.source_stable_id.as_str(), version.boundary.as_str()))
+        {
             return Err(MeasurementStoreError::Invalid(format!(
                 "duplicate source version boundary {} for {}",
                 version.boundary.as_str(),
@@ -1446,7 +1452,6 @@ fn validate_scoped_fingerprint(
     }
     Ok(())
 }
-
 
 fn parse_source_version_boundary(value: String) -> rusqlite::Result<SourceVersionBoundary> {
     match value.as_str() {
@@ -1765,7 +1770,6 @@ mod tests {
         let _ = fs::remove_file(path);
     }
 
-
     #[test]
     fn source_versions_are_idempotent_filterable_and_privacy_scoped() {
         let path = temp_db("source-version-history");
@@ -1801,16 +1805,37 @@ mod tests {
         assert_eq!(first, second);
         assert_eq!(first.source_version_count, 2);
         assert_eq!(db.source_version_count().unwrap(), 2);
-        assert_eq!(db.source_version_schema_version().unwrap().as_deref(), Some("1"));
+        assert_eq!(
+            db.source_version_schema_version().unwrap().as_deref(),
+            Some("1")
+        );
 
         let history = db
             .source_version_history(Some(&input.project_id), Some(&input.workspace_id), 10)
             .expect("source version history");
-        assert_eq!(history.schema_version, SOURCE_VERSION_HISTORY_SCHEMA_VERSION);
+        assert_eq!(
+            history.schema_version,
+            SOURCE_VERSION_HISTORY_SCHEMA_VERSION
+        );
         assert_eq!(history.versions.len(), 2);
-        assert!(history.versions.iter().all(|item| item.source_stable_id == source_id));
-        assert!(history.versions.iter().any(|item| item.boundary == SourceVersionBoundary::Before));
-        assert!(history.versions.iter().any(|item| item.boundary == SourceVersionBoundary::After));
+        assert!(
+            history
+                .versions
+                .iter()
+                .all(|item| item.source_stable_id == source_id)
+        );
+        assert!(
+            history
+                .versions
+                .iter()
+                .any(|item| item.boundary == SourceVersionBoundary::Before)
+        );
+        assert!(
+            history
+                .versions
+                .iter()
+                .any(|item| item.boundary == SourceVersionBoundary::After)
+        );
 
         drop(db);
         let bytes = fs::read(&path).expect("read sqlite");

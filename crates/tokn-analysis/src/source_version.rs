@@ -39,7 +39,10 @@ pub struct SourceBoundaryVersionReport {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum SourceBoundaryVersionBuildError {
-    UnsupportedSourceVersionHistorySchema { actual: u64, expected: u64 },
+    UnsupportedSourceVersionHistorySchema {
+        actual: u64,
+        expected: u64,
+    },
     DuplicateBoundary {
         run_id: String,
         source_stable_id: String,
@@ -149,7 +152,10 @@ mod tests {
     use super::*;
     use tokn_domain::HistoricalSourceVersionRecord;
 
-    fn version(boundary: SourceVersionBoundary, fingerprint: &str) -> HistoricalSourceVersionRecord {
+    fn version(
+        boundary: SourceVersionBoundary,
+        fingerprint: &str,
+    ) -> HistoricalSourceVersionRecord {
         HistoricalSourceVersionRecord {
             version_id: format!("svr-{}", boundary.as_str()),
             run_id: "run-1".into(),
@@ -208,7 +214,10 @@ mod tests {
             "ver-v1-after",
         )]))
         .expect("report");
-        assert_eq!(report.sources[0].comparison, SourceBoundaryComparison::Unknown);
+        assert_eq!(
+            report.sources[0].comparison,
+            SourceBoundaryComparison::Unknown
+        );
     }
 
     #[test]

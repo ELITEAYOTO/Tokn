@@ -22,7 +22,6 @@ impl StableSourceLocatorObservation {
     }
 }
 
-
 pub fn file_source_locator_from_relative_path(
     relative_path: &str,
     selected_workspace: Option<&str>,
@@ -368,14 +367,10 @@ mod tests {
 
     #[test]
     fn snapshot_relative_locator_matches_across_windows_clones() {
-        let left = file_source_locator_from_relative_path(
-            "Src/Example.rs",
-            Some(r"E:\clone-a\PROJECT"),
-        );
-        let right = file_source_locator_from_relative_path(
-            "src/example.rs",
-            Some(r"E:\clone-b\PROJECT"),
-        );
+        let left =
+            file_source_locator_from_relative_path("Src/Example.rs", Some(r"E:\clone-a\PROJECT"));
+        let right =
+            file_source_locator_from_relative_path("src/example.rs", Some(r"E:\clone-b\PROJECT"));
         assert_eq!(left.coverage, EvidenceIdentityCoverage::Observed);
         assert_eq!(left.locator, right.locator);
         assert_eq!(left.locator.as_deref(), Some("file:src/example.rs"));
