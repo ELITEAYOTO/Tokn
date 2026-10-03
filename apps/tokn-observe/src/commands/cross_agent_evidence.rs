@@ -50,6 +50,7 @@ pub fn run(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use tokn_domain::TOOL_ACTIVITY_HISTORY_SCHEMA_VERSION;
 
     #[test]
     fn empty_store_emits_empty_cross_agent_report() {
@@ -73,7 +74,7 @@ mod tests {
         assert_eq!(value["source_snapshot_schema_version"].as_u64(), Some(1));
         assert_eq!(
             value["source_activity_history_schema_version"].as_u64(),
-            Some(2)
+            Some(TOOL_ACTIVITY_HISTORY_SCHEMA_VERSION)
         );
         assert_eq!(value["overlaps"].as_array().map(Vec::len), Some(0));
 
