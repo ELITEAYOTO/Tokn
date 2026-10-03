@@ -71,6 +71,8 @@ Assert-Contains "docs/design/MODEL-RUNTIME-PROFILE.md" "Token Semantics V2"
 Assert-Contains "docs/design/TOKN-STORE-V2.md" "## Current next boundary"
 Assert-Contains "docs/design/CONTEXT-RESULT-IDENTITY.md" "Status: M4 ACCEPTED FOUNDATION / M4.5 SEED"
 Assert-Contains "docs/design/SOURCE-IDENTITY-CONTENT-EVOLUTION.md" "Status: M4 ACCEPTED FOUNDATION / M4.5 SEED"
+Assert-Contains "docs/design/WORKSPACE-GIT-PROVENANCE.md" "Status: ACCEPTED FOUNDATION / OBSERVATION-ONLY (2026-10-03)."
+Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "Workspace Git Provenance V0 + WorkspaceGitProvenanceHistory V1: ACCEPTED FOUNDATION."
 Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "SourceStableId file V0 + SourceIdentityHistory V1: ACCEPTED FOUNDATION."
 Assert-Contains "docs/design/CROSS-AGENT-EVIDENCE.md" "# Cross-Agent Evidence V2"
 Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "Context/Result Identity Foundation V0 : ACCEPTED FOUNDATION."
@@ -94,6 +96,7 @@ $activeDocs = @(
     "docs/design/PLUGIN-ENGINE-INTEGRATION.md",
     "docs/design/TARGET-ARCHITECTURE.md",
     "docs/design/MULTI-RUNTIME-CORE-AND-DATA-ARCHITECTURE.md",
+    "docs/design/WORKSPACE-GIT-PROVENANCE.md",
     "docs/design/CONTEXT-RESULT-IDENTITY.md",
     "docs/design/CROSS-AGENT-EVIDENCE.md",
     "docs/decisions/ADR-006-MULTI-RUNTIME-CORE-ADAPTER-BOUNDARY.md",

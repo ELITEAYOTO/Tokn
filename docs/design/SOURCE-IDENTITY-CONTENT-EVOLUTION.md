@@ -72,7 +72,7 @@ Its content evolution values are:
 ## Next boundary
 
 Still required before a real freshness/rediscovery finding:
-- run-boundary source version/hash is now accepted from Runner snapshots; Git commit/additional provenance only when directly observable;
+- run-boundary source version/hash and workspace Git HEAD/dirty provenance are now accepted from Runner snapshots; source-specific causality remains unproven;
 - verified mutation effect and freshness/invalidation semantics rather than operation intent alone;
 - broader runtime-neutral source kinds such as symbol/range identities only when provable;
 - compaction/context-management evidence where observable;

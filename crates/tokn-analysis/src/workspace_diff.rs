@@ -12,6 +12,22 @@ pub struct ProjectSnapshotFile {
     pub last_write_utc: Option<String>,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum ProjectSnapshotGitStatus {
+    Observed,
+    Unknown,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ProjectSnapshotGitProvenance {
+    pub status: ProjectSnapshotGitStatus,
+    #[serde(default)]
+    pub head: Option<String>,
+    #[serde(default)]
+    pub dirty: Option<bool>,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ProjectSnapshot {
     pub schema_version: u64,
@@ -22,6 +38,8 @@ pub struct ProjectSnapshot {
     pub excluded_top_level: Vec<String>,
     pub file_count: u64,
     pub total_bytes: u64,
+    #[serde(default)]
+    pub git: Option<ProjectSnapshotGitProvenance>,
     #[serde(default)]
     pub files: Vec<ProjectSnapshotFile>,
 }
@@ -138,6 +156,7 @@ mod tests {
             file_count: files.len() as u64,
 
             total_bytes: files.iter().map(|file| file.bytes).sum(),
+            git: None,
             files,
         }
     }

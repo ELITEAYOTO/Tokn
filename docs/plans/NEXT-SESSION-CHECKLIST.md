@@ -115,7 +115,7 @@ Ces sujets restent apres V0.1 et doivent venir d'un finding mesure.
 P7-P9 sont offline/replay.
 Aucun quota Astra n'est requis.
 
-## M4 continuation after run-boundary source version acceptance
+## M4 continuation after workspace Git provenance acceptance
 
 Do not rebuild the accepted activity foundation.
 
@@ -127,12 +127,13 @@ SourceStableId file V0 + SourceIdentityHistory V1: ACCEPTED FOUNDATION.
 `source-identity-history` reports exact observed content evolution without claiming freshness, staleness or safe reuse.
 ToolActivityHistory V3 + SourceMutationHistory V1: ACCEPTED FOUNDATION. Mutation-operation timing may be observed; mutation effect remains `NOT_VERIFIED`.
 Run-Boundary Source Version V0 + SourceVersionHistory V1: ACCEPTED FOUNDATION. BEFORE/AFTER snapshot versions are directly observed; missing boundaries remain `UNKNOWN`, and no mutation causality/freshness is inferred.
+Workspace Git Provenance V0 + WorkspaceGitProvenanceHistory V1: ACCEPTED FOUNDATION. BEFORE/AFTER snapshots now carry directly observed HEAD/dirty evidence when available; legacy absence is `NOT_CAPTURED`, attempted but unprovable Git state is `UNKNOWN`, and raw Git SHA values are not persisted in SQLite.
 
 Next concrete work:
-1. Git-commit/additional provenance and verified mutation effect only where directly observable;
-2. freshness/invalidation semantics with `UNKNOWN`/`NOT_CAPTURED` preserved;
+1. verified mutation effect only where directly observable;
+2. freshness/invalidation semantics joining read timing + exact SourceVersion + Workspace Git Provenance + later rediscovery while preserving `UNKNOWN`/`NOT_CAPTURED`;
 3. broader source kinds, compaction and rediscovery only when directly observed;
-4. explicit cross-run comparison with compatible evidence scope.
+4. explicit cross-run comparison with compatible evidence/provenance scope.
 
 Optional parallel hardening: measure current raw tool-result retention first; only if the cost is non-trivial, replace `BTreeMap<String, Vec<String>>` retention with a private transient fingerprint accumulator/visitor that preserves exact fingerprints and coverage. No Store/Measurement migration and no general buffer subsystem in M4.
 

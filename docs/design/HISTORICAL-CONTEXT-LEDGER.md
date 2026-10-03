@@ -161,7 +161,7 @@ Re-ingestion replaces the run-owned snapshot set deterministically, duplicate ag
 
 CLI: `tokn-observe rate-limit-history`.
 
-Automatic runtime compatibility, rate-limit history, Cross-Agent Evidence V2, exact result identity, conservative SourceStableId file V0 and mutation-operation timing are accepted foundations. Remaining M4 work is source version/hash/commit, provenance/freshness and verified mutation effect where provable, broader source kinds, rediscovery/compaction and explicit cross-run analysis, not per-turn token invention.
+Automatic runtime compatibility, rate-limit history, Cross-Agent Evidence V2, exact result identity, conservative SourceStableId file V0, mutation-operation timing, run-boundary SourceVersionHistory V1 and Workspace Git Provenance V0 are accepted foundations. Remaining M4 work is fail-closed freshness/invalidation and verified mutation effect where provable, broader source kinds, rediscovery/compaction and explicit cross-run analysis, not per-turn token invention.
 
 ## Accepted Cross-Agent Evidence V2 slice - 2026-10-03
 
@@ -199,4 +199,12 @@ Runner workspace BEFORE/AFTER snapshots directly expose per-file relative path, 
 
 `SourceVersionHistory V1` stores at most one BEFORE and one AFTER record per `(run, source)`; the Store and SQLite both reject duplicates. Missing a boundary remains explicit rather than being interpreted as addition or deletion.
 
-The analysis reducer reports `UNCHANGED_OBSERVED` only when both exact boundary fingerprints exist and match, `CHANGED_OBSERVED` when both exist and differ, otherwise `UNKNOWN`. CLI: `tokn-observe source-version-history`. This proves source-state difference across the run boundary only; it does not prove which operation caused it, Git-commit provenance, freshness/staleness, invalidation effect or safe reuse.
+The analysis reducer reports `UNCHANGED_OBSERVED` only when both exact boundary fingerprints exist and match, `CHANGED_OBSERVED` when both exist and differ, otherwise `UNKNOWN`. CLI: `tokn-observe source-version-history`. This proves source-state difference across the run boundary only; it does not prove which operation caused it, source-specific mutation causality, freshness/staleness, invalidation effect or safe reuse.
+
+## Accepted Workspace Git Provenance V0 slice - 2026-10-03
+
+ProjectSnapshot V1 now carries an optional Git evidence block at Runner BEFORE/AFTER boundaries. `OBSERVED` requires a directly resolved HEAD plus working-tree dirty state; failed/non-Git observation is `UNKNOWN`, while legacy snapshots with no Git block remain `NOT_CAPTURED`.
+
+`workspace_git_provenance_v1` stores at most one record per `(run, boundary)`. Durable evidence contains coverage, dirty state and a project-scoped `git-v1-*` HEAD fingerprint; the raw Git SHA is not persisted in SQLite.
+
+CLI: `tokn-observe workspace-git-provenance-history`. This is workspace-level provenance only: it does not identify which source changed, prove mutation effect, emit freshness/staleness, or authorize invalidation/reuse/savings claims.

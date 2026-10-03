@@ -8,11 +8,14 @@ use tokn_domain::{
     EvidenceIdentityCoverage, HISTORICAL_SNAPSHOT_SCHEMA_VERSION, HistoricalAgentRecord,
     HistoricalProvenanceRecord, HistoricalRateLimitSnapshotRecord, HistoricalRunRecord,
     HistoricalRuntimeProfileRecord, HistoricalSnapshot, HistoricalSourceVersionRecord,
-    HistoricalToolActivityRecord, HistoricalWorkspaceRecord, MEASUREMENT_CONTRACT_ID,
-    MEASUREMENT_CONTRACT_VERSION, MeasurementContractManifest, ModelRuntimeProfile,
-    RATE_LIMIT_HISTORY_SCHEMA_VERSION, RateLimitHistory, RunGroup, RunnerQualityStatus,
-    RunnerResult, SOURCE_VERSION_HISTORY_SCHEMA_VERSION, SourceVersionBoundary,
-    SourceVersionHistory, TOOL_ACTIVITY_HISTORY_SCHEMA_VERSION, TokenTotals, ToolActivityHistory,
+    HistoricalToolActivityRecord, HistoricalWorkspaceGitProvenanceRecord,
+    HistoricalWorkspaceRecord, MEASUREMENT_CONTRACT_ID, MEASUREMENT_CONTRACT_VERSION,
+    MeasurementContractManifest, ModelRuntimeProfile, RATE_LIMIT_HISTORY_SCHEMA_VERSION,
+    RateLimitHistory, RunGroup, RunnerQualityStatus, RunnerResult,
+    SOURCE_VERSION_HISTORY_SCHEMA_VERSION, SourceVersionBoundary, SourceVersionHistory,
+    TOOL_ACTIVITY_HISTORY_SCHEMA_VERSION, TokenTotals, ToolActivityHistory,
+    WORKSPACE_GIT_PROVENANCE_HISTORY_SCHEMA_VERSION, WorkspaceGitProvenanceCoverage,
+    WorkspaceGitProvenanceHistory,
 };
 
 use crate::Database;
@@ -50,6 +53,7 @@ pub struct MeasurementStoreInput {
     pub tool_activities: Vec<ToolActivityStoreInput>,
     pub rate_limit_snapshots: Vec<RateLimitStoreInput>,
     pub source_versions: Vec<SourceVersionStoreInput>,
+    pub workspace_git_provenance: Vec<WorkspaceGitProvenanceStoreInput>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -103,6 +107,15 @@ pub struct SourceVersionStoreInput {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+pub struct WorkspaceGitProvenanceStoreInput {
+    pub boundary: SourceVersionBoundary,
+    pub coverage: WorkspaceGitProvenanceCoverage,
+    pub head_fingerprint: Option<String>,
+    pub dirty: Option<bool>,
+    pub snapshot_observed_at: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct MeasurementStoreSummary {
     pub run_id: String,
     pub project_id: String,
@@ -113,6 +126,7 @@ pub struct MeasurementStoreSummary {
     pub tool_activity_count: u64,
     pub rate_limit_snapshot_count: u64,
     pub source_version_count: u64,
+    pub workspace_git_provenance_count: u64,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -197,6 +211,15 @@ pub fn scoped_source_version_bytes(scope_key: &str, snapshot_sha256: &[u8]) -> S
     hasher.update(&[0]);
     hasher.update(snapshot_sha256);
     format!("ver-v1-{}", hasher.finalize().to_hex())
+}
+
+pub fn scoped_git_head_bytes(scope_key: &str, git_head: &[u8]) -> String {
+    let key = blake3::derive_key("tokn.project-scoped-git-head.v1", scope_key.as_bytes());
+    let mut hasher = blake3::Hasher::new_keyed(&key);
+    hasher.update(b"git-head-commit-v1");
+    hasher.update(&[0]);
+    hasher.update(git_head);
+    format!("git-v1-{}", hasher.finalize().to_hex())
 }
 
 impl Database {
@@ -364,6 +387,10 @@ impl Database {
             params![input.result.run_id],
         )?;
         tx.execute(
+            "DELETE FROM workspace_git_provenance_v1 WHERE run_id = ?1",
+            params![input.result.run_id],
+        )?;
+        tx.execute(
             "DELETE FROM agents_v2 WHERE run_id = ?1",
             params![input.result.run_id],
         )?;
@@ -528,6 +555,36 @@ impl Database {
             )?;
         }
 
+        for provenance in &input.workspace_git_provenance {
+            let provenance_id = private_id(
+                "wgp",
+                &format!(
+                    "{}|{}|{}|{:?}|{:?}",
+                    input.result.run_id,
+                    provenance.boundary.as_str(),
+                    provenance.coverage.as_str(),
+                    provenance.head_fingerprint,
+                    provenance.dirty
+                ),
+            );
+            tx.execute(
+                "INSERT INTO workspace_git_provenance_v1(
+                    provenance_id, run_id, boundary, coverage, head_fingerprint,
+                    dirty, snapshot_observed_at, created_at_unix
+                 ) VALUES (?1,?2,?3,?4,?5,?6,?7,?8)",
+                params![
+                    provenance_id,
+                    input.result.run_id,
+                    provenance.boundary.as_str(),
+                    provenance.coverage.as_str(),
+                    provenance.head_fingerprint,
+                    provenance.dirty.map(i64::from),
+                    provenance.snapshot_observed_at,
+                    now
+                ],
+            )?;
+        }
+
         tx.execute(
             "INSERT INTO provenance_v2(
                 source_id, run_id, source_kind, source_fingerprint, snapshot_bytes,
@@ -564,6 +621,7 @@ impl Database {
             tool_activity_count: input.tool_activities.len() as u64,
             rate_limit_snapshot_count: input.rate_limit_snapshots.len() as u64,
             source_version_count: input.source_versions.len() as u64,
+            workspace_git_provenance_count: input.workspace_git_provenance.len() as u64,
         })
     }
 
@@ -702,6 +760,89 @@ impl Database {
                         version_fingerprint: row.get(6)?,
                         snapshot_observed_at: row.get(7)?,
                         bytes: row_u64(row, 8)?,
+                        run_created_at_unix: row.get(9)?,
+                    })
+                },
+            )?
+            .collect::<rusqlite::Result<Vec<_>>>()?;
+
+        Ok(history)
+    }
+
+    pub fn workspace_git_provenance_schema_version(&self) -> rusqlite::Result<Option<String>> {
+        self.connection()
+            .query_row(
+                "SELECT value FROM schema_meta WHERE key='workspace_git_provenance_schema_version'",
+                [],
+                |row| row.get(0),
+            )
+            .optional()
+    }
+
+    pub fn workspace_git_provenance_count(&self) -> rusqlite::Result<i64> {
+        self.connection().query_row(
+            "SELECT COUNT(*) FROM workspace_git_provenance_v1",
+            [],
+            |row| row.get(0),
+        )
+    }
+
+    pub fn workspace_git_provenance_history(
+        &self,
+        project_filter: Option<&str>,
+        workspace_filter: Option<&str>,
+        run_limit: usize,
+    ) -> Result<WorkspaceGitProvenanceHistory, MeasurementStoreError> {
+        let mut history = WorkspaceGitProvenanceHistory {
+            schema_version: WORKSPACE_GIT_PROVENANCE_HISTORY_SCHEMA_VERSION,
+            project_filter: project_filter.map(str::to_string),
+            workspace_filter: workspace_filter.map(str::to_string),
+            run_limit: u64::try_from(run_limit).unwrap_or(u64::MAX),
+            ..Default::default()
+        };
+        if run_limit == 0 {
+            return Ok(history);
+        }
+
+        let mut stmt = self.connection().prepare(
+            "WITH selected_runs AS (
+                SELECT run_id, project_id, workspace_id, created_at_unix
+                FROM measurement_runs_v2
+                WHERE (?1 IS NULL OR project_id = ?1)
+                  AND (?2 IS NULL OR workspace_id = ?2)
+                ORDER BY created_at_unix DESC, run_id ASC
+                LIMIT ?3
+             )
+             SELECT provenance.provenance_id, provenance.run_id, selected.project_id,
+                selected.workspace_id, provenance.boundary, provenance.coverage,
+                provenance.head_fingerprint, provenance.dirty,
+                provenance.snapshot_observed_at, selected.created_at_unix
+             FROM workspace_git_provenance_v1 AS provenance
+             INNER JOIN selected_runs AS selected ON selected.run_id = provenance.run_id
+             ORDER BY selected.created_at_unix DESC, provenance.run_id ASC,
+                provenance.boundary ASC",
+        )?;
+
+        history.observations = stmt
+            .query_map(
+                params![
+                    project_filter,
+                    workspace_filter,
+                    i64::try_from(run_limit).unwrap_or(i64::MAX)
+                ],
+                |row| {
+                    Ok(HistoricalWorkspaceGitProvenanceRecord {
+                        provenance_id: row.get(0)?,
+                        run_id: row.get(1)?,
+                        project_id: row.get(2)?,
+                        workspace_id: row.get(3)?,
+                        boundary: parse_source_version_boundary(row.get::<_, String>(4)?)?,
+                        coverage: parse_workspace_git_provenance_coverage(
+                            row.get::<_, String>(5)?,
+                        )?,
+                        head_fingerprint: row.get(6)?,
+                        dirty: row.get::<_, Option<i64>>(7)?.map(|value| value != 0),
+                        snapshot_observed_at: row.get(8)?,
                         run_created_at_unix: row.get(9)?,
                     })
                 },
@@ -1345,6 +1486,49 @@ fn validate_input(input: &MeasurementStoreInput) -> Result<(), MeasurementStoreE
         }
     }
 
+    let mut git_provenance_boundaries = BTreeSet::new();
+    for provenance in &input.workspace_git_provenance {
+        if !git_provenance_boundaries.insert(provenance.boundary.as_str()) {
+            return Err(MeasurementStoreError::Invalid(format!(
+                "duplicate workspace Git provenance boundary {}",
+                provenance.boundary.as_str()
+            )));
+        }
+        if provenance
+            .snapshot_observed_at
+            .as_deref()
+            .is_some_and(|value| value.trim().is_empty())
+        {
+            return Err(MeasurementStoreError::Invalid(
+                "workspace Git provenance snapshot_observed_at cannot be empty".into(),
+            ));
+        }
+        match provenance.coverage {
+            WorkspaceGitProvenanceCoverage::Observed => {
+                let head = provenance.head_fingerprint.as_deref().ok_or_else(|| {
+                    MeasurementStoreError::Invalid(
+                        "OBSERVED workspace Git provenance requires head_fingerprint".into(),
+                    )
+                })?;
+                validate_scoped_fingerprint("workspace Git head_fingerprint", head, "git")?;
+                if provenance.dirty.is_none() {
+                    return Err(MeasurementStoreError::Invalid(
+                        "OBSERVED workspace Git provenance requires dirty state".into(),
+                    ));
+                }
+            }
+            WorkspaceGitProvenanceCoverage::NotCaptured
+            | WorkspaceGitProvenanceCoverage::Unknown => {
+                if provenance.head_fingerprint.is_some() || provenance.dirty.is_some() {
+                    return Err(MeasurementStoreError::Invalid(
+                        "non-observed workspace Git provenance cannot carry head or dirty state"
+                            .into(),
+                    ));
+                }
+            }
+        }
+    }
+
     for snapshot in &input.rate_limit_snapshots {
         if snapshot.observed_at.trim().is_empty() {
             return Err(MeasurementStoreError::Invalid(
@@ -1463,6 +1647,24 @@ fn parse_source_version_boundary(value: String) -> rusqlite::Result<SourceVersio
             Box::new(std::io::Error::new(
                 std::io::ErrorKind::InvalidData,
                 format!("unknown source version boundary: {value}"),
+            )),
+        )),
+    }
+}
+
+fn parse_workspace_git_provenance_coverage(
+    value: String,
+) -> rusqlite::Result<WorkspaceGitProvenanceCoverage> {
+    match value.as_str() {
+        "OBSERVED" => Ok(WorkspaceGitProvenanceCoverage::Observed),
+        "NOT_CAPTURED" => Ok(WorkspaceGitProvenanceCoverage::NotCaptured),
+        "UNKNOWN" => Ok(WorkspaceGitProvenanceCoverage::Unknown),
+        _ => Err(rusqlite::Error::FromSqlConversionFailure(
+            0,
+            rusqlite::types::Type::Text,
+            Box::new(std::io::Error::new(
+                std::io::ErrorKind::InvalidData,
+                format!("unknown workspace Git provenance coverage: {value}"),
             )),
         )),
     }
@@ -1670,7 +1872,112 @@ mod tests {
             tool_activities: Vec::new(),
             rate_limit_snapshots: Vec::new(),
             source_versions: Vec::new(),
+            workspace_git_provenance: Vec::new(),
         }
+    }
+
+    #[test]
+    fn workspace_git_provenance_is_private_queryable_and_idempotent() {
+        let path = temp_db("git-provenance");
+        let _ = fs::remove_file(&path);
+        let raw_head = "0123456789abcdef0123456789abcdef01234567";
+        let mut input = input(r"C:\fixture\session.jsonl");
+        input.workspace_git_provenance = vec![
+            WorkspaceGitProvenanceStoreInput {
+                boundary: SourceVersionBoundary::Before,
+                coverage: WorkspaceGitProvenanceCoverage::Observed,
+                head_fingerprint: Some(scoped_git_head_bytes("fixture-scope", raw_head.as_bytes())),
+                dirty: Some(false),
+                snapshot_observed_at: Some("2026-10-03T15:00:00Z".into()),
+            },
+            WorkspaceGitProvenanceStoreInput {
+                boundary: SourceVersionBoundary::After,
+                coverage: WorkspaceGitProvenanceCoverage::Unknown,
+                head_fingerprint: None,
+                dirty: None,
+                snapshot_observed_at: Some("2026-10-03T15:05:00Z".into()),
+            },
+        ];
+
+        let db = Database::open(&path).expect("open db");
+        let first = db.save_measurement(&input).expect("first save");
+        let second = db.save_measurement(&input).expect("second save");
+        assert_eq!(first, second);
+        assert_eq!(first.workspace_git_provenance_count, 2);
+        assert_eq!(db.workspace_git_provenance_count().unwrap(), 2);
+        assert_eq!(
+            db.workspace_git_provenance_schema_version()
+                .unwrap()
+                .as_deref(),
+            Some("1")
+        );
+        let history = db.workspace_git_provenance_history(None, None, 50).unwrap();
+        assert_eq!(history.observations.len(), 2);
+        assert_eq!(
+            history.observations[0].boundary,
+            SourceVersionBoundary::After
+        );
+        assert_eq!(
+            history.observations[0].coverage,
+            WorkspaceGitProvenanceCoverage::Unknown
+        );
+        assert_eq!(
+            history.observations[1].boundary,
+            SourceVersionBoundary::Before
+        );
+        assert_eq!(
+            history.observations[1].coverage,
+            WorkspaceGitProvenanceCoverage::Observed
+        );
+        assert_eq!(history.observations[1].dirty, Some(false));
+        assert!(
+            history.observations[1]
+                .head_fingerprint
+                .as_deref()
+                .is_some_and(|value| value.starts_with("git-v1-"))
+        );
+
+        drop(db);
+        let bytes = fs::read(&path).expect("read sqlite");
+        let haystack = String::from_utf8_lossy(&bytes);
+        assert!(!haystack.contains(raw_head));
+        let _ = fs::remove_file(path);
+    }
+
+    #[test]
+    fn duplicate_workspace_git_provenance_boundary_fails_closed() {
+        let path = temp_db("git-provenance-duplicate");
+        let _ = fs::remove_file(&path);
+        let mut input = input(r"C:\fixture\session.jsonl");
+        let fingerprint =
+            scoped_git_head_bytes("fixture-scope", b"0123456789abcdef0123456789abcdef01234567");
+        input.workspace_git_provenance = vec![
+            WorkspaceGitProvenanceStoreInput {
+                boundary: SourceVersionBoundary::Before,
+                coverage: WorkspaceGitProvenanceCoverage::Observed,
+                head_fingerprint: Some(fingerprint.clone()),
+                dirty: Some(false),
+                snapshot_observed_at: None,
+            },
+            WorkspaceGitProvenanceStoreInput {
+                boundary: SourceVersionBoundary::Before,
+                coverage: WorkspaceGitProvenanceCoverage::Observed,
+                head_fingerprint: Some(fingerprint),
+                dirty: Some(true),
+                snapshot_observed_at: None,
+            },
+        ];
+
+        let db = Database::open(&path).expect("open db");
+        let error = db
+            .save_measurement(&input)
+            .expect_err("duplicate boundary must fail");
+        assert!(
+            error
+                .to_string()
+                .contains("duplicate workspace Git provenance boundary")
+        );
+        let _ = fs::remove_file(path);
     }
 
     #[test]

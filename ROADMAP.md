@@ -163,7 +163,8 @@ Reste M4 :
 - SourceStableId file-read V0 + observed content evolution history : ACCEPTED FOUNDATION ;
 - source mutation-operation timing + SourceMutationHistory V1 : ACCEPTED FOUNDATION, effect remains `NOT_VERIFIED` ;
 - run-boundary source version/hash from Runner BEFORE/AFTER snapshots + SourceVersionHistory V1 : ACCEPTED FOUNDATION ;
-- Git-commit/additional provenance, verified mutation effect/freshness, broader symbol/range identity, compaction/rediscovery and explicit cross-run comparison remain.
+- Workspace Git Provenance V0 (boundary HEAD fingerprint + dirty + explicit coverage) : ACCEPTED FOUNDATION ;
+- verified mutation effect/freshness, broader symbol/range identity, compaction/rediscovery and explicit cross-run comparison remain.
 
 ## M4.5 - Context Identity + Shadow Foundations
 
@@ -176,8 +177,8 @@ Context Identity / Context Twin V0 seed:
 - project-scoped keyed content/result fingerprints when content is transiently available;
 - SourceStableId file V0 accepted for conservative directly observed reads; broader source kinds/range/symbol identity only when provable ;
 - ContentFingerprint privacy-safe pour la version/resultat observe, separe de l'identite stable ;
-- run-boundary source version/hash is accepted when directly observed in Runner snapshots; range/symbol + Git commit only when known;
-- mutation-operation timing is accepted evidence; causal provenance, freshness and verified invalidation state remain explicit/unknown until directly provable;
+- run-boundary source version/hash + workspace Git HEAD/dirty provenance are accepted when directly observed in Runner snapshots; range/symbol identity remains evidence-gated;
+- mutation-operation timing is accepted evidence; source-specific causality, freshness and verified invalidation state remain explicit/unknown until directly provable;
 - agent/run distribution only when directly observed;
 - `UNKNOWN` / `NOT_CAPTURED` when delivery, freshness or result identity cannot be proven.
 

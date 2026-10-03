@@ -6,7 +6,7 @@ Binaire/Cargo : **V0.1 / 0.1.0**
 
 ## Resume
 
-**P0-P9 DONE. Experiment 002 est ACCEPTED. Measurement Contract V1 est FROZEN. Store foundation est DONE. Local MCP transport prototype est ACCEPTED. Historical Analyzer + Context Ledger est IN PROGRESS ; Context/Result Identity V0, Cross-Agent Evidence V2, Source Mutation Observation V0 et Run-Boundary Source Version V0 sont ACCEPTED FOUNDATIONS.**
+**P0-P9 DONE. Experiment 002 est ACCEPTED. Measurement Contract V1 est FROZEN. Store foundation est DONE. Local MCP transport prototype est ACCEPTED. Historical Analyzer + Context Ledger est IN PROGRESS ; Context/Result Identity V0, Cross-Agent Evidence V2, Source Mutation Observation V0, Run-Boundary Source Version V0 et Workspace Git Provenance V0 sont ACCEPTED FOUNDATIONS.**
 
 Le projet est revenu sur une direction unique :
 mesurer l'efficacite du contexte sans reduire la capacite d'Astra.
@@ -245,8 +245,8 @@ Limites explicites du contrat V1 :
 
 ## Prochaine action
 
-Continuer **M4** a partir des fondations d'identite, de mutation-operation et de version source aux frontieres du run maintenant acceptees :
-provenance additionnelle (dont Git commit seulement quand directement observable), puis semantiques de fraicheur/invalidation fail-closed, compaction/rediscovery et comparaison cross-run explicite.
+Continuer **M4** a partir des fondations d'identite, de mutation-operation, de version source et de provenance Git workspace aux frontieres du run maintenant acceptees :
+construire ensuite les semantiques de fraicheur/invalidation fail-closed seulement quand une chronologie read -> changement prouve -> rediscovery est observable, puis compaction/rediscovery et comparaison cross-run explicite.
 
 La mutation-operation peut maintenant etre datee quand le rollout fournit un timestamp, mais son effet reste `NOT_VERIFIED`. Cette fondation doit preparer un Context Twin V0 sans pretendre connaitre la memoire interne d'Astra.
 Ne pas persister les tool outputs bruts par defaut uniquement pour obtenir une identite.
@@ -335,13 +335,17 @@ Accepted M4 additions:
 - SourceVersionHistory V1 stores project-scoped `ver-v1-*` fingerprints keyed by the same SourceStableId, never raw paths or raw snapshot SHA-256 values;
 - source boundary reducer reports `UNCHANGED_OBSERVED` / `CHANGED_OBSERVED` only with both boundaries, otherwise `UNKNOWN`;
 - `tokn-observe source-version-history` read-only JSON surface;
+- Workspace Git Provenance V0 from Runner BEFORE/AFTER ProjectSnapshot evidence;
+- `workspace_git_provenance_v1` stores only coverage, dirty state and project-scoped `git-v1-*` HEAD fingerprints, never raw Git SHA values;
+- legacy snapshots without Git evidence map to `NOT_CAPTURED`, failed/non-Git observation maps to `UNKNOWN`;
+- `tokn-observe workspace-git-provenance-history` read-only JSON surface;
 - `tokn-observe cross-agent-evidence` read-only JSON analysis surface.
 
 Next M4 work:
-- Git-commit/additional provenance and verified mutation effect only when directly observable;
-- freshness/invalidation semantics that preserve `UNKNOWN` / `NOT_CAPTURED` instead of inferring staleness;
+- verified mutation effect only where directly observable, without promoting tool completion into file-change proof;
+- freshness/invalidation semantics that join read timing + exact SourceVersion + Workspace Git Provenance + later rediscovery while preserving `UNKNOWN` / `NOT_CAPTURED`;
 - broader source kinds plus compaction/rediscovery only when directly observable;
-- explicit cross-run comparison primitives.
+- explicit cross-run comparison primitives with compatible provenance scope.
 
 Before Experiment 003: characterize run-to-run variance, predeclare multidimensional quality gates, and measure Tokn overhead for any injected/default-active integration.
 

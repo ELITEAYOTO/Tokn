@@ -5,7 +5,7 @@ Status: ACCEPTED FOUNDATION / OBSERVATION-ONLY (2026-10-03).
 ## Purpose
 
 This slice records an exact privacy-safe version observation for a logical file at Runner run boundaries.
-It is intentionally narrower than freshness, invalidation, Git provenance or mutation-effect verification.
+It is intentionally narrower than freshness, invalidation or mutation-effect verification. Workspace-level Git provenance is a separate accepted evidence surface.
 
 ## Direct evidence source
 
@@ -54,19 +54,19 @@ A source present at only one boundary is not called ADDED or REMOVED because sna
 This slice does not prove:
 - which mutation, tool call or process caused a version difference;
 - that a completed mutation operation changed durable bytes;
-- Git commit, branch or working-tree provenance;
+- source-specific Git causality, branch/remote identity or file-level Git attribution;
 - that an earlier context/read is stale;
 - that Astra retained or forgot any context;
 - invalidation correctness, safe reuse, cacheability or token savings.
 
 `CHANGED_OBSERVED` means only that two directly observed run-boundary versions differ.
 `UNCHANGED_OBSERVED` means only that the two directly observed boundary versions match.
-Neither result is a freshness verdict.
+Neither result is a freshness verdict. Workspace-level HEAD/dirty boundary provenance is captured separately by `WORKSPACE-GIT-PROVENANCE.md`.
 
 ## Next evidence needed
 
 Before Tokn can emit freshness/invalidation findings it still needs, where directly observable:
-- additional provenance such as Git commit/working-tree state;
+- Workspace Git provenance is now available as boundary evidence, but must be joined conservatively with exact source versions and chronology;
 - a verified chronological relation between reads, source changes and later rediscovery;
 - mutation-effect evidence stronger than mutation-operation intent;
 - explicit coverage/comparability rules across runs;
