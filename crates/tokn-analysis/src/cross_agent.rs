@@ -281,10 +281,16 @@ fn summarize_result_identity(
         return (EvidenceIdentityCoverage::Observed, result_match);
     }
     if observed > 0 || has_partial {
-        return (EvidenceIdentityCoverage::Partial, ResultIdentityMatch::Unknown);
+        return (
+            EvidenceIdentityCoverage::Partial,
+            ResultIdentityMatch::Unknown,
+        );
     }
     if has_unknown {
-        return (EvidenceIdentityCoverage::Unknown, ResultIdentityMatch::Unknown);
+        return (
+            EvidenceIdentityCoverage::Unknown,
+            ResultIdentityMatch::Unknown,
+        );
     }
     (
         EvidenceIdentityCoverage::NotCaptured,
@@ -404,12 +410,7 @@ mod tests {
         content_fingerprint: Option<&str>,
         coverage: EvidenceIdentityCoverage,
     ) -> HistoricalToolActivityRecord {
-        let mut item = activity(
-            run_id,
-            thread_id,
-            ordinal,
-            Some(operation_fingerprint),
-        );
+        let mut item = activity(run_id, thread_id, ordinal, Some(operation_fingerprint));
         item.content_fingerprint = content_fingerprint.map(str::to_string);
         item.content_identity_coverage = coverage;
         item
@@ -468,7 +469,10 @@ mod tests {
     #[test]
     fn reports_same_result_only_when_all_occurrences_have_same_observed_identity() {
         let report = build_cross_agent_evidence(
-            &snapshot(vec![agent("root", None, 0), agent("child", Some("root"), 1)]),
+            &snapshot(vec![
+                agent("root", None, 0),
+                agent("child", Some("root"), 1),
+            ]),
             &history(vec![
                 activity_with_result(
                     "run-1",
@@ -491,7 +495,10 @@ mod tests {
         .unwrap();
 
         let overlap = &report.overlaps[0];
-        assert_eq!(overlap.result_identity_coverage, EvidenceIdentityCoverage::Observed);
+        assert_eq!(
+            overlap.result_identity_coverage,
+            EvidenceIdentityCoverage::Observed
+        );
         assert_eq!(overlap.result_identity_match, ResultIdentityMatch::Same);
         assert_eq!(overlap.distinct_result_fingerprint_count, 1);
     }
@@ -499,14 +506,25 @@ mod tests {
     #[test]
     fn reports_different_result_when_complete_identity_disagrees() {
         let report = build_cross_agent_evidence(
-            &snapshot(vec![agent("root", None, 0), agent("child", Some("root"), 1)]),
+            &snapshot(vec![
+                agent("root", None, 0),
+                agent("child", Some("root"), 1),
+            ]),
             &history(vec![
                 activity_with_result(
-                    "run-1", "root", 0, "op-same", Some("cnt-v1-a"),
+                    "run-1",
+                    "root",
+                    0,
+                    "op-same",
+                    Some("cnt-v1-a"),
                     EvidenceIdentityCoverage::Observed,
                 ),
                 activity_with_result(
-                    "run-1", "child", 0, "op-same", Some("cnt-v1-b"),
+                    "run-1",
+                    "child",
+                    0,
+                    "op-same",
+                    Some("cnt-v1-b"),
                     EvidenceIdentityCoverage::Observed,
                 ),
             ]),
@@ -514,22 +532,39 @@ mod tests {
         .unwrap();
 
         let overlap = &report.overlaps[0];
-        assert_eq!(overlap.result_identity_coverage, EvidenceIdentityCoverage::Observed);
-        assert_eq!(overlap.result_identity_match, ResultIdentityMatch::Different);
+        assert_eq!(
+            overlap.result_identity_coverage,
+            EvidenceIdentityCoverage::Observed
+        );
+        assert_eq!(
+            overlap.result_identity_match,
+            ResultIdentityMatch::Different
+        );
         assert_eq!(overlap.distinct_result_fingerprint_count, 2);
     }
 
     #[test]
     fn incomplete_result_identity_is_partial_and_never_claims_match() {
         let report = build_cross_agent_evidence(
-            &snapshot(vec![agent("root", None, 0), agent("child", Some("root"), 1)]),
+            &snapshot(vec![
+                agent("root", None, 0),
+                agent("child", Some("root"), 1),
+            ]),
             &history(vec![
                 activity_with_result(
-                    "run-1", "root", 0, "op-same", Some("cnt-v1-a"),
+                    "run-1",
+                    "root",
+                    0,
+                    "op-same",
+                    Some("cnt-v1-a"),
                     EvidenceIdentityCoverage::Observed,
                 ),
                 activity_with_result(
-                    "run-1", "child", 0, "op-same", None,
+                    "run-1",
+                    "child",
+                    0,
+                    "op-same",
+                    None,
                     EvidenceIdentityCoverage::NotCaptured,
                 ),
             ]),
@@ -537,7 +572,10 @@ mod tests {
         .unwrap();
 
         let overlap = &report.overlaps[0];
-        assert_eq!(overlap.result_identity_coverage, EvidenceIdentityCoverage::Partial);
+        assert_eq!(
+            overlap.result_identity_coverage,
+            EvidenceIdentityCoverage::Partial
+        );
         assert_eq!(overlap.result_identity_match, ResultIdentityMatch::Unknown);
         assert_eq!(overlap.distinct_result_fingerprint_count, 1);
     }
@@ -545,14 +583,25 @@ mod tests {
     #[test]
     fn unavailable_result_identity_is_unknown() {
         let report = build_cross_agent_evidence(
-            &snapshot(vec![agent("root", None, 0), agent("child", Some("root"), 1)]),
+            &snapshot(vec![
+                agent("root", None, 0),
+                agent("child", Some("root"), 1),
+            ]),
             &history(vec![
                 activity_with_result(
-                    "run-1", "root", 0, "op-same", None,
+                    "run-1",
+                    "root",
+                    0,
+                    "op-same",
+                    None,
                     EvidenceIdentityCoverage::Unknown,
                 ),
                 activity_with_result(
-                    "run-1", "child", 0, "op-same", None,
+                    "run-1",
+                    "child",
+                    0,
+                    "op-same",
+                    None,
                     EvidenceIdentityCoverage::NotCaptured,
                 ),
             ]),
@@ -560,7 +609,10 @@ mod tests {
         .unwrap();
 
         let overlap = &report.overlaps[0];
-        assert_eq!(overlap.result_identity_coverage, EvidenceIdentityCoverage::Unknown);
+        assert_eq!(
+            overlap.result_identity_coverage,
+            EvidenceIdentityCoverage::Unknown
+        );
         assert_eq!(overlap.result_identity_match, ResultIdentityMatch::Unknown);
     }
 

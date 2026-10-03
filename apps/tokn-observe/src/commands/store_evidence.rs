@@ -171,7 +171,9 @@ fn build_tool_activities(
             let (content_fingerprint, content_identity_coverage) = match &result_outputs {
                 Ok(outputs)
                     if per_call_operation_count.get(base_call_id) == Some(&1)
-                        && outputs.get(base_call_id).is_some_and(|items| items.len() == 1) =>
+                        && outputs
+                            .get(base_call_id)
+                            .is_some_and(|items| items.len() == 1) =>
                 {
                     let output = &outputs[base_call_id][0];
                     (
@@ -386,10 +388,8 @@ mod tests {
 
     #[test]
     fn result_identity_is_project_scoped_and_raw_output_is_not_projected() {
-        let path = std::env::temp_dir().join(format!(
-            "tokn-result-identity-{}.jsonl",
-            std::process::id()
-        ));
+        let path =
+            std::env::temp_dir().join(format!("tokn-result-identity-{}.jsonl", std::process::id()));
         let raw_output = "PRIVATE FIXTURE RESULT alpha-123";
         let record = serde_json::json!({
             "type": "response_item",
@@ -399,7 +399,11 @@ mod tests {
                 "output": raw_output
             }
         });
-        std::fs::write(&path, format!("{}\n", serde_json::to_string(&record).unwrap())).unwrap();
+        std::fs::write(
+            &path,
+            format!("{}\n", serde_json::to_string(&record).unwrap()),
+        )
+        .unwrap();
 
         let member = AgentEvidence {
             source_path: path.to_string_lossy().to_string(),
@@ -419,14 +423,25 @@ mod tests {
         let second = build_tool_activities(project_id, "project-key-a", &[member.clone()]);
         let other_project = build_tool_activities(project_id, "project-key-b", &[member]);
 
-        assert_eq!(first[0].content_identity_coverage, EvidenceIdentityCoverage::Observed);
+        assert_eq!(
+            first[0].content_identity_coverage,
+            EvidenceIdentityCoverage::Observed
+        );
         assert_eq!(first[0].content_fingerprint, second[0].content_fingerprint);
-        assert_ne!(first[0].content_fingerprint, other_project[0].content_fingerprint);
-        assert!(first[0]
-            .content_fingerprint
-            .as_deref()
-            .is_some_and(|value| value.starts_with("cnt-v1-")));
-        assert_eq!(first[0].source_identity_coverage, EvidenceIdentityCoverage::NotCaptured);
+        assert_ne!(
+            first[0].content_fingerprint,
+            other_project[0].content_fingerprint
+        );
+        assert!(
+            first[0]
+                .content_fingerprint
+                .as_deref()
+                .is_some_and(|value| value.starts_with("cnt-v1-"))
+        );
+        assert_eq!(
+            first[0].source_identity_coverage,
+            EvidenceIdentityCoverage::NotCaptured
+        );
         assert!(first[0].source_stable_id.is_none());
         assert!(!format!("{first:?}").contains(raw_output));
 
@@ -447,7 +462,11 @@ mod tests {
                 "output": "aggregate output"
             }
         });
-        std::fs::write(&path, format!("{}\n", serde_json::to_string(&record).unwrap())).unwrap();
+        std::fs::write(
+            &path,
+            format!("{}\n", serde_json::to_string(&record).unwrap()),
+        )
+        .unwrap();
         let member = AgentEvidence {
             source_path: path.to_string_lossy().to_string(),
             thread_id: "thread-root".into(),
@@ -499,7 +518,10 @@ mod tests {
             "fixture-project-key",
             &[member],
         );
-        assert_eq!(activities[0].content_identity_coverage, EvidenceIdentityCoverage::Unknown);
+        assert_eq!(
+            activities[0].content_identity_coverage,
+            EvidenceIdentityCoverage::Unknown
+        );
         assert!(activities[0].content_fingerprint.is_none());
     }
 

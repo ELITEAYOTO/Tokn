@@ -396,7 +396,10 @@ mod tests {
         }
 
         let db = Database::open(&path).unwrap();
-        assert_eq!(db.tool_activity_schema_version().unwrap().as_deref(), Some("2"));
+        assert_eq!(
+            db.tool_activity_schema_version().unwrap().as_deref(),
+            Some("2")
+        );
         drop(db);
 
         let conn = Connection::open(&path).unwrap();

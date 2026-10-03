@@ -8,11 +8,10 @@ use tokn_domain::{
     EvidenceIdentityCoverage, HISTORICAL_SNAPSHOT_SCHEMA_VERSION, HistoricalAgentRecord,
     HistoricalProvenanceRecord, HistoricalRateLimitSnapshotRecord, HistoricalRunRecord,
     HistoricalRuntimeProfileRecord, HistoricalSnapshot, HistoricalToolActivityRecord,
-    HistoricalWorkspaceRecord,
-    MEASUREMENT_CONTRACT_ID, MEASUREMENT_CONTRACT_VERSION, MeasurementContractManifest,
-    ModelRuntimeProfile, RATE_LIMIT_HISTORY_SCHEMA_VERSION, RateLimitHistory, RunGroup,
-    RunnerQualityStatus, RunnerResult, TOOL_ACTIVITY_HISTORY_SCHEMA_VERSION, TokenTotals,
-    ToolActivityHistory,
+    HistoricalWorkspaceRecord, MEASUREMENT_CONTRACT_ID, MEASUREMENT_CONTRACT_VERSION,
+    MeasurementContractManifest, ModelRuntimeProfile, RATE_LIMIT_HISTORY_SCHEMA_VERSION,
+    RateLimitHistory, RunGroup, RunnerQualityStatus, RunnerResult,
+    TOOL_ACTIVITY_HISTORY_SCHEMA_VERSION, TokenTotals, ToolActivityHistory,
 };
 
 use crate::Database;
@@ -145,8 +144,16 @@ pub fn fingerprint_bytes(bytes: &[u8]) -> String {
     blake3::hash(bytes).to_hex().to_string()
 }
 
-pub fn scoped_fingerprint_bytes(prefix: &str, scope_key: &str, domain: &str, bytes: &[u8]) -> String {
-    let key = blake3::derive_key("tokn.project-scoped-content-fingerprint.v1", scope_key.as_bytes());
+pub fn scoped_fingerprint_bytes(
+    prefix: &str,
+    scope_key: &str,
+    domain: &str,
+    bytes: &[u8],
+) -> String {
+    let key = blake3::derive_key(
+        "tokn.project-scoped-content-fingerprint.v1",
+        scope_key.as_bytes(),
+    );
     let mut hasher = blake3::Hasher::new_keyed(&key);
     hasher.update(domain.as_bytes());
     hasher.update(&[0]);
@@ -750,9 +757,13 @@ impl Database {
                         operation_fingerprint: row.get(19)?,
                         workdir_fingerprint: row.get(20)?,
                         source_stable_id: row.get(21)?,
-                        source_identity_coverage: parse_identity_coverage(row.get::<_, String>(22)?)?,
+                        source_identity_coverage: parse_identity_coverage(
+                            row.get::<_, String>(22)?,
+                        )?,
                         content_fingerprint: row.get(23)?,
-                        content_identity_coverage: parse_identity_coverage(row.get::<_, String>(24)?)?,
+                        content_identity_coverage: parse_identity_coverage(
+                            row.get::<_, String>(24)?,
+                        )?,
                         parse_error_present: row.get::<_, i64>(25)? != 0,
                         run_created_at_unix: row.get(26)?,
                     })

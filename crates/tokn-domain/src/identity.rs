@@ -1,4 +1,3 @@
-
 use serde::{Deserialize, Serialize};
 
 pub const CONTEXT_IDENTITY_SCHEMA_VERSION: u64 = 1;

@@ -10,12 +10,14 @@ use super::{
     extract_terminal_observation, extract_usage_record,
 };
 
-
 pub fn read_session_tool_result_outputs(path: &Path) -> Result<BTreeMap<String, Vec<String>>> {
     let mut outputs = BTreeMap::<String, Vec<String>>::new();
     read_jsonl(path, &JsonlConfig::default(), |record| {
         if let Some(result) = extract_session_tool_result_output(&record.value) {
-            outputs.entry(result.call_id).or_default().push(result.output);
+            outputs
+                .entry(result.call_id)
+                .or_default()
+                .push(result.output);
         }
     })
     .with_context(|| format!("read session tool outputs {}", path.display()))?;
