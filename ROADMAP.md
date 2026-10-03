@@ -120,10 +120,10 @@ Statut : DONE / TRANSPORT PROTOTYPE ACCEPTED
 Resultat :
 - executable separe `tokn-mcp` ;
 - transport stdio process-bound, read-only ;
-- `tokn_status` + `tokn_recent_runs` ;
+- `tokn_status` + `tokn_recent_runs` + `tokn_context_ledger` ;
 - tests Rust + smoke process release PASS ;
 - Codex 0.161.0-alpha.2 accepte l'enregistrement stdio ;
-- Codex app-server lance Tokn et decouvre les deux outils, toolsError=null ;
+- Codex app-server lance Tokn et decouvre les trois outils, toolsError=null ;
 - aucun daemon permanent ;
 - aucune logique analytique dupliquee ;
 - thread ephemere local cree idle avec 0 turns ;
@@ -138,7 +138,7 @@ Statut : IN PROGRESS
 But :
 construire l'historique fiable par projet/run/agent/phase.
 
-Valide dans le slice courant :
+Valide dans M4 a ce jour :
 - ProjectIdentity et WorkspaceLineage ;
 - historique multi-run par project/workspace/run/agent ;
 - cached/uncached/cache-write/input/output/reasoning par run/agent avec coverage explicite ;

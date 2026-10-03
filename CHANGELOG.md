@@ -1,3 +1,11 @@
+## 2026-10-03 - M4 health audit / documentation state sync
+
+- re-audited clean `main` after Task Input Identity V0 acceptance: no new product `unsafe`/`panic!`/`todo!`/`unimplemented!` debt found and no Measurement Contract/Runner schema change required;
+- confirmed legacy runs without Task Input evidence remain fail-closed as `NOT_CAPTURED` / Cross-Run `UNKNOWN`;
+- synchronized active M4 docs so Cross-Run + Task Input Identity are no longer described as pending/current candidate work;
+- synchronized the accepted MCP surface to three read-only tools: `tokn_status`, `tokn_recent_runs`, `tokn_context_ledger`;
+- kept runtime task delivery `NOT_PROVEN`: the accepted Experiment 002 provenance references a historical rollout that is no longer retained locally, so no delivery-event schema is inferred without a real fixtureable sample.
+
 ## 2026-10-03 - M4 Task Input Identity V0
 
 - added additive Store `task_input_identity_v1` with fail-closed schema versioning, one run-owned observation, explicit coverage and no raw task/path persistence;
