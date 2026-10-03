@@ -82,7 +82,7 @@ An observed mutation operation does not prove:
 ## Next boundary
 
 Before Tokn can emit a real freshness or invalidation finding, it still needs evidence such as:
-- directly observable source version/hash/Git commit when available;
+- directly observable source version/hash plus workspace Git HEAD/dirty provenance are now accepted boundary evidence, but source-specific attribution is still required;
 - verified mutation effect rather than operation intent alone;
 - a chronological relation between reads, verified changes and later rediscovery;
 - broader runtime-neutral source kinds only when stable identity is provable;

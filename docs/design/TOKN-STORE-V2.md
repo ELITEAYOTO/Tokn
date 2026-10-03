@@ -119,12 +119,33 @@ M4 ingestion is implemented from directly observed Codex token-count rate-limit 
 The Store retains only limit identity, primary/secondary percentage-window-reset data and reached type. It deliberately excludes credit balances, plan/account identity and limit_name.
 No rate-limit values are invented or backfilled.
 
+### source_versions_v1
+
+Stores privacy-safe file-version observations at Runner run boundaries:
+- project-scoped SourceStableId;
+- `BEFORE` / `AFTER` boundary;
+- project-scoped `ver-v1-*` source-version fingerprint;
+- optional snapshot observation time and byte count.
+
+The raw workspace-relative path and raw snapshot SHA-256 are not persisted. `(run_id, source_stable_id, boundary)` is unique.
+
+### workspace_git_provenance_v1
+
+Stores workspace-level Git boundary provenance:
+- `BEFORE` / `AFTER` boundary;
+- coverage `OBSERVED`, `NOT_CAPTURED` or `UNKNOWN`;
+- project-scoped `git-v1-*` HEAD fingerprint only when observed;
+- dirty working-tree state only when observed;
+- optional snapshot observation time.
+
+The raw Git HEAD SHA is not persisted in SQLite. `(run_id, boundary)` is unique. Legacy snapshots without the optional Git block map to `NOT_CAPTURED`; attempted but unprovable Git observation maps to `UNKNOWN`.
+
 ## Deferred by design
 
 Not yet implemented in the Store foundation:
 - Findings persistence;
 - Experiment Lab persistence;
-- broader historical query/index APIs beyond the accepted Context Ledger, Tool Activity and RateLimitHistory surfaces;
+- broader historical query/index APIs beyond the accepted Context Ledger, Tool Activity, RateLimitHistory, SourceVersionHistory and WorkspaceGitProvenanceHistory surfaces;
 - Context Ledger tables;
 - cross-run finding aggregation.
 
@@ -170,7 +191,9 @@ Current keys:
 - agent: `run_id + thread_id`;
 - project/workspace: privacy-preserving logical IDs;
 - runtime profile: serialized V1 profile fingerprint;
-- provenance: source fingerprint identity.
+- provenance: source fingerprint identity;
+- source version: `run_id + source_stable_id + boundary`;
+- workspace Git provenance: `run_id + boundary`.
 
 Re-ingesting the same evidence updates the same logical rows and does not multiply
 runs or agents.

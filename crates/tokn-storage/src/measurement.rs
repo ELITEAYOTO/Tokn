@@ -9,11 +9,11 @@ use tokn_domain::{
     HistoricalProvenanceRecord, HistoricalRateLimitSnapshotRecord, HistoricalRunRecord,
     HistoricalRuntimeProfileRecord, HistoricalSnapshot, HistoricalSourceVersionRecord,
     HistoricalToolActivityRecord, HistoricalWorkspaceGitProvenanceRecord,
-    HistoricalWorkspaceRecord, MEASUREMENT_CONTRACT_ID,
-    MEASUREMENT_CONTRACT_VERSION, MeasurementContractManifest, ModelRuntimeProfile,
-    RATE_LIMIT_HISTORY_SCHEMA_VERSION, RateLimitHistory, RunGroup, RunnerQualityStatus,
-    RunnerResult, SOURCE_VERSION_HISTORY_SCHEMA_VERSION, SourceVersionBoundary,
-    SourceVersionHistory, TOOL_ACTIVITY_HISTORY_SCHEMA_VERSION, TokenTotals, ToolActivityHistory,
+    HistoricalWorkspaceRecord, MEASUREMENT_CONTRACT_ID, MEASUREMENT_CONTRACT_VERSION,
+    MeasurementContractManifest, ModelRuntimeProfile, RATE_LIMIT_HISTORY_SCHEMA_VERSION,
+    RateLimitHistory, RunGroup, RunnerQualityStatus, RunnerResult,
+    SOURCE_VERSION_HISTORY_SCHEMA_VERSION, SourceVersionBoundary, SourceVersionHistory,
+    TOOL_ACTIVITY_HISTORY_SCHEMA_VERSION, TokenTotals, ToolActivityHistory,
     WORKSPACE_GIT_PROVENANCE_HISTORY_SCHEMA_VERSION, WorkspaceGitProvenanceCoverage,
     WorkspaceGitProvenanceHistory,
 };
@@ -214,10 +214,7 @@ pub fn scoped_source_version_bytes(scope_key: &str, snapshot_sha256: &[u8]) -> S
 }
 
 pub fn scoped_git_head_bytes(scope_key: &str, git_head: &[u8]) -> String {
-    let key = blake3::derive_key(
-        "tokn.project-scoped-git-head.v1",
-        scope_key.as_bytes(),
-    );
+    let key = blake3::derive_key("tokn.project-scoped-git-head.v1", scope_key.as_bytes());
     let mut hasher = blake3::Hasher::new_keyed(&key);
     hasher.update(b"git-head-commit-v1");
     hasher.update(&[0]);
@@ -1877,6 +1874,110 @@ mod tests {
             source_versions: Vec::new(),
             workspace_git_provenance: Vec::new(),
         }
+    }
+
+    #[test]
+    fn workspace_git_provenance_is_private_queryable_and_idempotent() {
+        let path = temp_db("git-provenance");
+        let _ = fs::remove_file(&path);
+        let raw_head = "0123456789abcdef0123456789abcdef01234567";
+        let mut input = input(r"C:\fixture\session.jsonl");
+        input.workspace_git_provenance = vec![
+            WorkspaceGitProvenanceStoreInput {
+                boundary: SourceVersionBoundary::Before,
+                coverage: WorkspaceGitProvenanceCoverage::Observed,
+                head_fingerprint: Some(scoped_git_head_bytes("fixture-scope", raw_head.as_bytes())),
+                dirty: Some(false),
+                snapshot_observed_at: Some("2026-10-03T15:00:00Z".into()),
+            },
+            WorkspaceGitProvenanceStoreInput {
+                boundary: SourceVersionBoundary::After,
+                coverage: WorkspaceGitProvenanceCoverage::Unknown,
+                head_fingerprint: None,
+                dirty: None,
+                snapshot_observed_at: Some("2026-10-03T15:05:00Z".into()),
+            },
+        ];
+
+        let db = Database::open(&path).expect("open db");
+        let first = db.save_measurement(&input).expect("first save");
+        let second = db.save_measurement(&input).expect("second save");
+        assert_eq!(first, second);
+        assert_eq!(first.workspace_git_provenance_count, 2);
+        assert_eq!(db.workspace_git_provenance_count().unwrap(), 2);
+        assert_eq!(
+            db.workspace_git_provenance_schema_version()
+                .unwrap()
+                .as_deref(),
+            Some("1")
+        );
+        let history = db.workspace_git_provenance_history(None, None, 50).unwrap();
+        assert_eq!(history.observations.len(), 2);
+        assert_eq!(
+            history.observations[0].boundary,
+            SourceVersionBoundary::After
+        );
+        assert_eq!(
+            history.observations[0].coverage,
+            WorkspaceGitProvenanceCoverage::Unknown
+        );
+        assert_eq!(
+            history.observations[1].boundary,
+            SourceVersionBoundary::Before
+        );
+        assert_eq!(
+            history.observations[1].coverage,
+            WorkspaceGitProvenanceCoverage::Observed
+        );
+        assert_eq!(history.observations[1].dirty, Some(false));
+        assert!(
+            history.observations[1]
+                .head_fingerprint
+                .as_deref()
+                .is_some_and(|value| value.starts_with("git-v1-"))
+        );
+
+        drop(db);
+        let bytes = fs::read(&path).expect("read sqlite");
+        let haystack = String::from_utf8_lossy(&bytes);
+        assert!(!haystack.contains(raw_head));
+        let _ = fs::remove_file(path);
+    }
+
+    #[test]
+    fn duplicate_workspace_git_provenance_boundary_fails_closed() {
+        let path = temp_db("git-provenance-duplicate");
+        let _ = fs::remove_file(&path);
+        let mut input = input(r"C:\fixture\session.jsonl");
+        let fingerprint =
+            scoped_git_head_bytes("fixture-scope", b"0123456789abcdef0123456789abcdef01234567");
+        input.workspace_git_provenance = vec![
+            WorkspaceGitProvenanceStoreInput {
+                boundary: SourceVersionBoundary::Before,
+                coverage: WorkspaceGitProvenanceCoverage::Observed,
+                head_fingerprint: Some(fingerprint.clone()),
+                dirty: Some(false),
+                snapshot_observed_at: None,
+            },
+            WorkspaceGitProvenanceStoreInput {
+                boundary: SourceVersionBoundary::Before,
+                coverage: WorkspaceGitProvenanceCoverage::Observed,
+                head_fingerprint: Some(fingerprint),
+                dirty: Some(true),
+                snapshot_observed_at: None,
+            },
+        ];
+
+        let db = Database::open(&path).expect("open db");
+        let error = db
+            .save_measurement(&input)
+            .expect_err("duplicate boundary must fail");
+        assert!(
+            error
+                .to_string()
+                .contains("duplicate workspace Git provenance boundary")
+        );
+        let _ = fs::remove_file(path);
     }
 
     #[test]

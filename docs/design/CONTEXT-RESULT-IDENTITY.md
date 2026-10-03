@@ -71,7 +71,7 @@ SourceStableId file V0 is now implemented for conservative simple `Get-Content` 
 Still not solved by V0:
 - broader SourceStableId extraction beyond the conservative file-read subset;
 - range/symbol identity;
-- source version/commit semantics across runtimes;
+- broader source-version/Git provenance semantics beyond the accepted file SourceVersion V0 + workspace Git provenance V0, especially across runtimes;
 - freshness/invalidation;
 - compaction/rediscovery;
 - semantic/fuzzy equivalence;

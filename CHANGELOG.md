@@ -1,3 +1,12 @@
+## 2026-10-03 - M4 Workspace Git Provenance V0
+
+- added optional Git provenance to Runner `ProjectSnapshot` boundaries without changing ProjectSnapshot schema version;
+- new snapshots report `OBSERVED` only when Git worktree detection, `HEAD`, and porcelain status are all directly available; failed/unavailable probes remain `UNKNOWN`, while legacy snapshots without a Git block project as `NOT_CAPTURED`;
+- durable Store projection persists only boundary, coverage, dirty state, optional observation time, and project-scoped `git-v1-*` HEAD fingerprints; raw Git commit hashes, branch names, remotes, authors, messages, and status paths are not stored in SQLite;
+- added `workspace_git_provenance_v1` with unique `(run_id, boundary)` and fail-closed schema migration semantics;
+- added read-only `tokn-observe workspace-git-provenance-history` with bounded project/workspace filters;
+- validated clean Git, dirty Git, and non-Git capture paths; added storage regressions for idempotence, privacy/raw-HEAD absence, queryability, and duplicate-boundary rejection;
+- explicitly does not claim freshness, staleness, mutation causality, invalidation correctness, safe reuse, or token savings.
 ## 2026-10-03 - M4 Context / Result Identity Foundation V0
 
 - added runtime-neutral identity coverage (`OBSERVED`, `PARTIAL`, `NOT_CAPTURED`, `UNKNOWN`);
@@ -8,22 +17,22 @@
 - kept duplicate-waste/savings interpretation explicitly out of scope;
 - branch validation passed privacy, rustfmt, strict Clippy, workspace tests, release/provenance, MCP smoke, Experiment 001 golden, Experiment 002 regression and documentation consistency.
 
-# Tokn — Journal de développement
+# Tokn â€” Journal de dÃ©veloppement
 
 Ce fichier trace les modifications significatives avec date et heure locale.
 
 ## 2026-09-26 14:35 +02:00
 
-### Vérification après interruption
+### VÃ©rification aprÃ¨s interruption
 
-- récupération de l'historique Remote Desktop Commander ;
+- rÃ©cupÃ©ration de l'historique Remote Desktop Commander ;
 - confirmation du workspace dans `E:\Tokn\V0-CodexTkn-Consume\tool` ;
 - confirmation du renommage interne en Tokn ;
-- vérification de l'arborescence des crates et scripts ;
+- vÃ©rification de l'arborescence des crates et scripts ;
 - relecture du README, architecture, token-accounting et scripts de build.
 ### Validation technique
 
-Commande de validation complète relancée :
+Commande de validation complÃ¨te relancÃ©e :
 
 ```text
 cargo fmt --all -- --check
@@ -32,33 +41,33 @@ cargo test --workspace
 cargo build --release --locked -p tokn-observe
 ```
 
-Résultat : **PASS**.
+RÃ©sultat : **PASS**.
 
-Le binaire release a été généré avec succès.
-### Vérification runtime
+Le binaire release a Ã©tÃ© gÃ©nÃ©rÃ© avec succÃ¨s.
+### VÃ©rification runtime
 
-`tokn-observe doctor --dev` a confirmé :
+`tokn-observe doctor --dev` a confirmÃ© :
 
-- Codex Desktop : détecté ;
+- Codex Desktop : dÃ©tectÃ© ;
 - Codex Desktop version : `codex-cli 0.158.0-alpha.2` ;
-- deux installations Codex VS Code également détectées ;
+- deux installations Codex VS Code Ã©galement dÃ©tectÃ©es ;
 - capabilities : session-rollouts, trace-reduce, prompt-input, app-server ;
-- racine sessions : détectée ;
-- 136 rollouts locaux trouvés.
+- racine sessions : dÃ©tectÃ©e ;
+- 136 rollouts locaux trouvÃ©s.
 
-### Documentation ajoutée
+### Documentation ajoutÃ©e
 
 - `ROADMAP.md` ;
 - `STATUS.md` ;
 - `CHANGELOG.md` ;
 - `docs\MAINTENANCE.md` ;
-- README enrichi avec les règles de suivi.
-## Travail effectué avant la coupure
+- README enrichi avec les rÃ¨gles de suivi.
+## Travail effectuÃ© avant la coupure
 
-- création du workspace multi-crates ;
-- implémentation de `tokn-observe` ;
-- détection Codex ;
-- ingestion JSONL streaming/bornée ;
+- crÃ©ation du workspace multi-crates ;
+- implÃ©mentation de `tokn-observe` ;
+- dÃ©tection Codex ;
+- ingestion JSONL streaming/bornÃ©e ;
 - fixtures minimal / cached usage / unknown event / truncated tail ;
 - extraction `last_token_usage` ;
 - Token Ledger initial ;
@@ -66,10 +75,10 @@ Le binaire release a été généré avec succès.
 - stockage SQLite initial ;
 - reporting texte ;
 - scripts MSVC/test/build/package ;
-- smoke test réel sur un rollout Codex ;
+- smoke test rÃ©el sur un rollout Codex ;
 - renommage complet `pb-*` -> `tokn-*`.
 
-Le détail fin reste visible dans l'historique de fichiers et les commits futurs.
+Le dÃ©tail fin reste visible dans l'historique de fichiers et les commits futurs.
 
 ## 2026-09-26 15:01 +02:00
 

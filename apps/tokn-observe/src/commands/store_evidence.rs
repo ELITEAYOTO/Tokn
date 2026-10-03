@@ -328,8 +328,14 @@ fn build_workspace_git_provenance(
 ) -> anyhow::Result<Vec<WorkspaceGitProvenanceStoreInput>> {
     let mut out = Vec::new();
     for (boundary, name) in [
-        (SourceVersionBoundary::Before, "workspace-before-snapshot.json"),
-        (SourceVersionBoundary::After, "workspace-after-snapshot.json"),
+        (
+            SourceVersionBoundary::Before,
+            "workspace-before-snapshot.json",
+        ),
+        (
+            SourceVersionBoundary::After,
+            "workspace-after-snapshot.json",
+        ),
     ] {
         let path = evidence_dir.join(name);
         if !path.is_file() {
@@ -355,14 +361,22 @@ fn build_workspace_git_provenance(
                     .as_deref()
                     .map(str::trim)
                     .filter(|value| !value.is_empty())
-                    .ok_or_else(|| anyhow::anyhow!("OBSERVED Git snapshot is missing HEAD in {}", path.display()))?;
+                    .ok_or_else(|| {
+                        anyhow::anyhow!(
+                            "OBSERVED Git snapshot is missing HEAD in {}",
+                            path.display()
+                        )
+                    })?;
                 if !matches!(head.len(), 40 | 64)
                     || !head.bytes().all(|byte| byte.is_ascii_hexdigit())
                 {
                     anyhow::bail!("invalid Git HEAD in {}", path.display());
                 }
                 let dirty = git.dirty.ok_or_else(|| {
-                    anyhow::anyhow!("OBSERVED Git snapshot is missing dirty state in {}", path.display())
+                    anyhow::anyhow!(
+                        "OBSERVED Git snapshot is missing dirty state in {}",
+                        path.display()
+                    )
                 })?;
                 (
                     WorkspaceGitProvenanceCoverage::Observed,

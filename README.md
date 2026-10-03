@@ -109,7 +109,7 @@ Il ne prouve ni que le contexte est utile, ni que le cache est optimal.
 
 Ordre actuel :
 - M4 Historical Analyzer + Context Ledger ;
-- M4 exact Context/Result Identity + SourceStableId file V0 + observed content evolution + source mutation timing + run-boundary SourceVersionHistory V1 ACCEPTED ; M4.5 freshness/Context Twin + Shadow Retrieval/Edit ensuite ;
+- M4 exact Context/Result Identity + SourceStableId file V0 + observed content evolution + source mutation timing + run-boundary SourceVersionHistory V1 + Workspace Git Provenance V0 ACCEPTED ; M4.5 freshness/Context Twin + Shadow Retrieval/Edit ensuite ;
 - M5 Findings + Opportunity Analyzer ;
 - M6 counterfactual/policy lab puis Experiment 003 causal A/B ;
 - M7 Advisor ;
@@ -176,6 +176,16 @@ SourceVersionHistory V1 records privacy-safe source versions directly observed i
 - durable `ver-v1-*` fingerprints are project-scoped and domain-separated; raw relative paths and raw snapshot SHA-256 values are not persisted;
 - missing one boundary stays `UNKNOWN`; Tokn does not infer ADDED/REMOVED;
 - `tokn-observe source-version-history` exposes the observed boundary records; the analysis reducer can classify `UNCHANGED_OBSERVED`, `CHANGED_OBSERVED` or `UNKNOWN`;
-- no Git-commit provenance, mutation causality, freshness/staleness, invalidation effect or safe-reuse claim is implied.
+- workspace-level Git HEAD/dirty provenance is captured separately; it does not prove source-specific mutation causality, freshness/staleness, invalidation effect or safe reuse.
+
+
+## M4 workspace Git provenance evidence - 2026-10-03
+
+Workspace Git Provenance V0 adds directly observed repository state to Runner boundary snapshots.
+- ProjectSnapshot V1 carries an optional Git block with `OBSERVED` HEAD + dirty state or `UNKNOWN` when Git state cannot be proven;
+- legacy snapshots without the block remain valid and project to `NOT_CAPTURED`;
+- the Store persists only project-scoped `git-v1-*` HEAD fingerprints, dirty state and coverage; raw Git SHA values are not persisted in SQLite;
+- `tokn-observe workspace-git-provenance-history` exposes the read-only boundary history;
+- branch/remote identity, source-specific causality, freshness/staleness, invalidation and safe reuse remain unclaimed.
 
 Long-term direction remains observation-first. Multi-runtime support is an architectural target, not a current support claim. Before runtime #2: Runtime Adapter Contract V1, Token Semantics V2, Capability Manifest V1 and sanitized conformance fixtures. See docs/design/MULTI-RUNTIME-CORE-AND-DATA-ARCHITECTURE.md and ADR-006.
