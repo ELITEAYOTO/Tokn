@@ -245,12 +245,14 @@ Limites explicites du contrat V1 :
 
 ## Prochaine action
 
-Continuer **M4** avec l'activite historique evidence-bounded :
-result-identity/duplicate-evidence quand directement prouvable, compaction quand observable,
-rediscovery multi-run et comparaison cross-run explicite.
+Continuer **M4** avec une fondation d'identite contexte/resultat evidence-bounded :
+IDs privacy-safe, fingerprint de contenu/resultat seulement quand directement observable,
+source/version/provenance/fraicheur/invalidation, puis compaction/rediscovery et comparaison cross-run explicite.
 
+Cette fondation doit preparer un Context Twin V0 sans pretendre connaitre la memoire interne d'Astra.
+Ne pas persister les tool outputs bruts par defaut uniquement pour obtenir une identite.
 Ne pas creer artificiellement du per-turn a partir des agregats V1.
-Ne pas commencer M5 Findings tant que ces observations historiques ne sont pas fiables.
+Ne pas commencer M5 Findings + Opportunity Analyzer tant que ces observations historiques ne sont pas fiables.
 
 Chemin d'execution detaille :
 `docs/plans/IMPLEMENTATION-PATH.md`.
@@ -329,3 +331,9 @@ Next M4 work:
 Before Experiment 003: characterize run-to-run variance, predeclare multidimensional quality gates, and measure Tokn overhead for any injected/default-active integration.
 
 Before public binary distribution: threat model, retention/purge/export, dependency audit/SBOM, signing/update integrity and hostile parser/privacy corpus.
+
+Long-term strategy review 2026-10-03 ACCEPTED as direction:
+- M4.5 Context Identity / Context Twin seed before active retrieval;
+- M5 includes Opportunity Analyzer V0;
+- deterministic counterfactual replay + policy schema precede expensive A/B;
+- AutoLab/ML stays a later offline-first track, not current M4-M6 scope.

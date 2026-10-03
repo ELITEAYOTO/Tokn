@@ -110,10 +110,15 @@ P8 Runner DONE
 -> Measurement Contract V1 FROZEN
 -> Store V2 + ModelRuntimeProfile foundation DONE
 -> local Codex MCP transport prototype ACCEPTED
--> Historical Analyzer + Context Ledger NEXT
--> recurring findings
--> causal experiments
--> optimizer candidates.
+-> Historical Analyzer + Context Ledger IN PROGRESS
+-> Context Identity / Context Twin seed
+-> Findings + Opportunity Analyzer
+-> Shadow + deterministic counterfactual replay
+-> causal experiments + Policy Registry
+-> Advisor
+-> selective Context Compiler / Project Memory
+-> offline-first AutoLab
+-> adaptive learned policies only if later justified.
 
 ## Future Context Broker boundary - 2026-10-02
 
@@ -123,3 +128,14 @@ Runtime -> thin Tokn integration -> Context Broker -> retrieval/index/memory -> 
 The Broker is not a second reasoning agent. It ranks and packages deterministic evidence. The runtime/model keeps semantic responsibility and can always expand or fall back to normal repository access.
 
 Provider/runtime adapters must remain separate from provider-neutral domain contracts. OpenAI token accounting V1 must not be copied blindly to Anthropic/Cowork; a future Token Semantics V2 is required before runtime #2.
+## Long-term Intelligence / AutoLab boundary - 2026-10-03
+
+Context Twin is an observable registry, not a model-memory claim. It records only directly evidenced context/evidence identity, source version, provenance, distribution and freshness/invalidation. Missing host evidence remains UNKNOWN/NOT_CAPTURED.
+
+The analysis path is: normalized evidence -> Findings -> Opportunity Analyzer -> deterministic counterfactual/shadow -> causal A/B. Opportunity analysis may reject/deprioritize a technically feasible optimizer when its addressable surface is too small.
+
+The active path remains separate: only validated policies may enter Advisor and later selective Context Compiler behavior. Native runtime behavior remains the fallback/baseline.
+
+AutoLab is a later offline-first subsystem over versioned/rebuildable data: Experience Bank, Feature Store, DatasetManifest, holdouts, Policy Registry and drift handling. It does not require ML initially and never self-deploys learned policies.
+
+Learned methods are ordered by complexity and evidence: simple statistics/deterministic rules before contextual bandits, Bayesian optimization, learning-to-rank, calibrated surrogates, offline evolutionary search and any optional specialized LLM analyst.

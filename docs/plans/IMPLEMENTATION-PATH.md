@@ -299,7 +299,7 @@ Phase G evidence status:
 - duplicate evidence: remaining until result identity is directly captured/proven;
 - rediscovery and explicit cross-run comparison primitives.
 
-## Phase H - Findings Engine
+## Phase H - Findings + Opportunity Analyzer V0
 
 Convert repeated observations into evidence-backed findings.
 
@@ -317,11 +317,27 @@ Every finding requires:
 evidence, provenance, compatible profile scope, frequency,
 confidence, observed cost, bounded potential impact and quality risk.
 
-## Phase I - Experiment 003
+Before engineering an optimizer, Opportunity Analyzer V0 estimates separately:
+- addressable surface and theoretical upper bound;
+- realistic bounded potential;
+- frequency and confidence;
+- quality/preservation risk;
+- implementation complexity and experiment cost.
 
-Status: ONLY AFTER ONE REPRODUCIBLE FINDING
+A valid conclusion is DEPRIORITIZE.
 
-First causal optimization A/B.
+## Phase I - Counterfactual / Policy Foundation + Experiment 003
+
+Status: ONLY AFTER ONE REPRODUCIBLE FINDING + OPPORTUNITY
+
+Before the first causal optimization A/B:
+- retain Astra native as explicit baseline;
+- replay bounded deterministic variants offline when meaningful;
+- introduce a versioned PolicyCandidate / PolicyGenome V0;
+- record scope, runtime constraints, provenance, evidence references and lifecycle state;
+- keep offline estimates distinct from causal outcomes.
+
+Experiment 003 remains the first causal optimization A/B.
 
 Requirements:
 - identical frozen starting workspace;
@@ -360,6 +376,31 @@ Only after repeated causal wins:
 
 These remain separate from the Analyzer.
 
+## Phase L - AutoLab V0 / offline data foundation
+
+Future only after M4-M6 contracts are stable:
+- Experience Bank derived from structured Store evidence where possible;
+- Feature Store with observed features separated from derived labels;
+- DatasetManifest and schema/runtime/task/privacy metadata;
+- time/project/runtime holdouts where applicable;
+- deterministic replay, Offline Fidelity and drift detection;
+- Policy Registry and native baseline;
+- bounded raw retention plus purge/export/migration rules.
+
+No ML model is required for this phase.
+
+## Phase M - Adaptive policy learning
+
+Research only after enough data and after simpler methods plateau:
+- contextual bandit first;
+- Bayesian optimization;
+- learning-to-rank;
+- calibrated surrogate model;
+- evolutionary search offline only;
+- optional LLM analyst only if structured methods remain insufficient.
+
+No learned policy self-deploys.
+
 ## What not to build now
 
 Current non-goals while Historical Analyzer + Context Ledger is IN PROGRESS:
@@ -369,6 +410,7 @@ Current non-goals while Historical Analyzer + Context Ledger is IN PROGRESS:
 - Findings persistence before a Findings contract exists;
 - Experiment Lab persistence before its consumer contract exists;
 - active optimization;
+- AutoLab / Experience Bank / Feature Store / learned policy controller;
 - RAG/embeddings;
 - Project Memory;
 - context rewriting.
@@ -393,10 +435,11 @@ Completed in the current slice:
 7. CLI + read-only MCP exposure, including direct target-Codex tool-call validation.
 
 Next inside M4:
-1. keep phase/compaction observations evidence-bounded and only where directly supported ;
-2. add result-identity evidence before classifying cross-agent overlap as duplicate evidence ;
-3. add rediscovery observations and explicit multi-run comparison primitives ;
-4. only after those observations are reliable, begin M5 Findings.
+1. add Context/Result Identity Foundation V0 before classifying cross-agent overlap as duplicate evidence ;
+2. store only privacy-safe identity/provenance/freshness metadata and keep raw outputs non-durable by default ;
+3. keep phase/compaction observations evidence-bounded and only where directly supported ;
+4. add rediscovery observations and explicit multi-run comparison primitives ;
+5. only after those observations are reliable, enter M4.5 then M5 Findings + Opportunity Analyzer.
 
 ## 2026-10-02 insertion - shadow before active optimizer
 
@@ -417,3 +460,15 @@ Before causal optimization:
 Before public distribution: threat model, retention/purge/export, dependency audit + SBOM, signing/update integrity.
 
 Runtime #2 comes after stable Codex V1 and requires provider-neutral token semantics plus real sanitized Claude/Cowork evidence.
+
+## 2026-10-03 long-term AutoLab / Intelligence Layer review
+
+Accepted sequencing changes:
+- Context Identity / Context Twin seed is a prerequisite for trustworthy duplicate-evidence and rediscovery analysis;
+- Opportunity Analyzer V0 is part of M5 and may explicitly deprioritize low-addressable ideas;
+- deterministic counterfactual replay + versioned policy schema/registry precede expensive causal experiments;
+- active Context Compiler remains gated by repeated causal wins;
+- AutoLab is a later offline-first track with Experience Bank, Feature Store, DatasetManifest, holdouts and drift handling;
+- learned optimizers and any specialized LLM come only after simpler methods plateau and measured data is sufficient.
+
+Event sourcing is a compatibility direction, not a current Store rewrite mandate: prefer versioned/rebuildable derived views and fail closed on unknown schemas.

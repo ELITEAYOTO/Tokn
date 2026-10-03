@@ -123,8 +123,10 @@ Cross-Agent Evidence V1 exact-operation overlap: ACCEPTED FOUNDATION.
 Result identity remains `NOT_CAPTURED`; operation overlap is not duplicate evidence.
 
 Next concrete work:
-1. result-identity evidence when directly observable;
+1. Context/Result Identity Foundation V0: privacy-safe IDs/fingerprints + source version/provenance/freshness when directly observable;
 2. compaction/rediscovery only when directly observed;
 3. explicit cross-run comparison.
 
-After M4, prefer shadow retrieval/edit analysis before any active Context Compiler behavior.
+The identity slice is the seed of Context Twin V0, not the full Intelligence Layer.
+After M4, M4.5 builds Context Identity + shadow retrieval/edit foundations before M5 Findings + Opportunity Analyzer.
+Do not start Experience Bank, Feature Store, bandits, Bayesian optimization or a Tokn LLM in the current M4 scope.

@@ -783,3 +783,13 @@ P6 remains IN PROGRESS until one controlled real PreToolUse callback proves the 
 - added `tokn-observe cross-agent-evidence` JSON CLI with privacy-safe project/workspace filtering;
 - unsupported source schemas or mismatched filters fail closed;
 - validation passed privacy, rustfmt, strict Clippy, workspace tests, release/provenance, MCP smoke, Experiment 001/002 and documentation gates.
+
+## 2026-10-03 - long-term AutoLab / Intelligence Layer roadmap review
+
+- reviewed owner-supplied long-term architecture, optimizer comparison, AutoLab and Intelligence Layer research against the current repository;
+- moved Context Identity / Context Twin seed ahead of active retrieval as the reusable basis for result identity, rediscovery and later evidence reuse;
+- expanded M5 into Findings + Opportunity Analyzer V0 so low-addressable optimizations can be explicitly deprioritized;
+- added deterministic counterfactual replay and a versioned policy lifecycle before expensive causal A/B;
+- added future offline-first AutoLab phases for Experience Bank, Feature Store, DatasetManifest, holdouts, drift and policy learning;
+- kept event sourcing as a compatibility/rebuildability direction rather than a current Store rewrite;
+- kept ML, embeddings, evolutionary search and a specialized Tokn LLM outside the current M4-M6 critical path.

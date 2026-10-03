@@ -157,4 +157,5 @@ Les chats ne sont jamais la source de verite du projet.
 ## Audit / design review 2026-10-02
 
 - `audits/2026-10-02-CLAUDE-HANDOFF-REVIEW.md` - current-code review of the Claude handoff and accepted/deferred recommendations.
+- `audits/2026-10-03-LONG-TERM-AUTOLAB-REVIEW.md` - review of owner-supplied AutoLab, Intelligence Layer, data/ML and optimizer strategy research; accepted sequencing changes and deferred ideas.
 - Long-term Context Compiler / shadow guardrails are folded into ROADMAP, TARGET-ARCHITECTURE and CONTEXT-EFFICIENCY-STRATEGY instead of duplicating a second canonical design document.

@@ -159,90 +159,145 @@ Reste M4 :
 - duplicate evidence : result identity still NOT_CAPTURED / remaining ;
 - rediscovery et comparaison explicite entre runs.
 
-## M5 - Context Efficiency Findings
-
-Statut : PLANNED
-
-Observation-only.
-
-Findings cibles :
-- uncached growth anormal ;
-- cache churn quand observable ;
-- repeated file/search evidence ;
-- contexte duplique parent/sous-agents ;
-- instructions globales qui provoquent des lectures inutiles ;
-- tool evidence repetee ;
-- project facts rediscovered entre runs ;
-- compaction/context-management suivie de rediscovery.
-
-Chaque finding :
-preuve + provenance + confiance + cout observe + frequence +
-impact potentiel borne + risque qualite + proposition A/B.
-
-## M6 - Experiment Lab / Experiment 003
-
-Statut : PLANNED
-
-Experiment 003 sera le premier A/B causal d'optimisation.
-
-La variable sera choisie a partir d'un finding mesure.
-Ce n'est plus par defaut un output cap.
-
-Conditions :
-- meme tache ;
-- workspace initial gele ;
-- runtime/model/config comparables ;
-- une variable principale ;
-- qualite acceptee avant comparaison tokens ;
-- terminal status compatible ;
-- validity = VALID_FOR_CAUSAL_AB.
-
-## M7 - Advisor
-
-Statut : FUTURE
-
-Transforme les findings historiques en recommandations.
-Aucune modification automatique.
-
-## M8 - Context Compiler / Project Memory
-
-Statut : FUTURE / ACTIVE LAYER
-
-Seulement apres validation repetee des findings :
-- contexte structure ;
-- project memory avec provenance/fraicheur/invalidation ;
-- evidence compression si prouvee ;
-- cache-aware construction si la surface le permet ;
-- plugin/daemon/GUI si utiles.
-
-Cette couche reste separee de l'Analyzer.
-
-## Regle de passage
-
-Une phase est DONE uniquement si :
-- tests techniques PASS ;
-- evidence suffisante ;
-- documentation synchronisee ;
-- aucune affirmation plus forte que la preuve ;
-- aucune regression des golden facts.
-
-## M4.5 - Shadow Retrieval / Edit Strategy
+## M4.5 - Context Identity + Shadow Foundations
 
 Statut : PLANNED / OBSERVATION-ONLY.
 
-After M4 evidence is reliable and before active optimization, Tokn may build:
-- local repo/symbol index, content hashes and Git incremental invalidation;
-- Shadow Context Retrieval Engine (lexical/BM25 first, then AST/graph, semantic search only if measured useful);
-- Shadow Edit Strategy Analyzer (apply_patch vs deterministic script/refactor behavior) without changing Astra behavior;
-- context package candidates with provenance, freshness and expand/fallback paths.
+Purpose: bridge M4 evidence to later optimization without changing Astra behavior.
 
-Shadow mode must not block reads, Python, subagents or tests. It estimates what Tokn would have supplied/done while Codex continues normally.
+Context Identity / Context Twin V0 seed:
+- privacy-safe evidence/context IDs for directly observed items;
+- project-scoped keyed content/result fingerprints when content is transiently available;
+- source identity + range/symbol + source version/hash/commit when known;
+- provenance, freshness and invalidation state;
+- agent/run distribution only when directly observed;
+- `UNKNOWN` / `NOT_CAPTURED` when delivery, freshness or result identity cannot be proven.
+
+This foundation must not require durable raw tool-output storage.
+It is the preferred basis for duplicate-evidence proof, rediscovery analysis and later memory.
+
+Shadow foundations:
+- local repo/symbol index, content hashes and Git incremental invalidation;
+- Shadow Context Retrieval Engine: lexical/BM25 first, then AST/LSP/graph;
+- embeddings only if measured recall/value justifies them;
+- Shadow Edit Strategy Analyzer without changing Astra behavior;
+- Context Package candidates with provenance, freshness and expand/fallback paths.
 
 Guardrails:
 - Astra keeps semantic decisions; Tokn handles deterministic, verifiable mechanics;
-- every active Context Compiler path keeps expand/fallback;
-- memory requires provenance + freshness + invalidation;
-- tool-output compression and parent/subagent shared context require A/B because omission risk is non-trivial;
+- no claim that Astra still remembers a context merely because it was supplied earlier;
+- every active future Context Compiler path keeps expand/fallback;
 - no hard context cap, reasoning reduction or arbitrary output cap as default optimization.
 
-Experiment 003+ remains the causal gate. M8 activation is allowed only for categories that repeatedly win without quality loss.
+## M5 - Findings + Opportunity Analyzer V0
+
+Statut : PLANNED / OBSERVATION-ONLY.
+
+Findings cibles:
+- uncached growth anormal;
+- cache churn quand observable;
+- repeated file/search evidence;
+- duplicate evidence only when result/context identity is proven;
+- project facts rediscovered entre runs;
+- compaction/context-management suivie de rediscovery;
+- oversized/repeated tool evidence.
+
+Each finding must preserve evidence, provenance, confidence, compatible runtime scope and quality risk.
+
+Opportunity Analyzer V0 then estimates separately:
+- addressable surface;
+- theoretical upper bound;
+- realistic bounded potential;
+- frequency;
+- evidence confidence;
+- preservation/quality risk;
+- implementation complexity;
+- experiment priority.
+
+`DEPRIORITIZE` is a valid output. A technically elegant optimization is not automatically worth building.
+
+## M6 - Counterfactual / Policy / Experiment Lab
+
+Statut : PLANNED.
+
+Before expensive causal A/B, add a small deterministic offline layer:
+- native Astra baseline always retained;
+- counterfactual replay for eligible bounded interventions;
+- PolicyCandidate / PolicyGenome V0 with schema, scope, runtime constraints, provenance and evidence references;
+- Policy Registry lifecycle at least `DISCOVERED -> OFFLINE_PROMISING -> SHADOW -> EXPERIMENTAL`;
+- offline estimates explicitly separated from causal results.
+
+Experiment 003 remains the first causal optimization A/B.
+
+Conditions:
+- same task and frozen starting workspace;
+- compatible runtime/model/config;
+- one primary intervention;
+- quality gate PASS before efficiency comparison;
+- terminal status compatible;
+- validity = VALID_FOR_CAUSAL_AB;
+- rollback/fallback available for any active experimental path.
+
+Quality is a constraint. Efficiency is the objective inside the acceptable-quality region.
+
+## M7 - Advisor
+
+Statut : FUTURE.
+
+Turns validated recurring findings/opportunities into recommendations.
+No automatic mutation.
+Every recommendation explains why, evidence, confidence, runtime scope, bounded impact and risk.
+
+## M8 - Selective Context Compiler / Project Memory
+
+Statut : FUTURE / ACTIVE LAYER.
+
+Only for mechanisms with repeated causal wins:
+- structured context packages;
+- project memory with provenance/freshness/invalidation;
+- selective evidence reuse/compression with expand/fallback;
+- cache-aware construction when the surface permits it;
+- deterministic Tool Compiler operations only where semantics remain Astra-owned.
+
+## M9 - AutoLab V0 / Data and Replay Foundation
+
+Statut : FUTURE / OFFLINE-FIRST.
+
+Do not start before M4-M6 evidence and experiment contracts are stable.
+
+Foundation:
+- Experience Bank built from structured/rebuildable Store evidence where possible;
+- Feature Store separating observed features from derived labels;
+- DatasetManifest with schema/runtime/task/filter/privacy metadata;
+- train/validation/holdout discipline, including time/project/runtime holdouts where applicable;
+- deterministic replay and Offline Fidelity measurement;
+- Policy Registry + Drift Detector;
+- bounded raw retention, purge/export/migration policy;
+- native baseline remains an eligible policy.
+
+No ML model is required for M9.
+
+## M10 - Adaptive Policy Learning
+
+Statut : FUTURE / RESEARCH.
+
+Only if simpler deterministic/statistical approaches plateau and enough data exists:
+1. contextual bandit;
+2. Bayesian optimization;
+3. learning-to-rank;
+4. calibrated surrogate model;
+5. evolutionary search OFFLINE ONLY;
+6. optional specialized LLM analyst only if structured methods are insufficient.
+
+No learned policy self-deploys. Shadow, causal A/B, quality gate, runtime compatibility, rollback and monitoring remain mandatory promotion gates.
+
+## Regle de passage
+
+Une phase est DONE uniquement si:
+- tests techniques PASS;
+- evidence suffisante;
+- documentation synchronisee;
+- aucune affirmation plus forte que la preuve;
+- aucune regression des golden facts.
+
+Research direction does not override current evidence. New components enter the critical path only when their prerequisite/opportunity is measured.

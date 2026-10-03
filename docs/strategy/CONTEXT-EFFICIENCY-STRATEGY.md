@@ -166,10 +166,14 @@ An optimization candidate may reach Experiment Lab only when:
 1. Finish V0.1 measurement hardening.
 2. Validate the complete runner with Experiment 002.
 3. Build Historical Analyzer + Context Ledger.
-4. Add context/cache/duplication findings.
-5. Select one low-risk finding.
-6. Run the first causal A/B (Experiment 003).
-7. Only after repeated wins, consider active Context Compiler / Project Memory.
+4. Finish M4 identity/rediscovery evidence and seed Context Twin semantics without active injection.
+5. Build M4.5 Context Identity + Shadow Retrieval/Edit foundations.
+6. Build M5 Findings + Opportunity Analyzer V0 and allow explicit deprioritization.
+7. Add deterministic counterfactual replay + versioned policy candidates before expensive experiments.
+8. Run the first causal A/B (Experiment 003) on one bounded intervention.
+9. Advisor follows validated recurring evidence.
+10. Only after repeated wins, consider active Context Compiler / Project Memory.
+11. AutoLab/learned policies remain a later offline-first track.
 
 Plugin packaging is distribution/activation infrastructure, not an optimization by itself.
 
@@ -198,3 +202,17 @@ Not default optimization targets:
 - blocking Python or direct reads.
 
 Any active retrieval must support expand/fallback. Any Project Memory fact must carry content/state provenance, freshness and invalidation.
+
+## Long-term adaptive optimization gates - 2026-10-03
+
+The long-term target is an evidence-driven adaptive efficiency layer, not a generic token compressor or a smaller coding agent.
+
+New foundational rule: Context/Result Identity should be reusable infrastructure. When directly observable, record privacy-safe identity, source/version, provenance and freshness/invalidation without persisting raw outputs by default. This seeds future Context Twin semantics while preserving UNKNOWN/NOT_CAPTURED where host evidence is absent.
+
+Opportunity-first rule: before implementing an optimizer, estimate addressable surface, bounded upper potential, frequency, confidence, quality risk, implementation complexity and experiment cost. `DEPRIORITIZE` is valid.
+
+AutoLab is deliberately later and offline-first. Experience Bank / Feature Store / DatasetManifest / holdouts / drift handling precede any learned controller. Native Astra remains a baseline, and prediction/offline replay never becomes causal evidence by relabeling.
+
+Algorithm order, if data later justifies it: deterministic/statistical methods -> contextual bandit -> Bayesian optimization -> learning-to-rank -> calibrated surrogate -> evolutionary search offline -> optional specialized LLM analyst.
+
+No learned policy self-deploys. Shadow, causal A/B, quality gate, runtime compatibility, rollback and post-deploy monitoring remain mandatory for active promotion.
