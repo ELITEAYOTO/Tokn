@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS source_versions_v1 (
     FOREIGN KEY(run_id) REFERENCES measurement_runs_v2(run_id) ON DELETE CASCADE
 );
 
-CREATE INDEX IF NOT EXISTS idx_source_versions_v1_run_source
+CREATE UNIQUE INDEX IF NOT EXISTS idx_source_versions_v1_run_source
 ON source_versions_v1(run_id, source_stable_id, boundary);
 
 INSERT INTO schema_meta(key, value)
