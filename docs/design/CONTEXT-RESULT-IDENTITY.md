@@ -56,10 +56,20 @@ Cross-Agent Evidence schema V2 groups exact operation overlap as before, then su
 
 `SAME` does not by itself mean redundant, unnecessary, wasteful or avoidable. Those are later findings requiring contextual and eventually experimental evidence.
 
+## Transient result identity capture hardening
+
+The current Codex path still materializes raw `custom_tool_call_output` values in a `BTreeMap<String, Vec<String>>` before `store-evidence` reduces them to exact project-scoped fingerprints. This is acceptable today, but it is an implementation hardening opportunity rather than a new product subsystem.
+
+Accepted direction: first benchmark representative large and many-small outputs. If peak RSS, allocation pressure or repeated rollout IO is non-trivial, prefer a private adapter-local visitor or bounded fingerprint+count accumulator that hashes observed results promptly and releases raw content as early as practical.
+
+Any such refactor must preserve identical exact fingerprints, one-operation/one-result ambiguity rules, `OBSERVED` / `NOT_CAPTURED` / `UNKNOWN` semantics, and durable Store output. It must not require a Store migration, Measurement Contract change, generic buffer crate, daemon, fuzzy similarity or raw spill-to-disk. Dropping a Rust `String` is not claimed to provide secure zeroization.
+
 ## Remaining boundary
 
+SourceStableId file V0 is now implemented for conservative simple `Get-Content` reads that resolve inside the Runner selected workspace. The durable ID is project-scoped and the raw workspace-relative locator is not persisted. See `SOURCE-IDENTITY-CONTENT-EVOLUTION.md`.
+
 Still not solved by V0:
-- general SourceStableId extraction;
+- broader SourceStableId extraction beyond the conservative file-read subset;
 - range/symbol identity;
 - source version/commit semantics across runtimes;
 - freshness/invalidation;

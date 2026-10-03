@@ -123,12 +123,16 @@ Automatic ModelRuntimeProfile compatibility reducer: ACCEPTED FOUNDATION.
 Rate-limit snapshot ingestion + RateLimitHistory V1: ACCEPTED FOUNDATION.
 Cross-Agent Evidence V2 exact-operation + result-identity comparison: ACCEPTED FOUNDATION.
 Exact content/result identity is now `OBSERVED` only for unambiguous one-operation/one-result evidence; ambiguous or unavailable cases remain explicit.
+SourceStableId file V0 + SourceIdentityHistory V1: ACCEPTED FOUNDATION.
+`source-identity-history` reports exact observed content evolution without claiming freshness, staleness or safe reuse.
 
 Next concrete work:
-1. stable logical source identity only where directly observable;
-2. provenance/source version/freshness/invalidation with `UNKNOWN`/`NOT_CAPTURED` preserved;
+1. source version / directly observed invalidation timing and broader source kinds only where provable;
+2. provenance/freshness semantics with `UNKNOWN`/`NOT_CAPTURED` preserved;
 3. compaction/rediscovery only when directly observed;
 4. explicit cross-run comparison with compatible evidence scope.
+
+Optional parallel hardening: measure current raw tool-result retention first; only if the cost is non-trivial, replace `BTreeMap<String, Vec<String>>` retention with a private transient fingerprint accumulator/visitor that preserves exact fingerprints and coverage. No Store/Measurement migration and no general buffer subsystem in M4.
 
 Do not create `tokn-runtime-api`, Claude/OpenCode adapters or a public Adapter SDK in this slice. Before runtime #2: Runtime Adapter Contract V1, Token Semantics V2, Runtime Capability Manifest V1 and sanitized conformance fixtures.
 

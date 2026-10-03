@@ -76,6 +76,8 @@ Un document historique ne doit pas remplacer une source de verite courante.
   Cross-Agent Evidence V2 : chevauchement exact d'operations entre threads et comparaison d'identite de resultat uniquement sous preuve complete.
 - `design/CONTEXT-RESULT-IDENTITY.md`
   Contrat M4/M4.5 : SourceStableId distinct de ContentFingerprint, coverage explicite et aucun stockage brut des outputs.
+- `design/SOURCE-IDENTITY-CONTENT-EVOLUTION.md`
+  SourceStableId file V0, identite project-scoped stable entre clones et historique conservateur `UNCHANGED_OBSERVED` / `CHANGED_OBSERVED` / `UNKNOWN`.
 - `design/SESSION-ROLLOUT-ADAPTER.md`
 - `design/AGENT-COST-ATTRIBUTION.md`
 - `design/WORKSPACE-TRACKING.md`

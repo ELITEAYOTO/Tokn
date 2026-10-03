@@ -160,7 +160,8 @@ Reste M4 :
 - compaction events quand observables ;
 - exact result/content identity foundation : ACCEPTED when directly observable ;
 - duplicate evidence may be reported only when complete observed result identity agrees ;
-- SourceStableId logical identity, freshness/invalidation, rediscovery and explicit cross-run comparison remain.
+- SourceStableId file-read V0 + observed content evolution history : ACCEPTED FOUNDATION ;
+- source version/invalidation timing, broader symbol/range identity, compaction/rediscovery and explicit cross-run comparison remain.
 
 ## M4.5 - Context Identity + Shadow Foundations
 
@@ -171,7 +172,7 @@ Purpose: bridge M4 evidence to later optimization without changing Astra behavio
 Context Identity / Context Twin V0 seed:
 - privacy-safe evidence/context IDs for directly observed items;
 - project-scoped keyed content/result fingerprints when content is transiently available;
-- SourceStableId quand une source logique stable est observable ;
+- SourceStableId file V0 accepted for conservative directly observed reads; broader source kinds/range/symbol identity only when provable ;
 - ContentFingerprint privacy-safe pour la version/resultat observe, separe de l'identite stable ;
 - range/symbol + source version/hash/commit when known;
 - provenance, freshness and invalidation state;

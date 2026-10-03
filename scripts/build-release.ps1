@@ -4,8 +4,11 @@ $ErrorActionPreference = "Stop"
 $Root = Resolve-Path (Join-Path $PSScriptRoot "..")
 Set-Location $Root
 
-$SourceCommit = (& git rev-parse HEAD).Trim()
-$SourceBranch = (& git branch --show-current).Trim()
+$SourceCommit = (& git rev-parse HEAD | Out-String).Trim()
+$SourceBranch = (& git branch --show-current | Out-String).Trim()
+if (-not $SourceBranch) {
+    $SourceBranch = "DETACHED"
+}
 $Dirty = (& git status --porcelain | Out-String).Trim()
 if ($Dirty -and -not $AllowDirty) {
     throw "Release provenance requires a clean Git worktree. Commit or stash changes first."
