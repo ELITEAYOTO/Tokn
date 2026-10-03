@@ -2,7 +2,7 @@ use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Path, PathBuf};
 
 use anyhow::Context;
-use tokn_analysis::ProjectSnapshot;
+use tokn_analysis::{ProjectSnapshot, ProjectSnapshotGitStatus};
 use tokn_codex::session::{
     extract_file_source_locator, file_source_locator_from_relative_path,
     read_session_tool_result_outputs,
@@ -10,12 +10,13 @@ use tokn_codex::session::{
 use tokn_domain::{
     AgentEvidence, EvidenceIdentityCoverage, MeasurementContractManifest, ModelRuntimeProfile,
     PROJECT_SNAPSHOT_SCHEMA_VERSION, RunGroup, RunnerResult, RunnerSourceReport, SourceKind,
-    SourceVersionBoundary,
+    SourceVersionBoundary, WorkspaceGitProvenanceCoverage,
 };
 use tokn_storage::{
     Database, MeasurementStoreInput, RateLimitStoreInput, SourceVersionStoreInput,
-    ToolActivityStoreInput, fingerprint_bytes, private_id, scoped_fingerprint_bytes,
-    scoped_source_id_bytes, scoped_source_version_bytes,
+    ToolActivityStoreInput, WorkspaceGitProvenanceStoreInput, fingerprint_bytes, private_id,
+    scoped_fingerprint_bytes, scoped_git_head_bytes, scoped_source_id_bytes,
+    scoped_source_version_bytes,
 };
 
 use super::common::{db_path, open_db};
@@ -84,6 +85,7 @@ pub fn run(
         project_key,
         result.selected_workspace.as_deref(),
     )?;
+    let workspace_git_provenance = build_workspace_git_provenance(evidence_dir, project_key)?;
     let workspace_id = private_id("wsp", &format!("{project_key}:{workspace_key}"));
     let parent_workspace_id =
         parent_workspace_key.map(|key| private_id("wsp", &format!("{project_key}:{key}")));
@@ -105,6 +107,7 @@ pub fn run(
         tool_activities,
         rate_limit_snapshots,
         source_versions,
+        workspace_git_provenance,
     };
 
     let db = match db_override {
@@ -124,6 +127,10 @@ pub fn run(
         summary.rate_limit_snapshot_count
     );
     println!("  source_versions: {}", summary.source_version_count);
+    println!(
+        "  workspace_git_provenance: {}",
+        summary.workspace_git_provenance_count
+    );
     println!("  source_id: {}", summary.source_id);
     println!(
         "  profile_id: {}",
@@ -312,6 +319,69 @@ fn build_source_versions(
         }
     }
 
+    Ok(out)
+}
+
+fn build_workspace_git_provenance(
+    evidence_dir: &Path,
+    project_key: &str,
+) -> anyhow::Result<Vec<WorkspaceGitProvenanceStoreInput>> {
+    let mut out = Vec::new();
+    for (boundary, name) in [
+        (SourceVersionBoundary::Before, "workspace-before-snapshot.json"),
+        (SourceVersionBoundary::After, "workspace-after-snapshot.json"),
+    ] {
+        let path = evidence_dir.join(name);
+        if !path.is_file() {
+            continue;
+        }
+        let snapshot: ProjectSnapshot = read_json(&path)?;
+        if snapshot.schema_version != PROJECT_SNAPSHOT_SCHEMA_VERSION {
+            anyhow::bail!(
+                "unsupported project snapshot schema_version {} in {}; expected {}",
+                snapshot.schema_version,
+                path.display(),
+                PROJECT_SNAPSHOT_SCHEMA_VERSION
+            );
+        }
+        let (coverage, head_fingerprint, dirty) = match snapshot.git.as_ref() {
+            None => (WorkspaceGitProvenanceCoverage::NotCaptured, None, None),
+            Some(git) if git.status == ProjectSnapshotGitStatus::Unknown => {
+                (WorkspaceGitProvenanceCoverage::Unknown, None, None)
+            }
+            Some(git) => {
+                let head = git
+                    .head
+                    .as_deref()
+                    .map(str::trim)
+                    .filter(|value| !value.is_empty())
+                    .ok_or_else(|| anyhow::anyhow!("OBSERVED Git snapshot is missing HEAD in {}", path.display()))?;
+                if !matches!(head.len(), 40 | 64)
+                    || !head.bytes().all(|byte| byte.is_ascii_hexdigit())
+                {
+                    anyhow::bail!("invalid Git HEAD in {}", path.display());
+                }
+                let dirty = git.dirty.ok_or_else(|| {
+                    anyhow::anyhow!("OBSERVED Git snapshot is missing dirty state in {}", path.display())
+                })?;
+                (
+                    WorkspaceGitProvenanceCoverage::Observed,
+                    Some(scoped_git_head_bytes(
+                        project_key,
+                        head.to_ascii_lowercase().as_bytes(),
+                    )),
+                    Some(dirty),
+                )
+            }
+        };
+        out.push(WorkspaceGitProvenanceStoreInput {
+            boundary,
+            coverage,
+            head_fingerprint,
+            dirty,
+            snapshot_observed_at: snapshot.created_at,
+        });
+    }
     Ok(out)
 }
 

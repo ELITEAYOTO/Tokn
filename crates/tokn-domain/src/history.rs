@@ -6,6 +6,7 @@ pub const HISTORICAL_SNAPSHOT_SCHEMA_VERSION: u64 = 1;
 pub const TOOL_ACTIVITY_HISTORY_SCHEMA_VERSION: u64 = 3;
 pub const RATE_LIMIT_HISTORY_SCHEMA_VERSION: u64 = 1;
 pub const SOURCE_VERSION_HISTORY_SCHEMA_VERSION: u64 = 1;
+pub const WORKSPACE_GIT_PROVENANCE_HISTORY_SCHEMA_VERSION: u64 = 1;
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct HistoricalWorkspaceRecord {
@@ -152,6 +153,59 @@ impl Default for SourceVersionHistory {
             workspace_filter: None,
             run_limit: 0,
             versions: Vec::new(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum WorkspaceGitProvenanceCoverage {
+    Observed,
+    NotCaptured,
+    Unknown,
+}
+
+impl WorkspaceGitProvenanceCoverage {
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::Observed => "OBSERVED",
+            Self::NotCaptured => "NOT_CAPTURED",
+            Self::Unknown => "UNKNOWN",
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct HistoricalWorkspaceGitProvenanceRecord {
+    pub provenance_id: String,
+    pub run_id: String,
+    pub project_id: String,
+    pub workspace_id: String,
+    pub boundary: SourceVersionBoundary,
+    pub coverage: WorkspaceGitProvenanceCoverage,
+    pub head_fingerprint: Option<String>,
+    pub dirty: Option<bool>,
+    pub snapshot_observed_at: Option<String>,
+    pub run_created_at_unix: i64,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct WorkspaceGitProvenanceHistory {
+    pub schema_version: u64,
+    pub project_filter: Option<String>,
+    pub workspace_filter: Option<String>,
+    pub run_limit: u64,
+    pub observations: Vec<HistoricalWorkspaceGitProvenanceRecord>,
+}
+
+impl Default for WorkspaceGitProvenanceHistory {
+    fn default() -> Self {
+        Self {
+            schema_version: WORKSPACE_GIT_PROVENANCE_HISTORY_SCHEMA_VERSION,
+            project_filter: None,
+            workspace_filter: None,
+            run_limit: 0,
+            observations: Vec::new(),
         }
     }
 }

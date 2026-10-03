@@ -46,6 +46,37 @@ Get-ChildItem -LiteralPath $project -File -Recurse -Force |
             last_write_utc = $_.LastWriteTimeUtc.ToString("o")
         })
     }
+$gitEvidence = $null
+$gitCommand = Get-Command git -ErrorAction SilentlyContinue
+$previousErrorActionPreference = $ErrorActionPreference
+if ($null -ne $gitCommand) {
+    $ErrorActionPreference = "Continue"
+    $insideOutput = @(& git -C $project rev-parse --is-inside-work-tree 2>$null)
+    $insideExit = $LASTEXITCODE
+    $inside = $insideOutput | Select-Object -First 1
+    if ($insideExit -eq 0 -and $inside -eq "true") {
+        $headOutput = @(& git -C $project rev-parse --verify HEAD 2>$null)
+        $headExit = $LASTEXITCODE
+        $head = $headOutput | Select-Object -First 1
+        $statusLines = @(& git -C $project status --porcelain=v1 --untracked-files=normal 2>$null)
+        $statusExit = $LASTEXITCODE
+        if ($headExit -eq 0 -and $statusExit -eq 0 -and -not [string]::IsNullOrWhiteSpace($head)) {
+            $gitEvidence = [ordered]@{
+                status = "OBSERVED"
+                head = $head.Trim().ToLowerInvariant()
+                dirty = ($statusLines.Count -gt 0)
+            }
+        } else {
+            $gitEvidence = [ordered]@{ status = "UNKNOWN" }
+        }
+    } else {
+        $gitEvidence = [ordered]@{ status = "UNKNOWN" }
+    }
+} else {
+    $gitEvidence = [ordered]@{ status = "UNKNOWN" }
+}
+$ErrorActionPreference = $previousErrorActionPreference
+
 $snapshot = [ordered]@{
     schema_version = 1
     created_at = (Get-Date).ToString("o")
@@ -53,6 +84,7 @@ $snapshot = [ordered]@{
     excluded_top_level = $excludedTop
     file_count = $files.Count
     total_bytes = $totalBytes
+    git = $gitEvidence
     files = $files
 }
 

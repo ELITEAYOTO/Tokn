@@ -42,6 +42,7 @@ impl Database {
         apply_measurement_store_migrations(&conn)?;
         apply_tool_activity_migrations(&conn)?;
         apply_source_version_migrations(&conn)?;
+        apply_workspace_git_provenance_migrations(&conn)?;
         Ok(Self {
             conn,
             path: path.to_path_buf(),
@@ -240,6 +241,26 @@ fn apply_source_version_migrations(conn: &Connection) -> rusqlite::Result<()> {
     match current.as_deref() {
         Some("1") => Ok(()),
         None => conn.execute_batch(include_str!("../migrations/0006_source_versions.sql")),
+        Some(_) => Err(rusqlite::Error::InvalidQuery),
+    }
+}
+
+fn apply_workspace_git_provenance_migrations(conn: &Connection) -> rusqlite::Result<()> {
+    let current = {
+        let mut stmt = conn.prepare(
+            "SELECT value FROM schema_meta WHERE key='workspace_git_provenance_schema_version'",
+        )?;
+        let mut rows = stmt.query([])?;
+        rows.next()?
+            .map(|row| row.get::<_, String>(0))
+            .transpose()?
+    };
+
+    match current.as_deref() {
+        Some("1") => Ok(()),
+        None => conn.execute_batch(include_str!(
+            "../migrations/0007_workspace_git_provenance.sql"
+        )),
         Some(_) => Err(rusqlite::Error::InvalidQuery),
     }
 }
