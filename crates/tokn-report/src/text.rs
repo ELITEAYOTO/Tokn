@@ -9,7 +9,7 @@ pub fn render_text(run: &RunRecord) -> String {
     let uncached_input = run.input_tokens.checked_sub(run.cached_input_tokens);
 
     let mut out = String::new();
-    out.push_str("TOKN OBSERVER V0.0\n\n");
+    out.push_str(&format!("TOKN OBSERVER {}\n\n", env!("CARGO_PKG_VERSION")));
     out.push_str(&format!("RUN\n  {}\n", run.run_id));
     out.push_str(&format!("SOURCE\n  {}\n", run.source_path));
     out.push_str(&format!("ACCOUNTING\n  {}\n\n", run.accounting_mode));
@@ -114,6 +114,7 @@ mod tests {
     #[test]
     fn uncached_input_does_not_subtract_cache_write_twice() {
         let text = render_text(&record());
+        assert!(text.contains("TOKN OBSERVER 0.1.0"));
         assert!(text.contains("uncached input          30"));
         assert!(text.contains("cache write input       20"));
         assert!(!text.contains("uncached input          10"));

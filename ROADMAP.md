@@ -300,6 +300,25 @@ Only if simpler deterministic/statistical approaches plateau and enough data exi
 
 No learned policy self-deploys. Shadow, causal A/B, quality gate, runtime compatibility, rollback and monitoring remain mandatory promotion gates.
 
+## Cross-cutting benchmark-readiness gate
+
+Status: BASELINE PROTOCOL PREPARED / NON-CAUSAL.
+
+This gate does not renumber M4-M10. It may run in parallel with observation-only M4 work.
+
+Before Experiment 003:
+- collect a native baseline corpus with frozen repo/task manifests;
+- characterize run-to-run variance before fixing sample size;
+- preserve token semantics separately (cached, ordinary uncached, cache-write, output, reasoning);
+- predeclare quality and exclusion rules;
+- measure Tokn CPU/RAM/disk/latency overhead when injected/default-active;
+- randomize/interleave future A/B order when provider cache cannot be reset;
+- publish only sanitized manifests/metrics/aggregates, never raw private runs.
+
+`docs/benchmarks/BASELINE-PROTOCOL-V1.md` is the canonical protocol.
+`benchmarks/manifest.schema.json` is BenchmarkManifest V1.
+A passive observer baseline is descriptive only; Experiment 003 remains the first causal optimization A/B.
+
 ## Cross-cutting multi-runtime gates
 
 These gates do not renumber M9/M10.

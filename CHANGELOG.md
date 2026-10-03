@@ -1,3 +1,16 @@
+## 2026-10-03 - Stability and Benchmark Readiness
+
+- installed/pinned local Rust workflow to match Rust 1.97.1 CI and added `scripts/dev-check.ps1`;
+- added a local resource guard: 2 Cargo jobs / 2 Rust test threads by default, with TOKN_CARGO_JOBS=1 for gentler heavy operations and sequential heavy-task discipline;
+- ran RustSec `cargo audit` against the current lockfile: PASS, 95 dependencies scanned, no known vulnerability reported at audit time;
+- added CI PowerShell syntax validation and BenchmarkManifest validation;
+- fixed stale V0.0 CLI/report banners to derive from Cargo package version;
+- hardened packaging: clean Git worktree, tracked repo files only, explicit external whitelist, provenance included, package-wide text privacy scan, ZIP deletion on privacy failure;
+- refreshed README/SECURITY/maintenance/privacy docs and documented the canonical PR/squash/post-merge workflow;
+- added Baseline Benchmark Protocol V1 plus machine-readable BenchmarkManifest V1; baseline is descriptive only and Experiment 003 remains the first causal optimization A/B;
+- raw benchmark runs are ignored/forbidden from publication paths;
+- completed full code/script/docs review with no major refactor required and no unsafe/panic/TODO surface found in product code.
+
 ## 2026-10-03 - M4 Workspace Git Provenance V0
 
 - added optional Git provenance to Runner `ProjectSnapshot` boundaries without changing ProjectSnapshot schema version;
@@ -17,22 +30,22 @@
 - kept duplicate-waste/savings interpretation explicitly out of scope;
 - branch validation passed privacy, rustfmt, strict Clippy, workspace tests, release/provenance, MCP smoke, Experiment 001 golden, Experiment 002 regression and documentation consistency.
 
-# Tokn â€” Journal de dÃ©veloppement
+# Tokn ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â Journal de dÃƒÆ’Ã‚Â©veloppement
 
 Ce fichier trace les modifications significatives avec date et heure locale.
 
 ## 2026-09-26 14:35 +02:00
 
-### VÃ©rification aprÃ¨s interruption
+### VÃƒÆ’Ã‚Â©rification aprÃƒÆ’Ã‚Â¨s interruption
 
-- rÃ©cupÃ©ration de l'historique Remote Desktop Commander ;
+- rÃƒÆ’Ã‚Â©cupÃƒÆ’Ã‚Â©ration de l'historique Remote Desktop Commander ;
 - confirmation du workspace dans `E:\Tokn\V0-CodexTkn-Consume\tool` ;
 - confirmation du renommage interne en Tokn ;
-- vÃ©rification de l'arborescence des crates et scripts ;
+- vÃƒÆ’Ã‚Â©rification de l'arborescence des crates et scripts ;
 - relecture du README, architecture, token-accounting et scripts de build.
 ### Validation technique
 
-Commande de validation complÃ¨te relancÃ©e :
+Commande de validation complÃƒÆ’Ã‚Â¨te relancÃƒÆ’Ã‚Â©e :
 
 ```text
 cargo fmt --all -- --check
@@ -41,33 +54,33 @@ cargo test --workspace
 cargo build --release --locked -p tokn-observe
 ```
 
-RÃ©sultat : **PASS**.
+RÃƒÆ’Ã‚Â©sultat : **PASS**.
 
-Le binaire release a Ã©tÃ© gÃ©nÃ©rÃ© avec succÃ¨s.
-### VÃ©rification runtime
+Le binaire release a ÃƒÆ’Ã‚Â©tÃƒÆ’Ã‚Â© gÃƒÆ’Ã‚Â©nÃƒÆ’Ã‚Â©rÃƒÆ’Ã‚Â© avec succÃƒÆ’Ã‚Â¨s.
+### VÃƒÆ’Ã‚Â©rification runtime
 
-`tokn-observe doctor --dev` a confirmÃ© :
+`tokn-observe doctor --dev` a confirmÃƒÆ’Ã‚Â© :
 
-- Codex Desktop : dÃ©tectÃ© ;
+- Codex Desktop : dÃƒÆ’Ã‚Â©tectÃƒÆ’Ã‚Â© ;
 - Codex Desktop version : `codex-cli 0.158.0-alpha.2` ;
-- deux installations Codex VS Code Ã©galement dÃ©tectÃ©es ;
+- deux installations Codex VS Code ÃƒÆ’Ã‚Â©galement dÃƒÆ’Ã‚Â©tectÃƒÆ’Ã‚Â©es ;
 - capabilities : session-rollouts, trace-reduce, prompt-input, app-server ;
-- racine sessions : dÃ©tectÃ©e ;
-- 136 rollouts locaux trouvÃ©s.
+- racine sessions : dÃƒÆ’Ã‚Â©tectÃƒÆ’Ã‚Â©e ;
+- 136 rollouts locaux trouvÃƒÆ’Ã‚Â©s.
 
-### Documentation ajoutÃ©e
+### Documentation ajoutÃƒÆ’Ã‚Â©e
 
 - `ROADMAP.md` ;
 - `STATUS.md` ;
 - `CHANGELOG.md` ;
 - `docs\MAINTENANCE.md` ;
-- README enrichi avec les rÃ¨gles de suivi.
-## Travail effectuÃ© avant la coupure
+- README enrichi avec les rÃƒÆ’Ã‚Â¨gles de suivi.
+## Travail effectuÃƒÆ’Ã‚Â© avant la coupure
 
-- crÃ©ation du workspace multi-crates ;
-- implÃ©mentation de `tokn-observe` ;
-- dÃ©tection Codex ;
-- ingestion JSONL streaming/bornÃ©e ;
+- crÃƒÆ’Ã‚Â©ation du workspace multi-crates ;
+- implÃƒÆ’Ã‚Â©mentation de `tokn-observe` ;
+- dÃƒÆ’Ã‚Â©tection Codex ;
+- ingestion JSONL streaming/bornÃƒÆ’Ã‚Â©e ;
 - fixtures minimal / cached usage / unknown event / truncated tail ;
 - extraction `last_token_usage` ;
 - Token Ledger initial ;
@@ -75,10 +88,10 @@ Le binaire release a Ã©tÃ© gÃ©nÃ©rÃ© avec succÃ¨s.
 - stockage SQLite initial ;
 - reporting texte ;
 - scripts MSVC/test/build/package ;
-- smoke test rÃ©el sur un rollout Codex ;
+- smoke test rÃƒÆ’Ã‚Â©el sur un rollout Codex ;
 - renommage complet `pb-*` -> `tokn-*`.
 
-Le dÃ©tail fin reste visible dans l'historique de fichiers et les commits futurs.
+Le dÃƒÆ’Ã‚Â©tail fin reste visible dans l'historique de fichiers et les commits futurs.
 
 ## 2026-09-26 15:01 +02:00
 

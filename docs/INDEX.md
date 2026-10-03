@@ -4,14 +4,15 @@ Derniere mise a jour : **2026-10-03**
 
 Ce fichier est le point d'entree documentaire unique.
 
-## Reprendre le developpement en 5 documents
+## Reprendre le developpement en 6 documents
 
 Lire seulement :
 1. `../STATUS.md` - ou en est reellement le projet ;
 2. `../ROADMAP.md` - ordre des prochaines phases et gates ;
 3. `plans/IMPLEMENTATION-PATH.md` - chemin d execution courant ;
 4. `plans/NEXT-SESSION-CHECKLIST.md` - prochaine action concrete ;
-5. `design/MULTI-RUNTIME-CORE-AND-DATA-ARCHITECTURE.md` - contraintes architecturales durables pour les nouveaux contrats.
+5. `design/MULTI-RUNTIME-CORE-AND-DATA-ARCHITECTURE.md` - contraintes architecturales durables pour les nouveaux contrats ;
+6. `operations/DEVELOPMENT-WORKFLOW.md` - gates locaux, PR/merge et protection de `main`.
 
 Les plans et matrices V0.1 restent des references de release/golden, pas le chemin de reprise courant.
 
@@ -27,6 +28,7 @@ Etat actuel :
 - `research/` - recherches, sources, hypotheses et inconnues ;
 - `experiments/` - protocoles, runbooks et resultats ;
 - `baselines/` - snapshots de reference ;
+- `benchmarks/` - protocoles de benchmark descriptifs/causaux et manifests ;
 - `reference/` - compatibilite, confidentialite et reference stable ;
 - `operations/` - workflows operatoires reproductibles ;
 - `audits/` - audits dates et historiques ;
@@ -43,6 +45,8 @@ Golden Experiment 001 -> `experiments/001-POSTMORTEM.md`
 Strategie optimisation -> `strategy/CONTEXT-EFFICIENCY-STRATEGY.md`
 Regles de preuve -> `design/EVIDENCE-AND-COVERAGE.md`
 Validite experimentale -> `design/EXPERIMENT-VALIDITY.md`
+Workflow developpement/merge -> `operations/DEVELOPMENT-WORKFLOW.md`
+Baseline benchmark -> `benchmarks/BASELINE-PROTOCOL-V1.md`
 Maintenance documentaire -> `MAINTENANCE.md`
 
 Un document historique ne doit pas remplacer une source de verite courante.
@@ -157,6 +161,9 @@ Il ne represente plus la strategie produit.
   Template de generation des snapshots documentaires portables.
 - `reference/WORKSPACE-LAYOUT.md`
   Separation entre repo canonique, preuves runtime, artefacts, launchers et archives.
+- `operations/DEVELOPMENT-WORKFLOW.md` - workflow Git/local CI/merge courant ;
+- `benchmarks/BASELINE-PROTOCOL-V1.md` - protocole baseline descriptif avant toute optimisation active ;
+- `../benchmarks/manifest.schema.json` + `../benchmarks/example-manifest.json` - BenchmarkManifest V1 machine-readable ;
 - `operations/JEM-TRACE-WORKFLOW.md` (historique)
 - `audits/2026-09-29-MAINTAINABILITY.md` (snapshot historique)
 

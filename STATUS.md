@@ -25,6 +25,8 @@ P9 V0.1 release gate :
 - sanitized fixture/privacy tests : PASS ;
 - deterministic Experiment 001 Runner golden replay : PASS ;
 - package privacy validation : PASS ;
+- PowerShell syntax validation : PASS ;
+- benchmark manifest validation : PASS ;
 - documentation consistency : PASS ;
 - git diff --check : PASS ;
 - verdict golden INSTRUMENTATION_ONLY ;
@@ -35,6 +37,7 @@ Build environment note:
 Visual Studio Community 2026 is incomplete for native C builds,
 but the already-installed Visual Studio Build Tools 2022 toolchain is complete
 and is the validated build environment.
+Rustup is now installed locally; `rust-toolchain.toml` pins Rust 1.97.1 + rustfmt + Clippy so local checks match CI.
 
 Maintainability audit : CLEAN / NO MAJOR REFACTOR REQUIRED.
 Git local : `main` aligne sur `origin/main` (GitHub).
@@ -186,7 +189,7 @@ Points figes :
 - analyzer semantics version.
 
 Versions workspace/snapshot inconnues : rejet fail-closed.
-Experiment 001 golden : inchangé et replay PASS avec toutes les versions du contrat.
+Experiment 001 golden : inchangÃƒÂ© et replay PASS avec toutes les versions du contrat.
 
 ## Store V2 foundation - termine
 
@@ -252,6 +255,8 @@ La mutation-operation peut maintenant etre datee quand le rollout fournit un tim
 Ne pas persister les tool outputs bruts par defaut uniquement pour obtenir une identite.
 Ne pas creer artificiellement du per-turn a partir des agregats V1.
 Ne pas commencer M5 Findings + Opportunity Analyzer tant que ces observations historiques ne sont pas fiables.
+
+En parallele, Benchmark Baseline Protocol V1 est PREPARED/ACCEPTED pour mesurer variance native, decomposition des couts et overhead Tokn sans pretendre a une economie. Le premier A/B causal reste Experiment 003.
 
 Chemin d'execution detaille :
 `docs/plans/IMPLEMENTATION-PATH.md`.
@@ -346,6 +351,16 @@ Next M4 work:
 - freshness/invalidation semantics that join read timing + exact SourceVersion + Workspace Git Provenance + later rediscovery while preserving `UNKNOWN` / `NOT_CAPTURED`;
 - broader source kinds plus compaction/rediscovery only when directly observable;
 - explicit cross-run comparison primitives with compatible provenance scope.
+
+Stability / benchmark readiness 2026-10-03:
+- local Rust 1.97.1 toolchain installed and aligned with CI;
+- local Rust resource guard defaults to 2 Cargo jobs / 2 test threads; heavy exceptional work should use TOKN_CARGO_JOBS=1 and run sequentially;
+- RustSec cargo audit PASS on 2026-10-03 for the current Cargo.lock (95 dependencies); this is a point-in-time audit, not a substitute for release-time SBOM/dependency review;
+- `scripts/dev-check.ps1` is the canonical local pre-PR gate;
+- PowerShell syntax validation is part of CI;
+- packaging is clean-worktree + tracked-files-only, with package-wide privacy scanning and provenance;
+- Benchmark Baseline Protocol V1 + BenchmarkManifest V1 are accepted for descriptive native baselines;
+- repository-admin action still recommended: protect `main` with required PR + CI before merge.
 
 Before Experiment 003: characterize run-to-run variance, predeclare multidimensional quality gates, and measure Tokn overhead for any injected/default-active integration.
 

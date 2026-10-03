@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "benchmark_id": "baseline-v0-example",
+  "task_id": "example-bugfix-001",
+  "run_id": "example-bugfix-001-native-01",
+  "condition": "NATIVE_BASELINE",
+  "repository": {
+    "ref": "https://example.invalid/repository.git",
+    "commit": "0000000000000000000000000000000000000000"
+  },
+  "prompt": {
+    "ref": "benchmarks/tasks/example-bugfix-001.md",
+    "sha256": "1111111111111111111111111111111111111111111111111111111111111111"
+  },
+  "runtime": {
+    "kind": "codex",
+    "version": null,
+    "provider": null,
+    "model": null,
+    "reasoning_effort": null
+  },
+  "tokn": {
+    "commit": "2222222222222222222222222222222222222222",
+    "version": "0.1.0",
+    "policy_id": null
+  },
+  "run_order": 1,
+  "observed_at": "2026-10-03T18:00:00+02:00",
+  "quality_gate_version": "baseline-quality-v1",
+  "exclusion_policy_version": "baseline-exclusions-v1",
+  "cache_condition": "RECORDED_NOT_RESET",
+  "inclusion_status": "INCLUDED",
+  "evidence_notes": [
+    "Synthetic example only; replace all placeholder references before collecting a real baseline."
+  ]
+}

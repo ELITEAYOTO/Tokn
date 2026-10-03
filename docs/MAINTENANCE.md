@@ -1,6 +1,6 @@
 # Tokn Documentation and Maintenance
 
-Derniere mise a jour : **2026-09-30**
+Derniere mise a jour : **2026-10-03**
 
 ## Objectif
 
@@ -33,6 +33,9 @@ Protocoles et resultats d'experiences.
 
 `docs/baselines/*`
 Snapshots de reference lies aux experiences.
+
+`docs/benchmarks/*`
+Protocoles benchmark et discipline de mesure. Les runs bruts restent hors Git.
 
 `docs/reference/*`
 Compatibilite, confidentialite et reference stable.
@@ -71,6 +74,7 @@ Ne jamais laisser un vieux runbook redefinir l'etat courant.
 ## Discipline apres changement significatif
 
 Code :
+0. lancer `scripts/dev-check.ps1` avant PR (`-Full` pour le gate local complet) ;
 1. formatter ;
 2. Clippy -D warnings ;
 3. tests workspace ;
@@ -145,12 +149,10 @@ Par defaut :
 ## Reprise
 
 Etat :
-**P0-P7 DONE ; P8 NEXT.**
+**P0-P9 DONE ; Experiment 002 ACCEPTED ; Measurement Contract V1 FROZEN ; Store foundation DONE ; Local MCP transport prototype ACCEPTED ; Historical Analyzer + Context Ledger IN PROGRESS.**
 
 Lire :
-`INDEX.md` -> `../STATUS.md` -> `../ROADMAP.md` ->
-`plans/V0.1-IMPLEMENTATION-PLAN.md` -> `plans/NEXT-SESSION-CHECKLIST.md`.
+`INDEX.md` -> `../STATUS.md` -> `../ROADMAP.md` -> `plans/IMPLEMENTATION-PATH.md` -> `plans/NEXT-SESSION-CHECKLIST.md` -> `operations/DEVELOPMENT-WORKFLOW.md`.
 
-Ne pas reprendre P6 sauf regression ou besoin produit nouveau.
-Ne pas lancer Experiment 002 avant P9.
-Ne pas commencer Context Compiler/Project Memory avant V0.1 et l'Analyzer observation-only.
+Le protocole baseline descriptif est `benchmarks/BASELINE-PROTOCOL-V1.md`.
+Ne jamais utiliser un ancien runbook/changelog comme etat courant.

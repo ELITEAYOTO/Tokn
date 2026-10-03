@@ -32,6 +32,14 @@ jobs:
         shell: pwsh
         run: ./scripts/validation/check-repo-publication.ps1
 
+      - name: PowerShell syntax
+        shell: pwsh
+        run: ./scripts/validation/check-powershell-syntax.ps1
+
+      - name: Benchmark manifest
+        shell: pwsh
+        run: ./scripts/validation/check-benchmark-manifest.ps1
+
       - name: Format, clippy and tests
         shell: pwsh
         run: ./scripts/test.ps1
@@ -39,6 +47,10 @@ jobs:
       - name: Release build with provenance
         shell: pwsh
         run: ./scripts/build-release.ps1
+
+      - name: Package privacy
+        shell: pwsh
+        run: ./scripts/package.ps1
 
       - name: Local MCP prototype smoke
         shell: pwsh

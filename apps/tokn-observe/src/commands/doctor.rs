@@ -3,7 +3,7 @@ use tokn_platform::{observer_data_root, platform_info};
 
 pub fn run(dev: bool) -> anyhow::Result<()> {
     let p = platform_info();
-    println!("TOKN OBSERVER V0.0");
+    println!("TOKN OBSERVER {}", env!("CARGO_PKG_VERSION"));
     println!();
     println!("PLATFORM");
     println!("  OS              {}", p.os);

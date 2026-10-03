@@ -18,7 +18,8 @@ try {
         '(?i)^traces/',
         '(?i)^experiments/.*/runs/',
         '(?i)^target/',
-        '(?i)^artifacts/.*\.zip$'
+        '(?i)^artifacts/.*\.zip$',
+        '(?i)^benchmarks/(?:raw|runs)/'
     )
 
     $pathViolations = New-Object System.Collections.Generic.List[string]
