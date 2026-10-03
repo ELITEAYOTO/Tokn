@@ -229,3 +229,13 @@ Cross-runtime cohorts are descriptive benchmarks unless the causal validity cont
 Context Identity must keep stable source identity separate from privacy-safe content/result fingerprint so freshness, invalidation, deduplication and rediscovery can be represented without treating a changed source as identical content.
 
 Canonical architecture: `../design/MULTI-RUNTIME-CORE-AND-DATA-ARCHITECTURE.md` and ADR-006.
+
+## Buffer / replay architecture gates - 2026-10-03
+
+Near term, Tokn may use a private ephemeral result-identity accumulator only as ingestion hardening: observe raw -> exact scoped fingerprint -> ambiguity count -> release raw. It is not a cache, optimizer, Store tier or milestone, and it must be benchmarked before replacing the simpler implementation.
+
+A generic Hot Evidence Buffer is deferred until live processing or multiple consumers create a measured need. At that point it requires explicit byte bounds, TTL/eviction, backpressure, privacy metrics and coverage degradation semantics; silent raw spill-to-disk is forbidden without a separate encrypted contract.
+
+Long-term buffer roles stay distinct: ingestion/reorder, hot evidence, identity/similarity, context candidates, AutoLab replay and prediction-error/surprise sampling. Replay operates on structured/versioned Experience Bank records, never raw tool outputs. Surprise sampling may later prioritize large prediction-vs-causal-result errors, but only after those prediction and experiment layers exist.
+
+Exact fingerprints remain exact. Any future normalized or semantic similarity is a separate typed/versioned identity layer; `DUPLICATE` remains a Finding, not a raw identity state.

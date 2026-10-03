@@ -74,6 +74,8 @@ Assert-Contains "docs/design/SOURCE-IDENTITY-CONTENT-EVOLUTION.md" "Status: M4 A
 Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "SourceStableId file V0 + SourceIdentityHistory V1: ACCEPTED FOUNDATION."
 Assert-Contains "docs/design/CROSS-AGENT-EVIDENCE.md" "# Cross-Agent Evidence V2"
 Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "Context/Result Identity Foundation V0 : ACCEPTED FOUNDATION."
+Assert-Contains "docs/design/CONTEXT-RESULT-IDENTITY.md" "## Transient result identity capture hardening"
+Assert-Contains "docs/strategy/CONTEXT-EFFICIENCY-STRATEGY.md" "## Buffer / replay architecture gates - 2026-10-03"
 
 $activeDocs = @(
     "README.md",

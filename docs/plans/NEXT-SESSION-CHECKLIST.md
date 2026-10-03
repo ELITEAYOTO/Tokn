@@ -132,6 +132,8 @@ Next concrete work:
 3. compaction/rediscovery only when directly observed;
 4. explicit cross-run comparison with compatible evidence scope.
 
+Optional parallel hardening: measure current raw tool-result retention first; only if the cost is non-trivial, replace `BTreeMap<String, Vec<String>>` retention with a private transient fingerprint accumulator/visitor that preserves exact fingerprints and coverage. No Store/Measurement migration and no general buffer subsystem in M4.
+
 Do not create `tokn-runtime-api`, Claude/OpenCode adapters or a public Adapter SDK in this slice. Before runtime #2: Runtime Adapter Contract V1, Token Semantics V2, Runtime Capability Manifest V1 and sanitized conformance fixtures.
 
 The identity slice is the seed of Context Twin V0, not the full Intelligence Layer.

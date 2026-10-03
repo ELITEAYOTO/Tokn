@@ -823,3 +823,13 @@ P6 remains IN PROGRESS until one controlled real PreToolUse callback proves the 
 - added SourceIdentityHistory V1 and `tokn-observe source-identity-history`;
 - reports only exact observed content evolution (`UNCHANGED_OBSERVED`, `CHANGED_OBSERVED`, `UNKNOWN`) and explicitly does not claim freshness, staleness, redundancy, retained context or safe reuse;
 - branch validation passed privacy, rustfmt, strict Clippy, workspace tests, release/provenance, MCP smoke, Experiment 001/002 and documentation gates before documentation finalization.
+
+
+## 2026-10-03 - transient evidence capture architecture review
+
+- reviewed the owner-supplied Evidence Buffer / Ephemeral Identity handoff against the post-SourceStableId codebase;
+- confirmed Codex result identity still temporarily retains raw outputs as `BTreeMap<String, Vec<String>>` before exact fingerprint reduction;
+- accepted benchmark-first transient fingerprint accumulation as an opportunistic hardening path, not a new M4 milestone or generic buffer subsystem;
+- preserved the rule that any refactor must keep exact fingerprints, ambiguity/coverage semantics and durable Store evidence unchanged without Measurement/Store migration;
+- documented future Hot Evidence, Context Candidate, Replay and Surprise buffer roles as separate long-term gates rather than one universal buffer;
+- fixed release provenance so detached-HEAD CI checkouts record `DETACHED` instead of failing before the release build.

@@ -447,6 +447,12 @@ Next inside M4:
 4. add rediscovery observations and explicit multi-run comparison primitives ;
 5. only after those observations are reliable, continue M4.5 then M5 Findings + Opportunity Analyzer.
 
+Parallel implementation hardening, only if measurement justifies it:
+- benchmark current Codex raw-result retention with representative 1 MB / 10 MB / 50 MB and many-small-output fixtures;
+- compare peak RSS, elapsed ingestion time, exact fingerprint equality and durable Store equality;
+- if cost is non-trivial, replace retained raw result vectors with a private streaming/bounded fingerprint accumulator while preserving ambiguity and coverage semantics;
+- defer immediately if the change requires Runner/Measurement/Store contract changes, a generic buffer crate or active tool-call deduplication.
+
 ## 2026-10-02 insertion - shadow before active optimizer
 
 Current M4 activity foundation, runtime-profile compatibility reducer, rate-limit history, Cross-Agent Evidence V2, exact result identity and conservative SourceStableId file V0 are accepted. Next: source version/invalidation, broader source kinds where provable, compaction/rediscovery and explicit cross-run primitives.
