@@ -115,7 +115,7 @@ Ces sujets restent apres V0.1 et doivent venir d'un finding mesure.
 P7-P9 sont offline/replay.
 Aucun quota Astra n'est requis.
 
-## M4 continuation after activity timeline acceptance
+## M4 continuation after source mutation timing acceptance
 
 Do not rebuild the accepted activity foundation.
 
@@ -125,11 +125,12 @@ Cross-Agent Evidence V2 exact-operation + result-identity comparison: ACCEPTED F
 Exact content/result identity is now `OBSERVED` only for unambiguous one-operation/one-result evidence; ambiguous or unavailable cases remain explicit.
 SourceStableId file V0 + SourceIdentityHistory V1: ACCEPTED FOUNDATION.
 `source-identity-history` reports exact observed content evolution without claiming freshness, staleness or safe reuse.
+ToolActivityHistory V3 + SourceMutationHistory V1: ACCEPTED FOUNDATION. Mutation-operation timing may be observed; mutation effect remains `NOT_VERIFIED`.
 
 Next concrete work:
-1. source version / directly observed invalidation timing and broader source kinds only where provable;
-2. provenance/freshness semantics with `UNKNOWN`/`NOT_CAPTURED` preserved;
-3. compaction/rediscovery only when directly observed;
+1. source version/hash/commit, provenance and verified mutation effect only where directly observable;
+2. freshness/invalidation semantics with `UNKNOWN`/`NOT_CAPTURED` preserved;
+3. broader source kinds, compaction and rediscovery only when directly observed;
 4. explicit cross-run comparison with compatible evidence scope.
 
 Optional parallel hardening: measure current raw tool-result retention first; only if the cost is non-trivial, replace `BTreeMap<String, Vec<String>>` retention with a private transient fingerprint accumulator/visitor that preserves exact fingerprints and coverage. No Store/Measurement migration and no general buffer subsystem in M4.

@@ -825,6 +825,18 @@ P6 remains IN PROGRESS until one controlled real PreToolUse callback proves the 
 - branch validation passed privacy, rustfmt, strict Clippy, workspace tests, release/provenance, MCP smoke, Experiment 001/002 and documentation gates before documentation finalization.
 
 
+## 2026-10-03 - M4 source mutation operation observation
+
+- extended ToolActivityHistory to schema V3 with optional rollout `observed_at` timing evidence;
+- propagated Codex response-item timestamps into ToolObservation and durable privacy-minimized activity history;
+- added conservative SourceStableId extraction for simple single-target `Set-Content` / `Add-Content` operations under the selected workspace;
+- added SourceMutationHistory V1 and `tokn-observe source-mutation-history`;
+- mutation timing is `OBSERVED` only when a rollout timestamp is directly present, otherwise `NOT_CAPTURED`;
+- preserved `tool_status` while keeping mutation `effect_status=NOT_VERIFIED`, so completed operations are not treated as proven file changes;
+- SourceIdentityHistory remains restricted to `file_read` content observations so mutation command output cannot masquerade as new file content;
+- ToolActivity schema migration 2 -> 3 is additive and fail-closed for unknown future versions;
+- branch validation passed privacy, rustfmt, strict Clippy, workspace tests, release/provenance, MCP smoke, Experiment 001/002 and documentation gates before final cleanup.
+
 ## 2026-10-03 - transient evidence capture architecture review
 
 - reviewed the owner-supplied Evidence Buffer / Ephemeral Identity handoff against the post-SourceStableId codebase;

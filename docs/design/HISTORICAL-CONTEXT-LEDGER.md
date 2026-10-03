@@ -161,11 +161,11 @@ Re-ingestion replaces the run-owned snapshot set deterministically, duplicate ag
 
 CLI: `tokn-observe rate-limit-history`.
 
-Automatic runtime compatibility, rate-limit history, Cross-Agent Evidence V2, exact result identity and conservative SourceStableId file V0 are accepted foundations. Remaining M4 work is source version/invalidation evidence, broader source kinds where provable, rediscovery/compaction and explicit cross-run analysis, not per-turn token invention.
+Automatic runtime compatibility, rate-limit history, Cross-Agent Evidence V2, exact result identity, conservative SourceStableId file V0 and mutation-operation timing are accepted foundations. Remaining M4 work is source version/hash/commit, provenance/freshness and verified mutation effect where provable, broader source kinds, rediscovery/compaction and explicit cross-run analysis, not per-turn token invention.
 
 ## Accepted Cross-Agent Evidence V2 slice - 2026-10-03
 
-Cross-Agent Evidence V2 joins HistoricalSnapshot V1 lineage with ToolActivityHistory V2 exact privacy-safe operation fingerprints and result-identity coverage.
+Cross-Agent Evidence V2 joins HistoricalSnapshot V1 lineage with ToolActivityHistory V3 exact privacy-safe operation fingerprints and result-identity coverage.
 
 It emits same-run overlap only when the same operation fingerprint appears in at least two distinct threads. Same-thread repeats remain ActivityTimeline evidence, and identical operations across separate runs are not merged into one cross-agent observation.
 
@@ -182,3 +182,13 @@ For conservative single-file `Get-Content` observations, the Codex adapter can r
 `SourceIdentityHistory V1` groups those stable sources and reports occurrence/run/thread counts plus exact content-identity coverage. `UNCHANGED_OBSERVED` means every captured occurrence had complete exact identity and one fingerprint; `CHANGED_OBSERVED` means complete exact identity contained multiple fingerprints; incomplete evidence stays `UNKNOWN`. Neither value claims freshness, retained context, unnecessary rereads or safe memory reuse.
 
 CLI: `tokn-observe source-identity-history`.
+
+## Accepted Source Mutation Observation V0 slice - 2026-10-03
+
+ToolActivityHistory V3 adds optional `observed_at` evidence copied from the directly observed Codex rollout response-item timestamp. Missing timing remains absent and is reported as `NOT_CAPTURED`.
+
+For conservative single-target `Set-Content` / `Add-Content` operations, Tokn can resolve the same project-scoped SourceStableId used by file reads when the target is literal, unambiguous and inside the selected workspace.
+
+SourceMutationHistory V1 emits the run/thread/source identity, observed timing coverage and tool status. It deliberately reports `effect_status=NOT_VERIFIED`: a completed tool call is not proof that durable file content changed.
+
+CLI: `tokn-observe source-mutation-history`. No freshness, staleness, invalidation effect, safe reuse or savings claim follows from this operation evidence alone.
