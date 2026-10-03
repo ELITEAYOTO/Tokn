@@ -1,6 +1,6 @@
 # Tokn V0.1 - Next Session Checklist
 
-Derniere mise a jour : **2026-10-01**
+Derniere mise a jour : **2026-10-03**
 
 ## Etat de depart
 
@@ -22,6 +22,7 @@ Workspace :
 4. `V0.1-TEST-MATRIX.md`
 5. `../design/EXPERIMENT-VALIDITY.md`
 6. `IMPLEMENTATION-PATH.md`
+7. `../design/MULTI-RUNTIME-CORE-AND-DATA-ARCHITECTURE.md` - contraintes architecturales a respecter, pas un scope a implementer maintenant
 
 Ne pas refaire l'enquete P6 ni la recherche plugin/telemetry R1-R8 avant qu'un besoin concret de P8/P9 ne le justifie.
 
@@ -40,12 +41,11 @@ Le core deja valide ne doit pas etre refait :
 - per-turn = `NOT_CAPTURED` et current retained context = `UNKNOWN`.
 
 Prochain scope :
-- definir/persister uniquement l'activite tool/file privacy-safe necessaire ;
-- activity/phase timeline ;
-- repeated reads/searches/retries ;
-- shared/duplicate evidence parent/subagent ;
-- compaction/rediscovery quand directement observable ;
-- comparaison explicite multi-run.
+- Context/Result Identity Foundation V0 ;
+- `SourceStableId` separe de `ContentFingerprint` privacy-safe quand directement observable ;
+- provenance + source version + freshness/invalidation sans stockage brut par defaut ;
+- compaction/rediscovery uniquement quand directement observable ;
+- comparaison explicite multi-run avec coverage/comparability explicites.
 
 Aucune heuristique de finding tant que ces observations historiques ne sont pas fiables.
 Aucun nouveau quota Astra/Codex n'est requis pour ce travail offline/replay.
@@ -104,7 +104,8 @@ Ne pas commencer :
 - Project Memory active ;
 - Context Compiler ;
 - plugin d'optimisation ;
-- GUI.
+- GUI;
+- speculative runtime #2 adapter/refactor or public Adapter SDK.
 
 Ces sujets restent apres V0.1 et doivent venir d'un finding mesure.
 
@@ -123,9 +124,12 @@ Cross-Agent Evidence V1 exact-operation overlap: ACCEPTED FOUNDATION.
 Result identity remains `NOT_CAPTURED`; operation overlap is not duplicate evidence.
 
 Next concrete work:
-1. Context/Result Identity Foundation V0: privacy-safe IDs/fingerprints + source version/provenance/freshness when directly observable;
-2. compaction/rediscovery only when directly observed;
-3. explicit cross-run comparison.
+1. Context/Result Identity Foundation V0 with runtime-neutral naming; separate stable source identity from privacy-safe content/result fingerprint;
+2. provenance/source version/freshness/invalidation with `UNKNOWN`/`NOT_CAPTURED` preserved;
+3. compaction/rediscovery only when directly observed;
+4. explicit cross-run comparison with compatible evidence scope.
+
+Do not create `tokn-runtime-api`, Claude/OpenCode adapters or a public Adapter SDK in this slice. Before runtime #2: Runtime Adapter Contract V1, Token Semantics V2, Runtime Capability Manifest V1 and sanitized conformance fixtures.
 
 The identity slice is the seed of Context Twin V0, not the full Intelligence Layer.
 After M4, M4.5 builds Context Identity + shadow retrieval/edit foundations before M5 Findings + Opportunity Analyzer.

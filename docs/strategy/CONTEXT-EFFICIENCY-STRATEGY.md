@@ -1,7 +1,7 @@
 # Tokn Context Efficiency Strategy
 
 Status: PRODUCT DIRECTION
-Date: 2026-09-29
+Date: 2026-10-03
 Decision basis: ADR-003
 
 ## Objective
@@ -10,6 +10,8 @@ Improve useful work and quality per token without reducing Astra's reasoning or 
 
 Tokn first observes and explains context behavior.
 It only changes context after a reproducible finding and a valid A/B experiment.
+
+Long-term optimization is runtime-neutral: provider/runtime adapters translate evidence, while the analytical Core reasons over normalized concepts and observed capabilities. The long-term North Star broadens from token efficiency to same-or-better quality for lower total agent cost (tokens, time, retries, duplication and failures).
 
 ## What Tokn optimizes
 
@@ -216,3 +218,14 @@ AutoLab is deliberately later and offline-first. Experience Bank / Feature Store
 Algorithm order, if data later justifies it: deterministic/statistical methods -> contextual bandit -> Bayesian optimization -> learning-to-rank -> calibrated surrogate -> evolutionary search offline -> optional specialized LLM analyst.
 
 No learned policy self-deploys. Shadow, causal A/B, quality gate, runtime compatibility, rollback and post-deploy monitoring remain mandatory for active promotion.
+## Multi-runtime efficiency invariants - 2026-10-03
+
+Optimization evidence must remain semantically comparable across runtimes. OpenAI/Codex token categories are not assumed universal; Token Semantics V2 is required before runtime #2 becomes analysis-ready.
+
+Generic findings and policies should use capability/evidence eligibility where possible rather than runtime-name branches. Runtime-specific policies remain explicitly scoped.
+
+Cross-runtime cohorts are descriptive benchmarks unless the causal validity contract is actually satisfied. Always preserve cohort, sample size, coverage and uncertainty.
+
+Context Identity must keep stable source identity separate from privacy-safe content/result fingerprint so freshness, invalidation, deduplication and rediscovery can be represented without treating a changed source as identical content.
+
+Canonical architecture: `../design/MULTI-RUNTIME-CORE-AND-DATA-ARCHITECTURE.md` and ADR-006.

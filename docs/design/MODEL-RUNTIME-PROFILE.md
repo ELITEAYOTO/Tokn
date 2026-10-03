@@ -1,7 +1,7 @@
 # Tokn ModelRuntimeProfile
 
 Status: FROZEN V1 DOMAIN CONTRACT / PERSISTENCE IMPLEMENTED
-Date: 2026-10-01
+Date: 2026-10-03
 
 ## Purpose
 
@@ -16,7 +16,7 @@ It is descriptive infrastructure, not a model quality score.
 The V1 serializable domain contract is implemented in
 `crates/tokn-domain/src/model_runtime.rs` and versioned by
 `docs/design/MEASUREMENT-CONTRACT-V0.1.md`.
-Store persistence is intentionally the next phase, not part of this freeze.
+Store persistence is implemented. The V1 domain contract remains frozen; future multi-runtime generalization must be additive/versioned rather than silently changing V1 semantics.
 
 ## Profile identity
 
@@ -182,3 +182,11 @@ The shared `tokn-analysis` reducer compares two persisted V1 profiles conservati
 - `causal_compatible` is true only when the aggregate verdict is `PASS`.
 The reducer ignores `observed_at` and does not infer compatibility from missing data.
 It is a cross-run evidence guardrail, not a model score or optimization decision.
+
+## Multi-runtime compatibility boundary - 2026-10-03
+
+ModelRuntimeProfile V1 remains the current Codex-era frozen contract. A future `RuntimeCapabilityManifest` may represent richer capability states without reinterpreting missing V1 fields.
+
+Before runtime #2 is treated as analysis-ready, Tokn requires Token Semantics V2 so provider-specific usage/cache/reasoning metrics are not forced into OpenAI semantics. Runtime, model, provider, host/app and configuration remain distinct identities.
+
+Cross-runtime results may be descriptively compared only when their metric semantics and coverage justify it; they are not automatically causal-policy comparisons.

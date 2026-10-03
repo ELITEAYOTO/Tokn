@@ -1,7 +1,7 @@
 # Tokn Implementation Path
 
 Status: ACTIVE EXECUTION PLAN
-Date: 2026-09-30
+Date: 2026-10-03
 Current state: P0-P9 DONE / Experiment 002 ACCEPTED / Measurement Contract V1 FROZEN / Store foundation DONE / Local MCP transport prototype ACCEPTED / Historical Analyzer + Context Ledger IN PROGRESS
 
 ## Purpose
@@ -29,10 +29,14 @@ P8 Runner
 -> Store + ModelRuntimeProfile
 -> Local MCP Integration Prototype
 -> Historical Analyzer + Context Ledger
--> Findings Engine
+-> Context/Result Identity + Context Twin seed
+-> Shadow Retrieval/Edit foundations
+-> Findings + Opportunity Analyzer
+-> deterministic counterfactual + PolicyCandidate/Registry
 -> Experiment 003 causal A/B
 -> Advisor
--> optional active Context Compiler / Desktop expansion.
+-> selective Context Compiler / Project Memory
+-> offline-first AutoLab only after evidence/experiment contracts stabilize.
 
 ## Phase A - P8 Runner V0.1
 
@@ -412,6 +416,8 @@ Current non-goals while Historical Analyzer + Context Ledger is IN PROGRESS:
 - active optimization;
 - AutoLab / Experience Bank / Feature Store / learned policy controller;
 - RAG/embeddings;
+- speculative multi-runtime crate split or public Adapter SDK;
+- runtime #2 implementation before its adapter/token/capability contracts and sanitized evidence exist;
 - Project Memory;
 - context rewriting.
 
@@ -459,7 +465,7 @@ Before causal optimization:
 
 Before public distribution: threat model, retention/purge/export, dependency audit + SBOM, signing/update integrity.
 
-Runtime #2 comes after stable Codex V1 and requires provider-neutral token semantics plus real sanitized Claude/Cowork evidence.
+Runtime #2 comes after stable Codex V1 and is an architectural validation exercise, not only a support checkbox. Before it becomes analysis-ready Tokn requires Runtime Adapter Contract V1, Token Semantics V2, Runtime Capability Manifest V1, sanitized conformance fixtures and real runtime #2 evidence. Runtime #3 is the maturity test before any public Adapter SDK.
 
 ## 2026-10-03 long-term AutoLab / Intelligence Layer review
 
@@ -472,3 +478,16 @@ Accepted sequencing changes:
 - learned optimizers and any specialized LLM come only after simpler methods plateau and measured data is sufficient.
 
 Event sourcing is a compatibility direction, not a current Store rewrite mandate: prefer versioned/rebuildable derived views and fail closed on unknown schemas.
+## 2026-10-03 multi-runtime Core / Adapter review
+
+Accepted architecture constraints:
+- one provider-neutral analytical Core; runtime-specific details stay in thin adapters;
+- new M4/M4.5 identities and evidence use runtime-neutral names where possible;
+- capability/evidence checks are preferred to product/version branches in generic reducers;
+- runtime, model, provider, host and configuration remain distinct identities;
+- Context Identity separates stable source identity from privacy-safe content/result fingerprint;
+- Query/UI/MCP layers should consume shared Core/Query contracts instead of coupling to SQLite;
+- normalized events are a rebuildability direction, not a current Store rewrite;
+- cross-runtime comparison is descriptive unless causal validity conditions are actually satisfied.
+
+Canonical detail: `../design/MULTI-RUNTIME-CORE-AND-DATA-ARCHITECTURE.md` and ADR-006.

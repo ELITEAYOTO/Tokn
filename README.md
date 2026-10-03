@@ -2,14 +2,15 @@
 
 [![CI](https://github.com/ELITEAYOTO/Tokn/actions/workflows/ci.yml/badge.svg)](https://github.com/ELITEAYOTO/Tokn/actions/workflows/ci.yml)
 
-Tokn est un profiler/analyzer local pour Codex/Astra.
-Son objectif est d'augmenter le travail utile et la qualite obtenus par token,
-sans brider la capacite du modele.
+Tokn est un moteur local-first d'observabilite et d'analyse pour les coding agents.
+Codex/Astra est le premier runtime valide, pas une dependance du domaine Tokn.
+L'objectif actuel est d'augmenter le travail utile et la qualite par token sans brider le modele ;
+la North Star long terme est la meme ou meilleure qualite pour un cout agent total plus faible.
 
 Version binaire actuelle : **V0.1** (workspace Cargo 0.1.0)
 Release : **V0.1 Measurement Hardening**
 
-Etat au 2026-10-01 :
+Etat au 2026-10-03 :
 **P0-P9 DONE ; Experiment 002 ACCEPTED ; Measurement Contract V1 FROZEN ; Store foundation DONE ; Local MCP transport prototype ACCEPTED ; Historical Analyzer + Context Ledger IN PROGRESS.**
 
 ## Principe
@@ -22,11 +23,17 @@ Regles non negociables :
 - parent seul != run complet si des sous-agents existent ;
 - output workspace != input workspace tant que ce n'est pas prouve ;
 - aucune economie causale sans experience valide ;
-- aucune reduction de contexte n'est un gain si la qualite baisse.
+- aucune reduction de contexte n'est un gain si la qualite baisse ;
+- le Core reste provider-neutral et les details runtime/provider restent dans des adapters minces ;
+- une capability absente reste UNKNOWN/NOT_CAPTURED selon la preuve ;
+- les semantiques tokens OpenAI ne deviennent jamais un contrat universel par defaut.
 
-## KPI
+## KPI actuel / North Star long terme
 
-**Travail utile et qualite par token consomme.**
+**KPI actuel : travail utile et qualite par token consomme.**
+
+**North Star long terme : meme ou meilleure qualite pour un cout agent total plus faible**
+(tokens, temps, retries, duplication, failures), toujours avec qualite comme contrainte.
 
 Tokn ne cherche pas a rendre Astra artificiellement plus court.
 La strategie produit est de reduire le travail contextuel inutile :
@@ -38,6 +45,9 @@ docs/decisions/ADR-003-QUALITY-PRESERVING-EFFICIENCY.md
 
 Strategie :
 docs/strategy/CONTEXT-EFFICIENCY-STRATEGY.md
+
+Architecture multi-runtime :
+docs/design/MULTI-RUNTIME-CORE-AND-DATA-ARCHITECTURE.md
 
 ## Etat V0.1
 
@@ -97,17 +107,17 @@ Il ne prouve ni que le contexte est utile, ni que le cache est optimal.
 
 ## Direction apres V0.1
 
-Historical Analyzer + Context Ledger :
-- historique runs/projets ;
-- attribution parent/sous-agents ;
-- cached/uncached par tour/agent ;
-- repeated reads/searches ;
-- duplication de contexte ;
-- tool evidence footprint ;
-- cache/context-management observations ;
-- candidats Project Memory avec provenance.
+Ordre actuel :
+- M4 Historical Analyzer + Context Ledger ;
+- M4/M4.5 Context/Result Identity + Context Twin seed, puis Shadow Retrieval/Edit ;
+- M5 Findings + Opportunity Analyzer ;
+- M6 counterfactual/policy lab puis Experiment 003 causal A/B ;
+- M7 Advisor ;
+- M8 Selective Context Compiler / Project Memory ;
+- M9 AutoLab offline-first ;
+- M10 learned policies seulement si les methodes simples plafonnent.
 
-Puis Finding Engine -> Experiment Lab -> seulement ensuite optimisation active.
+Architecture long terme : un Core analytique provider-neutral consomme des preuves normalisees produites par des Runtime Adapters minces. Le prochain runtime ne doit pas provoquer une seconde implementation de Tokn Analysis.
 
 ## Build
 
@@ -127,12 +137,13 @@ Point d'entree unique :
 `docs/INDEX.md`
 
 Pour reprendre le developpement :
-1. `STATUS.md`
-2. `ROADMAP.md`
-3. `docs/plans/V0.1-IMPLEMENTATION-PLAN.md`
-4. `docs/plans/NEXT-SESSION-CHECKLIST.md`
+1. `STATUS.md` - etat reel ;
+2. `ROADMAP.md` - ordre et gates ;
+3. `docs/plans/IMPLEMENTATION-PATH.md` - chemin d execution courant ;
+4. `docs/plans/NEXT-SESSION-CHECKLIST.md` - prochaine action concrete ;
+5. `docs/design/MULTI-RUNTIME-CORE-AND-DATA-ARCHITECTURE.md` - contraintes architecturales a respecter.
 
-Ne pas relire tous les documents historiques pour reprendre le travail.
+Les plans/tests V0.1 restent des references historiques/validation. Ne pas relire tous les documents historiques pour reprendre le travail.
 
 ## Licence
 
@@ -148,4 +159,4 @@ The current accepted M4 slice adds a privacy-safe ToolActivityHistory and Activi
 - `tokn-observe activity-timeline` exposes the offline timeline;
 - legacy report uncached accounting is aligned with frozen V1 semantics: input - cached, while cache-write remains separate.
 
-Long-term direction remains observation-first. Claude/Cowork and a Context Compiler are planned future runtimes/layers, not current support claims.
+Long-term direction remains observation-first. Multi-runtime support is an architectural target, not a current support claim. Before runtime #2: Runtime Adapter Contract V1, Token Semantics V2, Capability Manifest V1 and sanitized conformance fixtures. See docs/design/MULTI-RUNTIME-CORE-AND-DATA-ARCHITECTURE.md and ADR-006.
