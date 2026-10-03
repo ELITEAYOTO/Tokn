@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use crate::{EvidenceIdentityCoverage, ModelRuntimeProfile, TokenTotals};
 
 pub const HISTORICAL_SNAPSHOT_SCHEMA_VERSION: u64 = 1;
-pub const TOOL_ACTIVITY_HISTORY_SCHEMA_VERSION: u64 = 2;
+pub const TOOL_ACTIVITY_HISTORY_SCHEMA_VERSION: u64 = 3;
 pub const RATE_LIMIT_HISTORY_SCHEMA_VERSION: u64 = 1;
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
@@ -118,6 +118,7 @@ pub struct HistoricalToolActivityRecord {
     pub surface: String,
     pub requester_type: Option<String>,
     pub status: String,
+    pub observed_at: Option<String>,
     pub started_seq: Option<u64>,
     pub ended_seq: Option<u64>,
     pub invocation_payload_bytes: Option<u64>,

@@ -2,7 +2,7 @@ use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Path, PathBuf};
 
 use anyhow::Context;
-use tokn_codex::session::{extract_file_read_source_locator, read_session_tool_result_outputs};
+use tokn_codex::session::{extract_file_source_locator, read_session_tool_result_outputs};
 use tokn_domain::{
     AgentEvidence, EvidenceIdentityCoverage, MeasurementContractManifest, ModelRuntimeProfile,
     RunGroup, RunnerResult, RunnerSourceReport, SourceKind,
@@ -174,7 +174,7 @@ fn build_tool_activities(
                 (!workdir.is_empty()).then(|| private_id("cwd", &format!("{project_id}:{workdir}")))
             });
             let source_locator =
-                extract_file_read_source_locator(tool, member.cwd.as_deref(), selected_workspace);
+                extract_file_source_locator(tool, member.cwd.as_deref(), selected_workspace);
             let source_stable_id = source_locator
                 .locator
                 .as_deref()
@@ -217,6 +217,7 @@ fn build_tool_activities(
                 surface: tool.surface.clone(),
                 requester_type: tool.requester_type.clone(),
                 status: tool.status.clone(),
+                observed_at: tool.observed_at.clone(),
                 started_seq: tool.started_seq,
                 ended_seq: tool.ended_seq,
                 invocation_payload_bytes: tool.invocation_payload_bytes,

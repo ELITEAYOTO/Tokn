@@ -53,6 +53,8 @@ pub fn extract_session_tools(value: &Value) -> Option<SessionToolBatch> {
         .and_then(Value::as_str)
         .unwrap_or("unknown")
         .to_string();
+    let observed_at = value.get("timestamp").and_then(Value::as_str)
+        .map(str::trim).filter(|value| !value.is_empty()).map(str::to_string);
     let input = payload
         .get("input")
         .and_then(Value::as_str)
@@ -88,6 +90,7 @@ pub fn extract_session_tools(value: &Value) -> Option<SessionToolBatch> {
                     category,
                     surface: "session_rollout".into(),
                     status: status.clone(),
+                    observed_at: observed_at.clone(),
                     max_output_tokens,
                     command,
                     workdir,
@@ -103,6 +106,7 @@ pub fn extract_session_tools(value: &Value) -> Option<SessionToolBatch> {
                     category: "command_unknown".into(),
                     surface: "session_rollout".into(),
                     status: status.clone(),
+                    observed_at: observed_at.clone(),
                     parse_error: Some(error),
                     ..Default::default()
                 });
@@ -356,6 +360,7 @@ mod tests {
     #[test]
     fn parses_capped_file_read() {
         let value = json!({
+            "timestamp": "2026-10-03T12:34:56Z",
             "type": "response_item",
             "payload": {
                 "type": "custom_tool_call",
@@ -370,6 +375,7 @@ mod tests {
         assert_eq!(batch.parse_failures, 0);
         assert_eq!(batch.observations.len(), 1);
         assert_eq!(batch.observations[0].category, "file_read");
+        assert_eq!(batch.observations[0].observed_at.as_deref(), Some("2026-10-03T12:34:56Z"));
         assert_eq!(batch.observations[0].max_output_tokens, Some(5_000));
     }
 

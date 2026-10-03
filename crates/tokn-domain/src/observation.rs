@@ -9,6 +9,7 @@ pub struct InferenceObservation {
     pub turn_id: Option<String>,
     pub model: Option<String>,
     pub status: String,
+    pub observed_at: Option<String>,
     pub started_seq: Option<u64>,
     pub ended_seq: Option<u64>,
     pub started_at_unix_ms: Option<i64>,

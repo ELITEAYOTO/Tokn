@@ -71,6 +71,9 @@ pub fn build_source_identity_history(
 
     let mut groups = BTreeMap::<String, SourceGroup>::new();
     for activity in &history.activities {
+        if activity.category != "file_read" {
+            continue;
+        }
         if activity.source_identity_coverage != EvidenceIdentityCoverage::Observed {
             continue;
         }
@@ -187,6 +190,7 @@ mod tests {
             project_id: "prj-fixture".into(),
             workspace_id: "wsp-fixture".into(),
             thread_id: thread_id.into(),
+            category: "file_read".into(),
             source_stable_id: source_id.map(str::to_string),
             source_identity_coverage: source_coverage,
             content_fingerprint: content.map(str::to_string),
