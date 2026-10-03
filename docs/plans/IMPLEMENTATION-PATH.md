@@ -325,8 +325,8 @@ Implementation prerequisites/state:
 1. shared SourceStableId derivation: **DONE** in `tokn-domain::identity`, Store compatibility re-export retained and `src-v1-*` golden locked;
 2. separate whole-file IndexContentHash: **DONE** as project-scoped `ixc-v1-*`;
 3. local shadow cache root: **DONE** via `observer_shadow_index_root()` + safe per-project segment, with no backend filename selected;
-4. bounded DIRECT_SCAN_V0 corpus/query semantics + sanitized gold fixtures: **NEXT / NOT STARTED**;
-5. FTS5 capability probe + candidate benchmark: **NOT STARTED**, only after the reference path exists.
+4. bounded DIRECT_SCAN_V0 corpus/query semantics + sanitized Git fixture: **ACCEPTED REFERENCE FOUNDATION / FULL GATES PASS**;
+5. FTS5 capability probe + candidate benchmark: **NEXT / NOT STARTED**; DIRECT_SCAN remains the fail-closed reference/fallback.
 
 Exit toward active shadow retrieval requires a backend to meet every predeclared quality/correctness/resource gate. Active context injection remains a later separate gate.
 

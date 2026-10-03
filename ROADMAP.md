@@ -191,7 +191,7 @@ This foundation must not require durable raw tool-output storage.
 It is the preferred basis for duplicate-evidence proof, rediscovery analysis and later memory.
 
 Shadow foundations:
-- Shadow Repository Index V0 : ACCEPTED DESIGN / PREREQUISITES IMPLEMENTED / DIRECT_SCAN NOT STARTED; shared `src-v1-*` identity, separate `ixc-v1-*` whole-file hash and safe local shadow cache root are in place; file-level retrieval itself is not implemented;
+- Shadow Repository Index V0 : ACCEPTED DESIGN / PREREQUISITES IMPLEMENTED / DIRECT_SCAN ACCEPTED REFERENCE FOUNDATION; Git-backed file-level reference scan/query is implemented fail-closed with bounded corpus/query limits, exact `ixc-v1-*` current-file verification and no retained source-text corpus;
 - Shadow Index Benchmark Protocol V0 + ShadowIndexMeasurement V1 : ACCEPTED PRE-IMPLEMENTATION MEASUREMENT CONTRACT; DIRECT_SCAN reference before backend selection;
 - candidate backends remain DIRECT_SCAN_V0 / SQLite FTS5 lexical variants only after capability + benchmark gates; no backend is selected yet;
 - Shadow Context Retrieval Engine: lexical/BM25 first only if measured value justifies the persistent index, then AST/LSP/graph;
