@@ -1,0 +1,758 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tokn.local/schemas/shadow-index-measurement-v1.schema.json",
+  "title": "Tokn ShadowIndexMeasurement V1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "measurement_id",
+    "run_order",
+    "observed_at",
+    "tokn",
+    "corpus",
+    "condition",
+    "capability",
+    "build",
+    "refresh",
+    "query_config",
+    "queries",
+    "aggregate",
+    "correctness",
+    "decision_gate"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "measurement_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "run_order": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "observed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "tokn": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "commit",
+        "version"
+      ],
+      "properties": {
+        "commit": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{40}$"
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "corpus": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "corpus_id",
+        "repository_ref",
+        "policy_id",
+        "commit",
+        "worktree_status",
+        "discovered_files",
+        "eligible_files",
+        "skipped_files",
+        "eligible_bytes",
+        "source_bytes_read",
+        "skipped_by_reason"
+      ],
+      "properties": {
+        "corpus_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "repository_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "commit": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{40}$"
+        },
+        "worktree_status": {
+          "type": "string",
+          "enum": [
+            "CLEAN",
+            "DIRTY",
+            "UNKNOWN"
+          ]
+        },
+        "discovered_files": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "eligible_files": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "skipped_files": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "eligible_bytes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "source_bytes_read": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "skipped_by_reason": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "policy_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "condition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mode",
+        "backend_id",
+        "tokenizer_id",
+        "configuration_id"
+      ],
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": [
+            "DIRECT_SCAN",
+            "INDEXED_CANDIDATE"
+          ]
+        },
+        "backend_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "tokenizer_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "configuration_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "capability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fts5",
+        "contentless_delete",
+        "integrity_check"
+      ],
+      "properties": {
+        "fts5": {
+          "$ref": "#/$defs/capability_state"
+        },
+        "contentless_delete": {
+          "$ref": "#/$defs/capability_state"
+        },
+        "integrity_check": {
+          "type": "string",
+          "enum": [
+            "PASS",
+            "FAIL",
+            "NOT_APPLICABLE",
+            "UNKNOWN"
+          ]
+        }
+      }
+    },
+    "build": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "elapsed_ms",
+        "source_bytes_read",
+        "index_bytes",
+        "peak_rss_bytes",
+        "cpu_ms",
+        "files_processed",
+        "files_skipped"
+      ],
+      "properties": {
+        "elapsed_ms": {
+          "type": "number",
+          "minimum": 0
+        },
+        "source_bytes_read": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "index_bytes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "peak_rss_bytes": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "cpu_ms": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "files_skipped": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "files_processed": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "refresh": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "changed_files",
+            "added_files",
+            "deleted_files",
+            "renamed_files",
+            "files_reread",
+            "bytes_reread",
+            "elapsed_ms",
+            "peak_rss_bytes",
+            "fallback_full_verification"
+          ],
+          "properties": {
+            "changed_files": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "added_files": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "deleted_files": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "renamed_files": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "files_reread": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "bytes_reread": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "elapsed_ms": {
+              "type": "number",
+              "minimum": 0
+            },
+            "peak_rss_bytes": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 0
+            },
+            "fallback_full_verification": {
+              "type": "boolean"
+            }
+          }
+        }
+      ]
+    },
+    "query_config": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "query_count",
+        "k_values",
+        "query_set_id",
+        "gold_set_id",
+        "timing_repetitions_per_query",
+        "cache_state"
+      ],
+      "properties": {
+        "query_count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "k_values": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "cache_state": {
+          "type": "string",
+          "enum": [
+            "UNKNOWN",
+            "COLD",
+            "WARM",
+            "MIXED"
+          ]
+        },
+        "query_set_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "gold_set_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "timing_repetitions_per_query": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "queries": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/query_result"
+      }
+    },
+    "aggregate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sample_count",
+        "latency_ms",
+        "recall_at_k",
+        "mrr",
+        "no_match_accuracy"
+      ],
+      "properties": {
+        "sample_count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "latency_ms": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "p25",
+            "p50",
+            "p75",
+            "p95"
+          ],
+          "properties": {
+            "p25": {
+              "type": "number",
+              "minimum": 0
+            },
+            "p50": {
+              "type": "number",
+              "minimum": 0
+            },
+            "p75": {
+              "type": "number",
+              "minimum": 0
+            },
+            "p95": {
+              "type": "number",
+              "minimum": 0
+            }
+          }
+        },
+        "recall_at_k": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "k",
+              "recall"
+            ],
+            "properties": {
+              "k": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "recall": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              }
+            }
+          }
+        },
+        "mrr": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "no_match_accuracy": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+    "correctness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "suite_id",
+        "cases",
+        "gate_status"
+      ],
+      "properties": {
+        "suite_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cases": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/correctness_case"
+          }
+        },
+        "gate_status": {
+          "$ref": "#/$defs/gate_status"
+        }
+      }
+    },
+    "decision_gate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "quality_floor_predeclared",
+        "resource_budgets_predeclared",
+        "thresholds_ref",
+        "resource_gate_status",
+        "quality_gate_status",
+        "verdict",
+        "notes"
+      ],
+      "properties": {
+        "quality_floor_predeclared": {
+          "type": "boolean"
+        },
+        "resource_budgets_predeclared": {
+          "type": "boolean"
+        },
+        "thresholds_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "verdict": {
+          "type": "string",
+          "enum": [
+            "BASELINE_ONLY",
+            "REJECTED",
+            "ELIGIBLE_FOR_IMPLEMENTATION",
+            "INCONCLUSIVE"
+          ]
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "quality_gate_status": {
+          "$ref": "#/$defs/gate_status"
+        },
+        "resource_gate_status": {
+          "$ref": "#/$defs/gate_status"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "capability_state": {
+      "type": "string",
+      "enum": [
+        "OBSERVED_AVAILABLE",
+        "OBSERVED_UNAVAILABLE",
+        "NOT_APPLICABLE",
+        "UNKNOWN"
+      ]
+    },
+    "query_result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "query_id",
+        "query_kind",
+        "requested_k",
+        "latency_samples_ms",
+        "expected_relevant_count",
+        "relevant_returned_count",
+        "first_relevant_rank",
+        "reciprocal_rank",
+        "no_match_correct"
+      ],
+      "properties": {
+        "query_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "query_kind": {
+          "type": "string",
+          "enum": [
+            "IDENTIFIER",
+            "PATH_OR_FILENAME",
+            "CONCEPT",
+            "SUBSTRING",
+            "NO_MATCH",
+            "OTHER"
+          ]
+        },
+        "requested_k": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "expected_relevant_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "relevant_returned_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "first_relevant_rank": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "reciprocal_rank": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "no_match_correct": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "latency_samples_ms": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "number",
+            "minimum": 0
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "query_kind": {
+                "const": "NO_MATCH"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "expected_relevant_count": {
+                "const": 0
+              },
+              "first_relevant_rank": {
+                "type": "null"
+              },
+              "reciprocal_rank": {
+                "const": 0
+              },
+              "no_match_correct": {
+                "type": "boolean"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "no_match_correct": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "gate_status": {
+      "type": "string",
+      "enum": [
+        "PASS",
+        "FAIL",
+        "NOT_APPLICABLE",
+        "UNKNOWN"
+      ]
+    },
+    "correctness_case": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "case_id",
+        "status",
+        "notes"
+      ],
+      "properties": {
+        "case_id": {
+          "type": "string",
+          "enum": [
+            "TRACKED_CONTENT_EDIT",
+            "DIRTY_UNCHANGED_HEAD",
+            "ADDED_TRACKED_FILE",
+            "NON_IGNORED_UNTRACKED_FILE",
+            "FILE_DELETION",
+            "FILE_RENAME",
+            "QUERY_AFTER_REFRESH",
+            "HASH_MISMATCH_QUERY_VERIFICATION",
+            "INDEX_DELETE_REBUILD",
+            "GIT_PROVENANCE_FALLBACK"
+          ]
+        },
+        "status": {
+          "$ref": "#/$defs/gate_status"
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "decision_gate": {
+            "properties": {
+              "verdict": {
+                "const": "ELIGIBLE_FOR_IMPLEMENTATION"
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "decision_gate": {
+            "properties": {
+              "quality_floor_predeclared": {
+                "const": true
+              },
+              "resource_budgets_predeclared": {
+                "const": true
+              },
+              "quality_gate_status": {
+                "const": "PASS"
+              },
+              "resource_gate_status": {
+                "const": "PASS"
+              }
+            }
+          },
+          "correctness": {
+            "properties": {
+              "gate_status": {
+                "const": "PASS"
+              },
+              "cases": {
+                "items": {
+                  "properties": {
+                    "status": {
+                      "const": "PASS"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "condition": {
+            "properties": {
+              "mode": {
+                "const": "DIRECT_SCAN"
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "condition": {
+            "properties": {
+              "backend_id": {
+                "const": "DIRECT_SCAN_V0"
+              },
+              "tokenizer_id": {
+                "type": "null"
+              }
+            }
+          },
+          "build": {
+            "properties": {
+              "index_bytes": {
+                "const": 0
+              }
+            }
+          },
+          "decision_gate": {
+            "properties": {
+              "verdict": {
+                "const": "BASELINE_ONLY"
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

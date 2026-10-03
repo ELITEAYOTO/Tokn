@@ -252,7 +252,7 @@ Le gate `docs/design/M4-EXIT-GATE.md` classe le coeur M4 comme **ACCEPTED**. Les
 
 ## Prochaine action
 
-Passer a **M4.5 Context Identity + Shadow Foundations** en observation-only. Premier slice recommande : **Shadow Repository Index V0 design + measurement contract**, rebuildable/local, separe du Store de mesure, avec invalidation Git/hash et sans injection active de contexte.
+Le premier slice M4.5 **Shadow Repository Index V0 design + measurement contract** est maintenant PREPARED/ACCEPTED au niveau design : index DERIVED/local/rebuildable separe du Store, file-level d'abord, invalidation Git/hash, DIRECT_SCAN de reference, FTS5 lexical seulement comme candidat mesure, et aucune injection active de contexte. L'implementation reste `NOT STARTED`.
 
 Cross-Run Source Re-read Evidence V0 reste **ACCEPTED CHRONOLOGY FOUNDATION** : `run_created_at_unix` n'est jamais une chronologie runtime et rediscovery/redundancy/freshness restent `NOT_PROVEN`. Task Input Identity V0 garde `delivery_status=NOT_PROVEN`. La compaction detaillee et la phase timeline restent `NOT_CAPTURED` tant qu'aucune preuve directe fixtureable n'existe.
 
@@ -261,7 +261,7 @@ Ne pas persister les tool outputs bruts par defaut uniquement pour obtenir une i
 Ne pas creer artificiellement du per-turn a partir des agregats V1.
 Ne pas commencer M5 Findings + Opportunity Analyzer tant que ces observations historiques ne sont pas fiables.
 
-En parallele, Benchmark Baseline Protocol V1 est PREPARED/ACCEPTED pour mesurer variance native, decomposition des couts et overhead Tokn sans pretendre a une economie. Le premier A/B causal reste Experiment 003.
+En parallele, Benchmark Baseline Protocol V1 reste PREPARED/ACCEPTED pour la variance native. Shadow Index Benchmark Protocol V0 + `Tokn ShadowIndexMeasurement V1` figent maintenant la mesure retrieval/build/refresh avant choix de backend. Aucun de ces protocoles ne pretend a une economie de tokens. Le premier A/B causal reste Experiment 003.
 
 Chemin d'execution detaille :
 `docs/plans/IMPLEMENTATION-PATH.md`.
@@ -369,6 +369,7 @@ Stability / benchmark readiness 2026-10-03:
 - PowerShell syntax validation is part of CI;
 - packaging is clean-worktree + tracked-files-only, with package-wide privacy scanning and provenance;
 - Benchmark Baseline Protocol V1 + BenchmarkManifest V1 are accepted for descriptive native baselines;
+- Shadow Repository Index V0 design + Shadow Index Benchmark Protocol V0 + ShadowIndexMeasurement V1 are accepted pre-implementation M4.5 contracts; implementation/backend selection remain pending measurement;
 - repository-admin action still recommended: protect `main` with required PR + CI before merge.
 
 Before Experiment 003: characterize run-to-run variance, predeclare multidimensional quality gates, and measure Tokn overhead for any injected/default-active integration.

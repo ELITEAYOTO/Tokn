@@ -98,6 +98,8 @@ Un document historique ne doit pas remplacer une source de verite courante.
   Cross-Run Source Re-read Evidence V0 : fondation chronologique acceptee observation-only ordonnant les relectures d'une SourceStableId entre runs uniquement avec timestamps rollout complets/parseables; rediscovery, redundancy et freshness restent `NOT_PROVEN`.
 - `design/M4-EXIT-GATE.md`
   Gate de sortie M4 : coeur accepte, extensions phase/compaction/delivery/rediscovery evidence-gated, et conditions d'entree M4.5 sans heuristiques.
+- `design/SHADOW-REPOSITORY-INDEX.md`
+  M4.5 Shadow Repository Index V0 : design measurement-first, file-level, DERIVED/rebuildable, separe du Store, hash/Git invalidation et backend lexical non selectionne.
 - `design/SESSION-ROLLOUT-ADAPTER.md`
 - `design/AGENT-COST-ATTRIBUTION.md`
 - `design/WORKSPACE-TRACKING.md`
@@ -173,7 +175,9 @@ Il ne represente plus la strategie produit.
   Separation entre repo canonique, preuves runtime, artefacts, launchers et archives.
 - `operations/DEVELOPMENT-WORKFLOW.md` - workflow Git/local CI/merge courant ;
 - `benchmarks/BASELINE-PROTOCOL-V1.md` - protocole baseline descriptif avant toute optimisation active ;
+- `benchmarks/SHADOW-INDEX-PROTOCOL-V0.md` - protocole M4.5 pre-implementation pour comparer DIRECT_SCAN et candidats lexicaux sans injection active ;
 - `../benchmarks/manifest.schema.json` + `../benchmarks/example-manifest.json` - BenchmarkManifest V1 machine-readable ;
+- `../benchmarks/shadow-index-measurement.schema.json` + `../benchmarks/example-shadow-index-measurement.json` - ShadowIndexMeasurement V1 machine-readable ;
 - `operations/JEM-TRACE-WORKFLOW.md` (historique)
 - `audits/2026-09-29-MAINTAINABILITY.md` (snapshot historique)
 

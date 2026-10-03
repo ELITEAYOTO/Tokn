@@ -97,11 +97,23 @@ Assert-Contains "docs/design/M4-EXIT-GATE.md" "Status: ACCEPTED / CORE COMPLETE 
 Assert-Contains "docs/design/M4-EXIT-GATE.md" 'semantic phase timeline: `NOT_CAPTURED`'
 Assert-Contains "docs/design/M4-EXIT-GATE.md" 'runtime task delivery: `NOT_PROVEN`'
 Assert-Contains "docs/design/M4-EXIT-GATE.md" "Shadow Repository Index V0 design + measurement contract"
+Assert-Contains "docs/design/SHADOW-REPOSITORY-INDEX.md" "Status: M4.5 ACCEPTED DESIGN / MEASUREMENT-FIRST / IMPLEMENTATION NOT STARTED"
+Assert-Contains "docs/design/SHADOW-REPOSITORY-INDEX.md" "DIRECT_SCAN_V0"
+Assert-Contains "docs/design/SHADOW-REPOSITORY-INDEX.md" "Do not duplicate the derivation algorithm in a second crate."
+Assert-Contains "docs/design/SHADOW-REPOSITORY-INDEX.md" "contentless FTS"
+Assert-Contains "docs/benchmarks/SHADOW-INDEX-PROTOCOL-V0.md" "Status: M4.5 ACCEPTED PRE-IMPLEMENTATION MEASUREMENT CONTRACT"
+Assert-Contains "docs/benchmarks/SHADOW-INDEX-PROTOCOL-V0.md" "ELIGIBLE_FOR_IMPLEMENTATION"
+Assert-Contains "benchmarks/shadow-index-measurement.schema.json" "Tokn ShadowIndexMeasurement V1"
+Assert-Contains "ROADMAP.md" "Shadow Repository Index V0 : ACCEPTED DESIGN / MEASUREMENT-FIRST / IMPLEMENTATION NOT STARTED"
+Assert-Contains "docs/plans/IMPLEMENTATION-PATH.md" "## Phase G.5 - Context Identity + Shadow Foundations"
+Assert-Contains "docs/plans/IMPLEMENTATION-PATH.md" "Status: STARTED / OBSERVATION-ONLY"
+Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "Premier scope M4.5 : **ACCEPTED PRE-IMPLEMENTATION DESIGN**."
+Assert-Contains "docs/design/SHADOW-REPOSITORY-INDEX.md" "No backend is selected by this design."
 Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "Cross-Run Source Re-read Evidence V0: ACCEPTED CHRONOLOGY FOUNDATION."
 Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "Task Input Identity V0: ACCEPTED OBSERVATION FOUNDATION."
 Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "M4 exit boundary :"
 Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "Premier scope M4.5 :"
-Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "Shadow Repository Index V0 design + measurement contract"
+Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "DIRECT_SCAN_V0 est la reference"
 Assert-Contains "ROADMAP.md" '`tokn_status` + `tokn_recent_runs` + `tokn_context_ledger`'
 Assert-Contains "docs/plans/IMPLEMENTATION-PATH.md" "Task Input Identity V0 ACCEPTED OBSERVATION FOUNDATION"
 Assert-NotContains "docs/plans/NEXT-SESSION-CHECKLIST.md" "Cross-Run Comparability V0 est le slice courant"
@@ -140,6 +152,8 @@ $activeDocs = @(
     "docs/design/LOCAL-MCP-PROTOTYPE.md",
     "docs/design/HISTORICAL-CONTEXT-LEDGER.md",
     "docs/design/M4-EXIT-GATE.md",
+    "docs/design/SHADOW-REPOSITORY-INDEX.md",
+    "docs/benchmarks/SHADOW-INDEX-PROTOCOL-V0.md",
     "docs/design/SOURCE-REREAD-EVIDENCE.md",
     "docs/design/PLUGIN-ENGINE-INTEGRATION.md",
     "docs/design/TARGET-ARCHITECTURE.md",
@@ -181,6 +195,7 @@ $stale = @(
     "Historical Analyzer + Context Ledger : NEXT",
     "Historical Analyzer + Context Ledger IN PROGRESS",
     "M4 IN PROGRESS / CONTEXT LEDGER V1 CORE ACCEPTED",
+    "## Phase G - Historical Analyzer + Context Ledger`n`nStatus: IN PROGRESS",
     "Context Ledger is NEXT",
     "P0-P7 DONE / P8 NEXT",
     "Cross-Agent Evidence V1",
