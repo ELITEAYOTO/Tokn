@@ -4,7 +4,7 @@ use std::fmt;
 use serde::{Deserialize, Serialize};
 use tokn_domain::{
     HISTORICAL_SNAPSHOT_SCHEMA_VERSION, HistoricalAgentRecord, HistoricalSnapshot,
-    HistoricalToolActivityRecord, TOOL_ACTIVITY_HISTORY_SCHEMA_VERSION, ToolActivityHistory,
+    TOOL_ACTIVITY_HISTORY_SCHEMA_VERSION, ToolActivityHistory,
 };
 
 pub const CROSS_AGENT_EVIDENCE_SCHEMA_VERSION: u64 = 1;
@@ -298,6 +298,7 @@ fn ancestor_status(
 
 #[cfg(test)]
 mod tests {
+    use tokn_domain::HistoricalToolActivityRecord;
     use super::*;
 
     const PROJECT: &str = "prj-0123456789abcdef01234567";
