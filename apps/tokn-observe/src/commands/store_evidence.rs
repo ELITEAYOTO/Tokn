@@ -419,8 +419,8 @@ mod tests {
             ..Default::default()
         };
         let project_id = "prj-0123456789abcdef01234567";
-        let first = build_tool_activities(project_id, "project-key-a", &[member.clone()]);
-        let second = build_tool_activities(project_id, "project-key-a", &[member.clone()]);
+        let first = build_tool_activities(project_id, "project-key-a", std::slice::from_ref(&member));
+        let second = build_tool_activities(project_id, "project-key-a", std::slice::from_ref(&member));
         let other_project = build_tool_activities(project_id, "project-key-b", &[member]);
 
         assert_eq!(
