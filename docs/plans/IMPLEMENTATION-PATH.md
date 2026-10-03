@@ -293,10 +293,10 @@ Contract V1 boundaries:
 Phase G evidence status:
 - rate-limit snapshots over time: ACCEPTED FOUNDATION;
 - tool/file activity timeline: ACCEPTED FOUNDATION;
-- parent/subagent shared-evidence analysis: remaining;
+- parent/subagent exact-operation overlap analysis: ACCEPTED FOUNDATION;
 - compaction events when observable: remaining;
 - repeated reads/searches/retries: exact-repeat foundation accepted, richer analysis remaining;
-- duplicate evidence: remaining;
+- duplicate evidence: remaining until result identity is directly captured/proven;
 - rediscovery and explicit cross-run comparison primitives.
 
 ## Phase H - Findings Engine
@@ -393,16 +393,14 @@ Completed in the current slice:
 7. CLI + read-only MCP exposure, including direct target-Codex tool-call validation.
 
 Next inside M4:
-1. persist only privacy-safe tool/file activity evidence needed by history ;
-2. build activity/phase timeline from direct evidence ;
-3. add repeated reads/searches/retries and shared/duplicate evidence analysis ;
-4. add compaction/rediscovery observations where directly supported ;
-5. add explicit multi-run comparison primitives ;
-6. only after those observations are reliable, begin M5 Findings.
+1. keep phase/compaction observations evidence-bounded and only where directly supported ;
+2. add result-identity evidence before classifying cross-agent overlap as duplicate evidence ;
+3. add rediscovery observations and explicit multi-run comparison primitives ;
+4. only after those observations are reliable, begin M5 Findings.
 
 ## 2026-10-02 insertion - shadow before active optimizer
 
-Current M4 activity foundation, automatic runtime-profile compatibility reducer and rate-limit history are accepted. Next: shared/duplicate evidence and rediscovery primitives.
+Current M4 activity foundation, runtime-profile compatibility reducer, rate-limit history and Cross-Agent Evidence V1 are accepted. Next: result-identity evidence, compaction/rediscovery and explicit cross-run primitives.
 
 Before Findings become interventions, introduce an observation-only shadow layer where useful:
 - repo/symbol index + Git/hash invalidation;

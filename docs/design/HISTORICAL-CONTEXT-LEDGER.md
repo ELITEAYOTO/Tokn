@@ -124,10 +124,10 @@ Before M4 can be marked DONE:
 - rate-limit snapshots over time where supported : ACCEPTED FOUNDATION ;
 - tool/file activity timeline : ACCEPTED FOUNDATION ;
 - phase timeline from direct evidence ;
-- parent/subagent shared-evidence analysis ;
+- parent/subagent exact-operation overlap : ACCEPTED FOUNDATION ;
 - repeated reads/searches/retries : exact-repeat foundation ACCEPTED ;
 - compaction observations where directly available ;
-- duplicate evidence ;
+- duplicate evidence : remaining because result identity is `NOT_CAPTURED` ;
 - rediscovery across runs ;
 - explicit cross-run comparison primitives.
 
@@ -161,4 +161,16 @@ Re-ingestion replaces the run-owned snapshot set deterministically, duplicate ag
 
 CLI: `tokn-observe rate-limit-history`.
 
-Automatic runtime compatibility and rate-limit history are now accepted foundations. Remaining M4 work is shared/duplicate-evidence, rediscovery/compaction and explicit cross-run analysis, not per-turn token invention.
+Automatic runtime compatibility, rate-limit history and Cross-Agent Evidence V1 are accepted foundations. Remaining M4 work is result-identity/duplicate-evidence proof, rediscovery/compaction and explicit cross-run analysis, not per-turn token invention.
+
+## Accepted Cross-Agent Evidence V1 slice - 2026-10-03
+
+Cross-Agent Evidence V1 joins HistoricalSnapshot V1 lineage with ToolActivityHistory V1 exact privacy-safe operation fingerprints.
+
+It emits same-run overlap only when the same operation fingerprint appears in at least two distinct threads. Same-thread repeats remain ActivityTimeline evidence, and identical operations across separate runs are not merged into one cross-agent observation.
+
+Lineage is reported as direct parent/child, ancestor/descendant, sibling, other known lineage or unknown lineage. Broken or missing lineage remains UNKNOWN instead of being inferred from depth.
+
+Every overlap carries `result_identity_coverage = NOT_CAPTURED`. Therefore operation overlap is not duplicate evidence, wasted work, repeated context or estimated savings. A future directly observed result identity is required before any such classification.
+
+CLI: `tokn-observe cross-agent-evidence`.

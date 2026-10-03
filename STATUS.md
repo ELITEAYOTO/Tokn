@@ -246,7 +246,7 @@ Limites explicites du contrat V1 :
 ## Prochaine action
 
 Continuer **M4** avec l'activite historique evidence-bounded :
-shared/duplicate evidence parent/subagent, compaction quand observable,
+result-identity/duplicate-evidence quand directement prouvable, compaction quand observable,
 rediscovery multi-run et comparaison cross-run explicite.
 
 Ne pas creer artificiellement du per-turn a partir des agregats V1.
@@ -315,10 +315,14 @@ Accepted M4 additions:
 - causal compatibility is PASS only when required runtime/model/config evidence is complete and equal;
 - RateLimitHistory V1 with privacy-minimized limit/window/reset evidence;
 - `tokn-observe rate-limit-history` filtered historical query;
-- no credit balance, plan/account identity or `limit_name` retained in Tokn rate-limit evidence.
+- no credit balance, plan/account identity or `limit_name` retained in Tokn rate-limit evidence;
+- Cross-Agent Evidence V1 for same-run exact operation overlap across distinct threads;
+- parent/child, ancestor/descendant, sibling and unknown-lineage relation reporting;
+- `result_identity_coverage = NOT_CAPTURED` guardrail, so operation overlap is not mislabeled duplicate evidence;
+- `tokn-observe cross-agent-evidence` read-only JSON analysis surface.
 
 Next M4 work:
-- shared/duplicate evidence parent/subagent;
+- result-identity evidence before any duplicate-evidence classification;
 - compaction/rediscovery only when directly observable;
 - explicit cross-run comparison primitives.
 

@@ -773,3 +773,13 @@ P6 remains IN PROGRESS until one controlled real PreToolUse callback proves the 
 - added `tokn-observe rate-limit-history` JSON output;
 - collapses duplicate copies observed across agents without collapsing distinct limit identities/windows;
 - added parser privacy/minimization, idempotence, filtering and empty-history regressions.
+
+## 2026-10-03 - M4 Cross-Agent Evidence V1 foundation
+
+- added same-run cross-agent exact operation-overlap analysis from privacy-safe operation fingerprints;
+- joins historical agent lineage by `(run_id, thread_id)` and reports direct parent/child, ancestor/descendant, sibling, other-known or unknown lineage;
+- keeps same-thread repeats and cross-run recurrence outside the cross-agent overlap contract;
+- added explicit `result_identity_coverage = NOT_CAPTURED`, preventing operation overlap from being mislabeled duplicate evidence, wasted work or token savings;
+- added `tokn-observe cross-agent-evidence` JSON CLI with privacy-safe project/workspace filtering;
+- unsupported source schemas or mismatched filters fail closed;
+- validation passed privacy, rustfmt, strict Clippy, workspace tests, release/provenance, MCP smoke, Experiment 001/002 and documentation gates.

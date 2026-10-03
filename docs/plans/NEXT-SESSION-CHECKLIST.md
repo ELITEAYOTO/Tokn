@@ -119,9 +119,11 @@ Do not rebuild the accepted activity foundation.
 
 Automatic ModelRuntimeProfile compatibility reducer: ACCEPTED FOUNDATION.
 Rate-limit snapshot ingestion + RateLimitHistory V1: ACCEPTED FOUNDATION.
+Cross-Agent Evidence V1 exact-operation overlap: ACCEPTED FOUNDATION.
+Result identity remains `NOT_CAPTURED`; operation overlap is not duplicate evidence.
 
 Next concrete work:
-1. shared/duplicate evidence parent/subagent;
+1. result-identity evidence when directly observable;
 2. compaction/rediscovery only when directly observed;
 3. explicit cross-run comparison.
 

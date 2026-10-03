@@ -68,6 +68,8 @@ Un document historique ne doit pas remplacer une source de verite courante.
   Fondation SQLite V2 : identities pseudonymisees, runs/agents/profiles/provenance et ingestion `store-evidence`.
 - `design/HISTORICAL-CONTEXT-LEDGER.md`
   M4 en cours : HistoricalSnapshot/Context Ledger V1, coverage, lineage, CLI/MCP et limites explicites.
+- `design/CROSS-AGENT-EVIDENCE.md`
+  Cross-Agent Evidence V1 : chevauchement exact d'operations privacy-safe entre threads, lineage et garde-fou `NOT_CAPTURED` sur l'identite du resultat.
 - `design/SESSION-ROLLOUT-ADAPTER.md`
 - `design/AGENT-COST-ATTRIBUTION.md`
 - `design/WORKSPACE-TRACKING.md`

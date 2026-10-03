@@ -154,9 +154,9 @@ Reste M4 :
 - file/tool activity graph : ACCEPTED FOUNDATION ;
 - repeated reads/searches/retries : exact-repeat foundation ACCEPTED ;
 - automatic ModelRuntimeProfile compatibility reducer : ACCEPTED FOUNDATION ;
-- parent/subagent shared evidence ;
+- parent/subagent exact operation overlap : ACCEPTED FOUNDATION ;
 - compaction events quand observables ;
-- duplicate evidence ;
+- duplicate evidence : result identity still NOT_CAPTURED / remaining ;
 - rediscovery et comparaison explicite entre runs.
 
 ## M5 - Context Efficiency Findings
