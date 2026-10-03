@@ -22,6 +22,20 @@ impl StableSourceLocatorObservation {
     }
 }
 
+pub fn extract_file_source_locator(
+    tool: &ToolObservation,
+    agent_cwd: Option<&str>,
+    selected_workspace: Option<&str>,
+) -> StableSourceLocatorObservation {
+    match tool.category.as_str() {
+        "file_read" => extract_file_read_source_locator(tool, agent_cwd, selected_workspace),
+        "write_mutation" => {
+            extract_file_mutation_source_locator(tool, agent_cwd, selected_workspace)
+        }
+        _ => StableSourceLocatorObservation::not_captured(),
+    }
+}
+
 pub fn extract_file_read_source_locator(
     tool: &ToolObservation,
     agent_cwd: Option<&str>,
@@ -53,6 +67,34 @@ pub fn extract_file_read_source_locator(
     StableSourceLocatorObservation::observed(format!("file:{relative}"))
 }
 
+pub fn extract_file_mutation_source_locator(
+    tool: &ToolObservation,
+    agent_cwd: Option<&str>,
+    selected_workspace: Option<&str>,
+) -> StableSourceLocatorObservation {
+    if tool.category != "write_mutation" {
+        return StableSourceLocatorObservation::not_captured();
+    }
+    let Some(command) = tool.command.as_deref() else {
+        return StableSourceLocatorObservation::not_captured();
+    };
+    let Some(workspace) = selected_workspace.filter(|value| !value.trim().is_empty()) else {
+        return StableSourceLocatorObservation::not_captured();
+    };
+    let Some(target) = parse_simple_file_mutation_target(command) else {
+        return StableSourceLocatorObservation::not_captured();
+    };
+    let cwd = tool
+        .workdir
+        .as_deref()
+        .filter(|value| !value.trim().is_empty())
+        .or(agent_cwd.filter(|value| !value.trim().is_empty()));
+    let Some(relative) = workspace_relative_path(&target, cwd, workspace) else {
+        return StableSourceLocatorObservation::not_captured();
+    };
+    StableSourceLocatorObservation::observed(format!("file:{relative}"))
+}
+
 fn parse_simple_get_content_target(command: &str) -> Option<String> {
     let tokens = tokenize_simple_command(command)?;
     if tokens.is_empty() || !tokens[0].eq_ignore_ascii_case("Get-Content") {
@@ -73,6 +115,34 @@ fn parse_simple_get_content_target(command: &str) -> Option<String> {
         || target.starts_with('~')
         || target.contains('$')
         || target.contains('`')
+        || target.chars().any(|ch| matches!(ch, '*' | '?' | '[' | ']'))
+    {
+        return None;
+    }
+    Some(target.clone())
+}
+
+fn parse_simple_file_mutation_target(command: &str) -> Option<String> {
+    let tokens = tokenize_simple_command(command)?;
+    let verb = tokens.first()?;
+    if !verb.eq_ignore_ascii_case("Set-Content") && !verb.eq_ignore_ascii_case("Add-Content") {
+        return None;
+    }
+    let target = if tokens.len() >= 2 && !tokens[1].starts_with('-') {
+        &tokens[1]
+    } else if tokens.len() >= 3
+        && (tokens[1].eq_ignore_ascii_case("-LiteralPath")
+            || tokens[1].eq_ignore_ascii_case("-Path"))
+    {
+        &tokens[2]
+    } else {
+        return None;
+    };
+    if target.is_empty()
+        || target.starts_with('~')
+        || target.contains('$')
+        || target.contains('`')
+        || target.contains(',')
         || target.chars().any(|ch| matches!(ch, '*' | '?' | '[' | ']'))
     {
         return None;
@@ -269,5 +339,31 @@ mod tests {
         value.category = "search".into();
         let observed = extract_file_read_source_locator(&value, None, Some(r"E:\repo\PROJECT"));
         assert_eq!(observed.coverage, EvidenceIdentityCoverage::NotCaptured);
+    }
+    #[test]
+    fn resolves_simple_set_content_mutation_inside_workspace() {
+        let mut value = tool(
+            "Set-Content src/example.rs updated",
+            Some(r"E:\repo\PROJECT"),
+        );
+        value.category = "write_mutation".into();
+        let observed = extract_file_mutation_source_locator(&value, None, Some(r"E:\repo\PROJECT"));
+        assert_eq!(observed.coverage, EvidenceIdentityCoverage::Observed);
+        assert_eq!(observed.locator.as_deref(), Some("file:src/example.rs"));
+    }
+
+    #[test]
+    fn rejects_ambiguous_mutation_targets() {
+        for command in [
+            "Set-Content *.rs updated",
+            "Set-Content $env:TEMP updated",
+            "Copy-Item a b",
+        ] {
+            let mut value = tool(command, Some(r"E:\repo\PROJECT"));
+            value.category = "write_mutation".into();
+            let observed =
+                extract_file_mutation_source_locator(&value, None, Some(r"E:\repo\PROJECT"));
+            assert_eq!(observed.coverage, EvidenceIdentityCoverage::NotCaptured);
+        }
     }
 }

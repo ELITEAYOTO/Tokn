@@ -15,9 +15,9 @@ It does not claim that a source is fresh, stale, still remembered by the model, 
 
 ## SourceStableId V0
 
-The Codex adapter currently emits a source locator only for conservative single-file `Get-Content` reads.
+The Codex adapter emits a source locator for conservative single-file `Get-Content` reads and for conservative single-target `Set-Content` / `Add-Content` mutation operations.
 
-Accepted V0 evidence requires:
+Accepted read evidence requires:
 - activity category `file_read`;
 - one simple `Get-Content` target;
 - a literal target with no wildcard, variable, pipeline or compound command;
@@ -37,9 +37,11 @@ Consequences:
 
 Unsupported or ambiguous command shapes remain `NOT_CAPTURED` rather than being guessed.
 
+Mutation-operation source identity reuses the same workspace-relative locator rules, but V0 only accepts simple literal single-target `Set-Content` / `Add-Content` operations. A recognized write category alone is not enough to claim a stable target.
+
 ## Content evolution report
 
-`tokn-observe source-identity-history` groups observed SourceStableIds from ToolActivityHistory V2 and reports occurrence, run and thread counts plus exact content-identity coverage.
+`tokn-observe source-identity-history` groups observed SourceStableIds from ToolActivityHistory V3 and reports occurrence, run and thread counts plus exact content-identity coverage.
 
 Its content evolution values are:
 - `UNCHANGED_OBSERVED`: every captured occurrence has observed content identity and all exact fingerprints are equal;
@@ -57,7 +59,7 @@ Its content evolution values are:
 - that rereading it was unnecessary;
 - that a Project Memory entry would be safe to reuse.
 
-`CHANGED_OBSERVED` proves only that at least two exact observed result fingerprints differ under complete coverage. It does not identify the edit, invalidation time or causal reason.
+`CHANGED_OBSERVED` proves only that at least two exact observed result fingerprints differ under complete coverage. By itself it does not identify which mutation caused the change or prove freshness/staleness; mutation-operation timing is a separate evidence surface.
 
 ## Privacy and fail-closed rules
 
@@ -70,7 +72,8 @@ Its content evolution values are:
 ## Next boundary
 
 Still required before a real freshness/rediscovery finding:
-- source version / Git commit or directly observed invalidation events;
+- source version / hash / Git commit when directly observable;
+- verified mutation effect and freshness/invalidation semantics rather than operation intent alone;
 - broader runtime-neutral source kinds such as symbol/range identities only when provable;
 - compaction/context-management evidence where observable;
 - chronological rediscovery events;

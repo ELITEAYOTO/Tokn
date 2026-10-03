@@ -27,6 +27,7 @@ pub struct ToolObservation {
     pub surface: String,
     pub requester_type: Option<String>,
     pub status: String,
+    pub observed_at: Option<String>,
     pub started_seq: Option<u64>,
     pub ended_seq: Option<u64>,
     pub invocation_payload_bytes: Option<u64>,

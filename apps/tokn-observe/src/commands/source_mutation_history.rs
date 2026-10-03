@@ -1,7 +1,7 @@
 use std::path::Path;
 
 use anyhow::Context;
-use tokn_analysis::build_cross_agent_evidence;
+use tokn_analysis::build_source_mutation_history;
 use tokn_storage::Database;
 
 use super::common::{open_db, validate_private_filter_id};
@@ -25,10 +25,8 @@ pub fn run(
         Some(path) => Database::open(path)?,
         None => open_db()?,
     };
-
-    let snapshot = db.historical_snapshot(project_id, workspace_id, limit)?;
-    let activity_history = db.tool_activity_history(project_id, workspace_id, limit)?;
-    let report = build_cross_agent_evidence(&snapshot, &activity_history)?;
+    let history = db.tool_activity_history(project_id, workspace_id, limit)?;
+    let report = build_source_mutation_history(&history)?;
     let json = serde_json::to_string_pretty(&report)?;
 
     if let Some(path) = output_json {
@@ -50,34 +48,35 @@ pub fn run(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use tokn_analysis::SOURCE_MUTATION_HISTORY_SCHEMA_VERSION;
     use tokn_domain::TOOL_ACTIVITY_HISTORY_SCHEMA_VERSION;
 
     #[test]
-    fn empty_store_emits_empty_cross_agent_report() {
+    fn empty_store_emits_empty_source_mutation_history() {
         let path = std::env::temp_dir().join(format!(
-            "tokn-cross-agent-evidence-empty-{}.sqlite3",
+            "tokn-source-mutation-history-empty-{}.sqlite3",
             std::process::id()
         ));
         let output = std::env::temp_dir().join(format!(
-            "tokn-cross-agent-evidence-empty-{}.json",
+            "tokn-source-mutation-history-empty-{}.json",
             std::process::id()
         ));
         let _ = std::fs::remove_file(&path);
         let _ = std::fs::remove_file(&output);
 
-        run(None, None, 50, Some(&path), Some(&output)).expect("cross-agent evidence");
+        run(None, None, 50, Some(&path), Some(&output)).expect("source mutation history");
         let value: serde_json::Value =
             serde_json::from_slice(&std::fs::read(&output).expect("read output"))
                 .expect("parse output");
-
-        assert_eq!(value["schema_version"].as_u64(), Some(2));
-        assert_eq!(value["source_snapshot_schema_version"].as_u64(), Some(1));
+        assert_eq!(
+            value["schema_version"].as_u64(),
+            Some(SOURCE_MUTATION_HISTORY_SCHEMA_VERSION)
+        );
         assert_eq!(
             value["source_activity_history_schema_version"].as_u64(),
             Some(TOOL_ACTIVITY_HISTORY_SCHEMA_VERSION)
         );
-        assert_eq!(value["overlaps"].as_array().map(Vec::len), Some(0));
-
+        assert_eq!(value["events"].as_array().map(Vec::len), Some(0));
         let _ = std::fs::remove_file(path);
         let _ = std::fs::remove_file(output);
     }

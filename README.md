@@ -109,7 +109,7 @@ Il ne prouve ni que le contexte est utile, ni que le cache est optimal.
 
 Ordre actuel :
 - M4 Historical Analyzer + Context Ledger ;
-- M4 exact Context/Result Identity + SourceStableId file V0 + observed content evolution ACCEPTED ; M4.5 invalidation/Context Twin + Shadow Retrieval/Edit ensuite ;
+- M4 exact Context/Result Identity + SourceStableId file V0 + observed content evolution + source mutation timing ACCEPTED ; M4.5 freshness/Context Twin + Shadow Retrieval/Edit ensuite ;
 - M5 Findings + Opportunity Analyzer ;
 - M6 counterfactual/policy lab puis Experiment 003 causal A/B ;
 - M7 Advisor ;
@@ -158,5 +158,14 @@ The current accepted M4 slice adds a privacy-safe ToolActivityHistory and Activi
 - exact repeated-operation fingerprints are observations, not waste/savings claims;
 - `tokn-observe activity-timeline` exposes the offline timeline;
 - legacy report uncached accounting is aligned with frozen V1 semantics: input - cached, while cache-write remains separate.
+
+## M4 source mutation observation - 2026-10-03
+
+The accepted mutation-timing slice extends ToolActivityHistory to V3 with optional rollout `observed_at` evidence.
+- conservative single-target `Set-Content` / `Add-Content` operations can resolve the same project-scoped SourceStableId used by file reads;
+- `tokn-observe source-mutation-history` exposes observed mutation-operation timing as `OBSERVED` or `NOT_CAPTURED`;
+- `tool_status=completed` is preserved but does not prove that the file changed; `effect_status` remains `NOT_VERIFIED`;
+- no raw path, raw command output or durable tool-result content is added by this slice;
+- no freshness, staleness, invalidation-effect or safe-reuse claim follows from operation timing alone.
 
 Long-term direction remains observation-first. Multi-runtime support is an architectural target, not a current support claim. Before runtime #2: Runtime Adapter Contract V1, Token Semantics V2, Capability Manifest V1 and sanitized conformance fixtures. See docs/design/MULTI-RUNTIME-CORE-AND-DATA-ARCHITECTURE.md and ADR-006.

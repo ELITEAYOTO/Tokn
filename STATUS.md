@@ -6,7 +6,7 @@ Binaire/Cargo : **V0.1 / 0.1.0**
 
 ## Resume
 
-**P0-P9 DONE. Experiment 002 est ACCEPTED. Measurement Contract V1 est FROZEN. Store foundation est DONE. Local MCP transport prototype est ACCEPTED. Historical Analyzer + Context Ledger est IN PROGRESS ; Context/Result Identity V0 et Cross-Agent Evidence V2 sont ACCEPTED FOUNDATIONS.**
+**P0-P9 DONE. Experiment 002 est ACCEPTED. Measurement Contract V1 est FROZEN. Store foundation est DONE. Local MCP transport prototype est ACCEPTED. Historical Analyzer + Context Ledger est IN PROGRESS ; Context/Result Identity V0, Cross-Agent Evidence V2 et Source Mutation Observation V0 sont ACCEPTED FOUNDATIONS.**
 
 Le projet est revenu sur une direction unique :
 mesurer l'efficacite du contexte sans reduire la capacite d'Astra.
@@ -245,11 +245,10 @@ Limites explicites du contrat V1 :
 
 ## Prochaine action
 
-Continuer **M4** avec une fondation d'identite contexte/resultat evidence-bounded :
-`SourceStableId` quand une source logique stable est observable, `ContentFingerprint` privacy-safe seulement quand le contenu/resultat est directement observable,
-source/version/provenance/fraicheur/invalidation, puis compaction/rediscovery et comparaison cross-run explicite.
+Continuer **M4** a partir des fondations d'identite et de mutation-operation maintenant acceptees :
+source version/hash/commit et provenance seulement quand directement observables, puis semantiques de fraicheur/invalidation fail-closed, compaction/rediscovery et comparaison cross-run explicite.
 
-Cette fondation doit preparer un Context Twin V0 sans pretendre connaitre la memoire interne d'Astra.
+La mutation-operation peut maintenant etre datee quand le rollout fournit un timestamp, mais son effet reste `NOT_VERIFIED`. Cette fondation doit preparer un Context Twin V0 sans pretendre connaitre la memoire interne d'Astra.
 Ne pas persister les tool outputs bruts par defaut uniquement pour obtenir une identite.
 Ne pas creer artificiellement du per-turn a partir des agregats V1.
 Ne pas commencer M5 Findings + Opportunity Analyzer tant que ces observations historiques ne sont pas fiables.
@@ -306,7 +305,7 @@ GitHub validation for branch `m4-activity-history` at `fa1d831` is PASS:
 - documentation consistency PASS.
 
 Accepted M4 additions:
-- ToolActivityHistory V2 additive schema;
+- ToolActivityHistory V3 additive schema, ajoutant `observed_at` optionnel aux preuves V2;
 - privacy-safe project-scoped operation/workdir fingerprints;
 - ActivityTimeline V1 per agent;
 - exact repeated-operation observations across runs/threads;
@@ -320,7 +319,7 @@ Accepted M4 additions:
 - no credit balance, plan/account identity or `limit_name` retained in Tokn rate-limit evidence;
 - Cross-Agent Evidence V2 for same-run exact operation overlap across distinct threads;
 - parent/child, ancestor/descendant, sibling and unknown-lineage relation reporting;
-- ToolActivityHistory schema V2 with separate `source_stable_id` and `content_fingerprint` evidence plus explicit coverage;
+- ToolActivityHistory schema V3 with separate `source_stable_id` / `content_fingerprint` evidence, explicit coverage and optional rollout `observed_at`;
 - privacy-safe project-scoped exact result fingerprints only when one observed tool result maps unambiguously to one normalized operation;
 - `OBSERVED` / `PARTIAL` / `NOT_CAPTURED` / `UNKNOWN` result-identity semantics;
 - Cross-Agent result comparison is `SAME` or `DIFFERENT` only under complete observed identity, otherwise `UNKNOWN`;
@@ -329,11 +328,15 @@ Accepted M4 additions:
 - source IDs use a project-scoped source-specific derivation domain distinct from content fingerprints;
 - SourceIdentityHistory V1 reports `UNCHANGED_OBSERVED` / `CHANGED_OBSERVED` only under complete exact content identity, otherwise `UNKNOWN`;
 - `tokn-observe source-identity-history` read-only JSON surface;
+- Source Mutation Observation V0: conservative `Set-Content` / `Add-Content` target identity plus rollout timing when directly observed;
+- SourceMutationHistory V1 preserves `tool_status` but keeps `effect_status=NOT_VERIFIED`;
+- `tokn-observe source-mutation-history` read-only JSON surface;
 - `tokn-observe cross-agent-evidence` read-only JSON analysis surface.
 
 Next M4 work:
-- source version/invalidation timing and broader source kinds only when directly observable;
-- compaction/rediscovery only when directly observable;
+- source version/hash/commit, provenance and verified mutation effect only when directly observable;
+- freshness/invalidation semantics that preserve `UNKNOWN` / `NOT_CAPTURED` instead of inferring staleness;
+- broader source kinds plus compaction/rediscovery only when directly observable;
 - explicit cross-run comparison primitives.
 
 Before Experiment 003: characterize run-to-run variance, predeclare multidimensional quality gates, and measure Tokn overhead for any injected/default-active integration.

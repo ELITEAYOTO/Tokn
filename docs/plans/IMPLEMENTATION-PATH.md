@@ -443,9 +443,10 @@ Completed in the current slice:
 Next inside M4:
 1. Context/Result Identity Foundation V0 is ACCEPTED; keep duplicate-evidence classification gated on complete observed identity ;
 2. SourceStableId file V0 + exact observed content-evolution history are ACCEPTED; broader source kinds remain evidence-gated ;
-3. add source version/invalidation timing and keep freshness/phase/compaction observations evidence-bounded and only where directly supported ;
-4. add rediscovery observations and explicit multi-run comparison primitives ;
-5. only after those observations are reliable, continue M4.5 then M5 Findings + Opportunity Analyzer.
+3. ToolActivityHistory V3 + SourceMutationHistory V1 are ACCEPTED for directly observed mutation-operation timing; effect remains `NOT_VERIFIED` ;
+4. add source version/hash/commit, provenance and freshness/invalidation semantics only where directly supported ;
+5. add broader source kinds, compaction/rediscovery observations and explicit multi-run comparison primitives ;
+6. only after those observations are reliable, continue M4.5 then M5 Findings + Opportunity Analyzer.
 
 Parallel implementation hardening, only if measurement justifies it:
 - benchmark current Codex raw-result retention with representative 1 MB / 10 MB / 50 MB and many-small-output fixtures;
@@ -455,7 +456,7 @@ Parallel implementation hardening, only if measurement justifies it:
 
 ## 2026-10-02 insertion - shadow before active optimizer
 
-Current M4 activity foundation, runtime-profile compatibility reducer, rate-limit history, Cross-Agent Evidence V2, exact result identity and conservative SourceStableId file V0 are accepted. Next: source version/invalidation, broader source kinds where provable, compaction/rediscovery and explicit cross-run primitives.
+Current M4 activity foundation, runtime-profile compatibility reducer, rate-limit history, Cross-Agent Evidence V2, exact result identity, conservative SourceStableId file V0 and mutation-operation timing are accepted. Next: source version/hash/commit, provenance/freshness with verified effect only where provable, broader source kinds, compaction/rediscovery and explicit cross-run primitives.
 
 Before Findings become interventions, introduce an observation-only shadow layer where useful:
 - repo/symbol index + Git/hash invalidation;

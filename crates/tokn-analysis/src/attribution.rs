@@ -302,6 +302,7 @@ mod tests {
                 surface: "runtime_mediated".into(),
                 requester_type: Some("code_cell".into()),
                 status: "completed".into(),
+                observed_at: None,
                 started_seq: Some(21),
                 ended_seq: Some(25),
                 invocation_payload_bytes: Some(50),

@@ -61,6 +61,7 @@ pub struct ToolActivityStoreInput {
     pub surface: String,
     pub requester_type: Option<String>,
     pub status: String,
+    pub observed_at: Option<String>,
     pub started_seq: Option<u64>,
     pub ended_seq: Option<u64>,
     pub invocation_payload_bytes: Option<u64>,
@@ -389,10 +390,10 @@ impl Database {
                     max_output_tokens, original_token_count, operation_fingerprint,
                     workdir_fingerprint, source_stable_id, source_identity_coverage,
                     content_fingerprint, content_identity_coverage,
-                    parse_error_present, created_at_unix
+                    parse_error_present, created_at_unix, observed_at
                  ) VALUES (
                     ?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15,?16,
-                    ?17,?18,?19,?20,?21,?22,?23,?24,?25
+                    ?17,?18,?19,?20,?21,?22,?23,?24,?25,?26
                  )",
                 params![
                     activity_id,
@@ -423,7 +424,8 @@ impl Database {
                     } else {
                         0_i64
                     },
-                    now
+                    now,
+                    activity.observed_at
                 ],
             )?;
         }
@@ -729,7 +731,7 @@ impl Database {
                 activity.workdir_fingerprint, activity.source_stable_id,
                 activity.source_identity_coverage, activity.content_fingerprint,
                 activity.content_identity_coverage, activity.parse_error_present,
-                selected.created_at_unix
+                selected.created_at_unix, activity.observed_at
              FROM tool_activity_v1 AS activity
              INNER JOIN selected_runs AS selected ON selected.run_id = activity.run_id
              ORDER BY
@@ -779,6 +781,7 @@ impl Database {
                         )?,
                         parse_error_present: row.get::<_, i64>(25)? != 0,
                         run_created_at_unix: row.get(26)?,
+                        observed_at: row.get(27)?,
                     })
                 },
             )?
@@ -1122,6 +1125,15 @@ fn validate_input(input: &MeasurementStoreInput) -> Result<(), MeasurementStoreE
                     "tool activity {name} cannot be empty"
                 )));
             }
+        }
+        if activity
+            .observed_at
+            .as_deref()
+            .is_some_and(|value| value.trim().is_empty())
+        {
+            return Err(MeasurementStoreError::Invalid(
+                "tool activity observed_at cannot be empty".into(),
+            ));
         }
         if let Some(value) = activity.operation_fingerprint.as_deref() {
             validate_private_id("operation_fingerprint", value, "op")?;
@@ -1608,6 +1620,7 @@ mod tests {
             surface: "session_rollout".into(),
             requester_type: None,
             status: "completed".into(),
+            observed_at: Some("2026-10-03T12:00:00Z".into()),
             started_seq: None,
             ended_seq: None,
             invocation_payload_bytes: None,
@@ -1633,7 +1646,7 @@ mod tests {
         assert_eq!(db.tool_activity_count().unwrap(), 1);
         assert_eq!(
             db.tool_activity_schema_version().unwrap().as_deref(),
-            Some("2")
+            Some("3")
         );
 
         let history = db

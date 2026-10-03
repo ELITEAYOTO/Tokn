@@ -209,11 +209,18 @@ fn apply_tool_activity_migrations(conn: &Connection) -> rusqlite::Result<()> {
     };
 
     match current.as_deref() {
-        Some("2") => Ok(()),
-        Some("1") => conn.execute_batch(include_str!("../migrations/0004_context_identity.sql")),
+        Some("3") => Ok(()),
+        Some("2") => {
+            conn.execute_batch(include_str!("../migrations/0005_tool_activity_timing.sql"))
+        }
+        Some("1") => {
+            conn.execute_batch(include_str!("../migrations/0004_context_identity.sql"))?;
+            conn.execute_batch(include_str!("../migrations/0005_tool_activity_timing.sql"))
+        }
         None => {
             conn.execute_batch(include_str!("../migrations/0003_tool_activity.sql"))?;
-            conn.execute_batch(include_str!("../migrations/0004_context_identity.sql"))
+            conn.execute_batch(include_str!("../migrations/0004_context_identity.sql"))?;
+            conn.execute_batch(include_str!("../migrations/0005_tool_activity_timing.sql"))
         }
         Some(_) => Err(rusqlite::Error::InvalidQuery),
     }
@@ -378,9 +385,9 @@ mod tests {
         let _ = fs::remove_file(path);
     }
     #[test]
-    fn migrates_tool_activity_v1_to_context_identity_v2() {
+    fn migrates_tool_activity_v1_to_timing_v3() {
         let path = std::env::temp_dir().join(format!(
-            "tokn-storage-activity-v1-v2-{}.sqlite3",
+            "tokn-storage-activity-v1-v3-{}.sqlite3",
             std::process::id()
         ));
         let _ = fs::remove_file(&path);
@@ -398,7 +405,7 @@ mod tests {
         let db = Database::open(&path).unwrap();
         assert_eq!(
             db.tool_activity_schema_version().unwrap().as_deref(),
-            Some("2")
+            Some("3")
         );
         drop(db);
 
@@ -413,6 +420,7 @@ mod tests {
         assert!(names.iter().any(|name| name == "source_identity_coverage"));
         assert!(names.iter().any(|name| name == "content_fingerprint"));
         assert!(names.iter().any(|name| name == "content_identity_coverage"));
+        assert!(names.iter().any(|name| name == "observed_at"));
         drop(stmt);
         drop(conn);
 

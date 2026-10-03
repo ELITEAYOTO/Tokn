@@ -18,7 +18,7 @@ It can answer whether exact observed result fingerprints are the same or differe
 
 The reducer joins two already accepted historical contracts:
 - `HistoricalSnapshot V1` for agent lineage (`thread_id`, `parent_thread_id`, `depth`);
-- `ToolActivityHistory V2` for privacy-safe exact operation fingerprints plus source/result identity fields and explicit coverage.
+- `ToolActivityHistory V3` for privacy-safe exact operation fingerprints plus source/result identity fields, explicit coverage and optional observed tool timing.
 
 Both inputs must use their supported schema versions and the same project/workspace filters. A mismatch fails closed instead of silently joining unrelated evidence.
 
@@ -48,7 +48,7 @@ Missing or broken lineage remains `UNKNOWN_LINEAGE`. Tokn does not infer a paren
 
 ## Result identity boundary
 
-ToolActivityHistory V2 separates:
+ToolActivityHistory V3 separates:
 - `source_stable_id`: stable logical source identity when directly observable;
 - `content_fingerprint`: project-scoped privacy-safe fingerprint of exact observed result content;
 - independent coverage for both identities.
