@@ -1,6 +1,12 @@
 @echo off
 setlocal EnableExtensions
 
+rem Resource guard: keep local Rust work responsive by default.
+rem Override explicitly with TOKN_CARGO_JOBS=1 (gentler) or a higher value when desired.
+if not defined TOKN_CARGO_JOBS set "TOKN_CARGO_JOBS=2"
+set "CARGO_BUILD_JOBS=%TOKN_CARGO_JOBS%"
+set "RUST_TEST_THREADS=%TOKN_CARGO_JOBS%"
+
 set "VSWHERE=C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe"
 if not exist "%VSWHERE%" set "VSWHERE=%ProgramFiles%\Microsoft Visual Studio\Installer\vswhere.exe"
 

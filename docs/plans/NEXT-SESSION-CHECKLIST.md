@@ -128,12 +128,16 @@ SourceStableId file V0 + SourceIdentityHistory V1: ACCEPTED FOUNDATION.
 ToolActivityHistory V3 + SourceMutationHistory V1: ACCEPTED FOUNDATION. Mutation-operation timing may be observed; mutation effect remains `NOT_VERIFIED`.
 Run-Boundary Source Version V0 + SourceVersionHistory V1: ACCEPTED FOUNDATION. BEFORE/AFTER snapshot versions are directly observed; missing boundaries remain `UNKNOWN`, and no mutation causality/freshness is inferred.
 Workspace Git Provenance V0 + WorkspaceGitProvenanceHistory V1: ACCEPTED FOUNDATION. BEFORE/AFTER snapshots now carry directly observed HEAD/dirty evidence when available; legacy absence is `NOT_CAPTURED`, attempted but unprovable Git state is `UNKNOWN`, and raw Git SHA values are not persisted in SQLite.
+Stability/benchmark readiness: local Rust toolchain + dev-check + package hardening + Benchmark Baseline Protocol V1 are ACCEPTED/PREPARED; this does not claim token savings.
 
 Next concrete work:
 1. verified mutation effect only where directly observable;
 2. freshness/invalidation semantics joining read timing + exact SourceVersion + Workspace Git Provenance + later rediscovery while preserving `UNKNOWN`/`NOT_CAPTURED`;
 3. broader source kinds, compaction and rediscovery only when directly observed;
 4. explicit cross-run comparison with compatible evidence/provenance scope.
+
+Parallel descriptive work allowed now: prepare/collect 6-10 frozen native baseline tasks using `docs/benchmarks/BASELINE-PROTOCOL-V1.md`, starting with a >=3-run variance pilot per task and no active Tokn intervention.
+Repository-admin housekeeping: protect `main` so PR + green CI are required before merge.
 
 Optional parallel hardening: measure current raw tool-result retention first; only if the cost is non-trivial, replace `BTreeMap<String, Vec<String>>` retention with a private transient fingerprint accumulator/visitor that preserves exact fingerprints and coverage. No Store/Measurement migration and no general buffer subsystem in M4.
 

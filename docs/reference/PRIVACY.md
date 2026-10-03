@@ -1,35 +1,34 @@
 # Privacy
 
-Tokn Observer is local-only by default.
+Tokn is local-first by default. Current V0.1 does not upload Tokn evidence or call an LLM on its own.
 
-V0.0 does not:
-- upload traces;
-- call an LLM;
-- store prompts in SQLite;
-- store raw terminal output in SQLite;
-- read Codex auth files.
+## Current durable boundary
 
-The normal automatic source is `%USERPROFILE%\.codex\sessions`.
-Diagnostic bundles can contain sensitive prompts, outputs, terminal data and paths; they are imported only when explicitly provided.
+Tokn may read explicitly supported local coding-agent evidence and persist structured historical evidence in its local Store. Durable data may include token accounting, runtime/profile evidence, activity metadata, project-scoped identities/fingerprints, source-version evidence and workspace Git provenance.
 
-## Plugin / MCP privacy boundary - 2026-09-30
+Tokn does not persist raw rollout/trace files or raw terminal/tool-result content merely for convenience or identity generation. Raw prompts, source files, auth credentials and private runtime evidence remain outside the Store unless a future explicit contract says otherwise.
 
-Tokn remains local-first by default.
+The normal Codex session source is `%USERPROFILE%\.codex\sessions`. Diagnostic bundles can contain sensitive prompts, outputs, terminal data and paths; they are imported only when explicitly provided.
 
-Future Codex integration must follow least privilege:
-- expose only the minimum tools/data needed for the requested Tokn operation;
-- keep secrets, API keys, auth tokens and auth.json out of plugin packages,
-  MCP results, evidence folders and logs;
-- do not persist creator account/user IDs merely because session metadata exposes them;
-- prefer normalized metrics and provenance over raw prompts or raw tool output;
-- redact or hash personal filesystem paths when durable history does not need the raw path;
+## Publication boundary
+
+- real rollouts/traces and benchmark runs stay local;
+- repository publication scans tracked files for common secret/private-path patterns;
+- benchmark raw/run directories are ignored and forbidden from publication paths;
+- release packaging starts from tracked Git files plus an explicit external whitelist;
+- package text is rescanned before the ZIP is kept;
+- failed package privacy validation deletes the generated ZIP.
+
+## Plugin / MCP boundary
+
+Tokn remains local-first by default. Runtime/plugin integrations must follow least privilege:
+- expose only the minimum data needed for the requested Tokn operation;
+- keep secrets, API keys, auth tokens and `auth.json` out of packages, MCP results, evidence folders and logs;
+- do not persist account/user IDs merely because session metadata exposes them;
+- prefer normalized evidence and privacy-safe provenance over raw prompts/tool output;
 - treat hook/MCP inputs as untrusted and validate them at the Engine boundary;
 - require explicit approval for future state-changing/destructive operations.
 
-The initial local Tokn MCP adapter should not require network access.
-A future public/remote plugin is a separate deployment mode and would require
-its own privacy policy, authentication model and data-retention review.
+The current local MCP adapter does not require network access. A future public/remote mode requires its own privacy, authentication and retention review.
 
-Official guidance reviewed:
-https://developers.openai.com/plugins/guides/security-privacy
-https://developers.openai.com/api/docs/guides/agents-api/tools/plugins
+Before public binary distribution, the remaining gates include a threat model, retention/purge/export policy, hostile parser/privacy corpus, dependency/SBOM review and signing/update integrity.

@@ -78,6 +78,16 @@ Assert-Contains "docs/design/CROSS-AGENT-EVIDENCE.md" "# Cross-Agent Evidence V2
 Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "Context/Result Identity Foundation V0 : ACCEPTED FOUNDATION."
 Assert-Contains "docs/design/CONTEXT-RESULT-IDENTITY.md" "## Transient result identity capture hardening"
 Assert-Contains "docs/strategy/CONTEXT-EFFICIENCY-STRATEGY.md" "## Buffer / replay architecture gates - 2026-10-03"
+Assert-Contains "README.md" "## Quickstart developpeur"
+Assert-Contains "SECURITY.md" "## Packaging"
+Assert-Contains "docs/MAINTENANCE.md" "Historical Analyzer + Context Ledger IN PROGRESS"
+Assert-Contains "docs/reference/PRIVACY.md" "## Current durable boundary"
+Assert-NotContains "docs/reference/PRIVACY.md" "V0.0 does not:"
+Assert-NotContains "docs/MAINTENANCE.md" "Ne pas lancer Experiment 002 avant P9"
+Assert-Contains "docs/operations/DEVELOPMENT-WORKFLOW.md" "## Merge rule"
+Assert-Contains "docs/benchmarks/BASELINE-PROTOCOL-V1.md" "Status: ACCEPTED PROTOCOL / BASELINE-ONLY"
+Assert-Contains "docs/benchmarks/BASELINE-PROTOCOL-V1.md" "Experiment 003 remains the first causal A/B optimization experiment."
+Assert-Contains "benchmarks/manifest.schema.json" "Tokn BenchmarkManifest V1"
 
 $activeDocs = @(
     "README.md",
@@ -100,6 +110,11 @@ $activeDocs = @(
     "docs/design/CONTEXT-RESULT-IDENTITY.md",
     "docs/design/CROSS-AGENT-EVIDENCE.md",
     "docs/decisions/ADR-006-MULTI-RUNTIME-CORE-ADAPTER-BOUNDARY.md",
+    "docs/MAINTENANCE.md",
+    "docs/reference/PRIVACY.md",
+    "docs/operations/DEVELOPMENT-WORKFLOW.md",
+    "docs/benchmarks/BASELINE-PROTOCOL-V1.md",
+    "SECURITY.md",
     "docs/INDEX.md"
 )
 $stale = @(

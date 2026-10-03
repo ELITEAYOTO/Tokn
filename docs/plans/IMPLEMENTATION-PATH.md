@@ -330,6 +330,14 @@ Before engineering an optimizer, Opportunity Analyzer V0 estimates separately:
 
 A valid conclusion is DEPRIORITIZE.
 
+## Parallel baseline / benchmark readiness
+
+Status: PROTOCOL PREPARED / MAY RUN DURING M4.
+
+Use `docs/benchmarks/BASELINE-PROTOCOL-V1.md` to collect native-agent variance and cost surfaces without an active Tokn intervention.
+Store raw runs locally only; commit sanitized manifests/aggregates only.
+Do not create a fake passive-observer A/B. The baseline prepares sample sizing, quality/exclusion rules, cache handling and Tokn-overhead measurement for Experiment 003.
+
 ## Phase I - Counterfactual / Policy Foundation + Experiment 003
 
 Status: ONLY AFTER ONE REPRODUCIBLE FINDING + OPPORTUNITY
