@@ -1460,10 +1460,10 @@ fn parse_source_version_boundary(value: String) -> rusqlite::Result<SourceVersio
         _ => Err(rusqlite::Error::FromSqlConversionFailure(
             0,
             rusqlite::types::Type::Text,
-            std::io::Error::new(
+            Box::new(std::io::Error::new(
                 std::io::ErrorKind::InvalidData,
                 format!("unknown source version boundary: {value}"),
-            ),
+            )),
         )),
     }
 }
