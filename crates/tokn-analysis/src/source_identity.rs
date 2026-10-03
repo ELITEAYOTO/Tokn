@@ -159,7 +159,8 @@ fn aggregate_content_coverage(
 ) -> EvidenceIdentityCoverage {
     if occurrences > 0 && observed == occurrences {
         EvidenceIdentityCoverage::Observed
-    } else if observed > 0 || coverages.contains(&EvidenceIdentityCoverage::Partial) {`r`n        EvidenceIdentityCoverage::Partial
+    } else if observed > 0 || coverages.contains(&EvidenceIdentityCoverage::Partial) {
+        EvidenceIdentityCoverage::Partial
     } else if coverages.contains(&EvidenceIdentityCoverage::Unknown) {
         EvidenceIdentityCoverage::Unknown
     } else {
