@@ -4,9 +4,9 @@ Tokn is local-first by default. Current V0.1 does not upload Tokn evidence or ca
 
 ## Current durable boundary
 
-Tokn may read explicitly supported local coding-agent evidence and persist structured historical evidence in its local Store. Durable data may include token accounting, runtime/profile evidence, activity metadata, project-scoped identities/fingerprints, source-version evidence and workspace Git provenance.
+Tokn may read explicitly supported local coding-agent evidence and persist structured historical evidence in its local Store. Durable data may include token accounting, runtime/profile evidence, activity metadata, project-scoped identities/fingerprints, source-version evidence, workspace Git provenance and project-scoped task-artifact fingerprints when an explicit task file is supplied.
 
-Tokn does not persist raw rollout/trace files or raw terminal/tool-result content merely for convenience or identity generation. Raw prompts, source files, auth credentials and private runtime evidence remain outside the Store unless a future explicit contract says otherwise.
+Tokn does not persist raw rollout/trace files or raw terminal/tool-result content merely for convenience or identity generation. `store-evidence --task-input` reads task bytes transiently and stores only a project-scoped/domain-separated `tsk-v1-*` fingerprint plus byte length; it does not store the task text or path. Raw prompts, source files, auth credentials and private runtime evidence remain outside the Store unless a future explicit contract says otherwise.
 
 The normal Codex session source is `%USERPROFILE%\.codex\sessions`. Diagnostic bundles can contain sensitive prompts, outputs, terminal data and paths; they are imported only when explicitly provided.
 

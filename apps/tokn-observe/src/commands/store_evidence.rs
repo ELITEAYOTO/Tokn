@@ -14,9 +14,9 @@ use tokn_domain::{
 };
 use tokn_storage::{
     Database, MeasurementStoreInput, RateLimitStoreInput, SourceVersionStoreInput,
-    ToolActivityStoreInput, WorkspaceGitProvenanceStoreInput, fingerprint_bytes, private_id,
-    scoped_fingerprint_bytes, scoped_git_head_bytes, scoped_source_id_bytes,
-    scoped_source_version_bytes,
+    TaskInputStoreInput, ToolActivityStoreInput, WorkspaceGitProvenanceStoreInput,
+    fingerprint_bytes, private_id, scoped_fingerprint_bytes, scoped_git_head_bytes,
+    scoped_source_id_bytes, scoped_source_version_bytes, scoped_task_input_bytes,
 };
 
 use super::common::{db_path, open_db};
@@ -27,6 +27,7 @@ pub fn run(
     workspace_key: &str,
     parent_workspace_key: Option<&str>,
     runtime_profile_path: Option<&Path>,
+    task_input_path: Option<&Path>,
     db_override: Option<&Path>,
 ) -> anyhow::Result<()> {
     if project_key.trim().is_empty() {
@@ -71,6 +72,7 @@ pub fn run(
     let profile = runtime_profile_path
         .map(read_json::<ModelRuntimeProfile>)
         .transpose()?;
+    let task_input = build_task_input(project_key, task_input_path)?;
 
     let project_id = private_id("prj", project_key);
     let tool_activities = build_tool_activities(
@@ -104,6 +106,7 @@ pub fn run(
         result,
         group,
         profile,
+        task_input,
         tool_activities,
         rate_limit_snapshots,
         source_versions,
@@ -127,6 +130,7 @@ pub fn run(
         summary.rate_limit_snapshot_count
     );
     println!("  source_versions: {}", summary.source_version_count);
+    println!("  task_input_observations: {}", summary.task_input_count);
     println!(
         "  workspace_git_provenance: {}",
         summary.workspace_git_provenance_count
@@ -320,6 +324,28 @@ fn build_source_versions(
     }
 
     Ok(out)
+}
+
+fn build_task_input(
+    project_key: &str,
+    task_input_path: Option<&Path>,
+) -> anyhow::Result<TaskInputStoreInput> {
+    let Some(path) = task_input_path else {
+        return Ok(TaskInputStoreInput::default());
+    };
+    if !path.is_file() {
+        anyhow::bail!("task input file not found: {}", path.display());
+    }
+    let bytes =
+        std::fs::read(path).with_context(|| format!("read task input {}", path.display()))?;
+    if bytes.is_empty() {
+        anyhow::bail!("task input file is empty: {}", path.display());
+    }
+    Ok(TaskInputStoreInput {
+        coverage: EvidenceIdentityCoverage::Observed,
+        task_fingerprint: Some(scoped_task_input_bytes(project_key, &bytes)),
+        bytes: Some(u64::try_from(bytes.len())?),
+    })
 }
 
 fn build_workspace_git_provenance(
@@ -698,6 +724,40 @@ mod tests {
         assert!(!format!("{first:?}").contains(raw_output));
 
         let _ = std::fs::remove_file(path);
+    }
+
+    #[test]
+    fn task_input_projection_is_scoped_and_does_not_retain_raw_content() {
+        let path = std::env::temp_dir().join(format!(
+            "tokn-task-input-projection-{}.md",
+            std::process::id()
+        ));
+        let raw = b"private exact task bytes";
+        std::fs::write(&path, raw).expect("write task fixture");
+
+        let first = build_task_input("project-a", Some(&path)).expect("task input");
+        let repeat = build_task_input("project-a", Some(&path)).expect("task input repeat");
+        let other_scope = build_task_input("project-b", Some(&path)).expect("other scope");
+        assert_eq!(first.coverage, EvidenceIdentityCoverage::Observed);
+        assert_eq!(first.bytes, Some(raw.len() as u64));
+        assert_eq!(first.task_fingerprint, repeat.task_fingerprint);
+        assert_ne!(first.task_fingerprint, other_scope.task_fingerprint);
+        assert!(
+            first
+                .task_fingerprint
+                .as_deref()
+                .is_some_and(|value| value.starts_with("tsk-v1-"))
+        );
+        assert!(!format!("{first:?}").contains("private exact task bytes"));
+        let _ = std::fs::remove_file(path);
+    }
+
+    #[test]
+    fn absent_task_input_projects_not_captured() {
+        let input = build_task_input("project-a", None).expect("missing task input");
+        assert_eq!(input.coverage, EvidenceIdentityCoverage::NotCaptured);
+        assert!(input.task_fingerprint.is_none());
+        assert!(input.bytes.is_none());
     }
 
     #[test]

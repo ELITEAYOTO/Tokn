@@ -31,10 +31,12 @@ pub fn run(
     let snapshot = db.historical_snapshot(project_id, None, limit)?;
     let source_versions = db.source_version_history(project_id, None, limit)?;
     let workspace_git = db.workspace_git_provenance_history(project_id, None, limit)?;
+    let task_inputs = db.task_input_history(project_id, None, limit)?;
     let report = build_cross_run_comparison(
         &snapshot,
         &source_versions,
         &workspace_git,
+        &task_inputs,
         baseline_run_id,
         candidate_run_id,
     )?;

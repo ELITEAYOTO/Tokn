@@ -8,16 +8,17 @@ Date: 2026-10-03
 Compare two explicitly selected historical runs on captured starting-state and runtime evidence without ranking their outcomes and without authorizing causal claims.
 
 This primitive answers a narrow question: **are the conditions Tokn actually captured compatible across the two runs?**
-It does not answer whether the tasks/prompts were identical, whether only one intervention changed, or which run was better.
+With the Task Input Identity V0 extension it can also compare exact frozen task-artifact identity when both sides directly captured it. It still does not prove that those bytes were delivered unchanged to the runtime/model, whether only one intervention changed, or which run was better.
 
 ## Inputs
 
 `tokn-observe cross-run-comparison` reads existing Store V2 history only:
 - HistoricalSnapshot V1 for run identity, contract versions and runtime profiles;
 - SourceVersionHistory V1 for exact `BEFORE` source state;
-- WorkspaceGitProvenanceHistory V1 for `BEFORE` Git HEAD/dirty evidence.
+- WorkspaceGitProvenanceHistory V1 for `BEFORE` Git HEAD/dirty evidence;
+- TaskInputHistory V1 for exact privacy-safe frozen task-artifact identity when captured.
 
-No Store migration and no Measurement Contract V1 change are required.
+The accepted Cross-Run base required no Store migration. The Task Input Identity V0 extension uses additive Store migration `0008_task_input_identity.sql`; Measurement Contract V1 and Runner V1 remain unchanged.
 
 The baseline and candidate run ids must be distinct and present inside the selected bounded history window.
 Optional project filtering uses the existing private `prj-*` identity boundary.
@@ -59,6 +60,15 @@ Per source it reports:
 An asymmetric snapshot is not relabeled as an added/removed source because absence from captured evidence is not proof of filesystem absence.
 Duplicate BEFORE source records fail closed.
 
+### Task input identity
+
+`TASK_INPUT_IDENTITY` compares only project-scoped `tsk-v1-*` identities within one project scope:
+- `PASS` when both runs directly captured exact task-artifact identity and the fingerprints match;
+- `FAIL` when both runs directly captured exact task-artifact identity and the fingerprints differ;
+- `UNKNOWN` for missing, partial, not-captured or otherwise incomplete identity.
+
+Across different project ids Tokn does not compare task fingerprints. `SAME_IDENTITY_OBSERVED` proves equality of the supplied task artifact bytes only; it does not prove runtime/model delivery. TaskInputHistory therefore keeps `delivery_status=NOT_PROVEN`.
+
 ### Workspace Git BEFORE state
 
 `WORKSPACE_GIT_BEFORE`:
@@ -79,7 +89,7 @@ Every report keeps:
 `causal_claims_status = NOT_ESTABLISHED`
 
 because this historical surface does not by itself prove:
-- same exact task/prompt;
+- that the captured task artifact was delivered unchanged to the runtime/model;
 - same external environment/dependencies;
 - same host-side hidden state;
 - a single primary intervention difference;
@@ -94,8 +104,8 @@ Cross-Run Comparability V0 does not:
 - call either run better/worse;
 - estimate token savings;
 - prove policy effect;
-- prove task identity;
-- infer source equality across project scopes;
+- turn task-artifact identity into proof of runtime delivery;
+- infer source or task equality across project scopes;
 - turn missing evidence into compatibility.
 
 ## Compaction boundary
@@ -108,5 +118,5 @@ Detailed compaction chronology remains `NOT_CAPTURED` until a real event can be 
 
 After this comparability primitive, remaining M4 evidence work includes:
 - real compaction/rediscovery evidence only when directly observable;
-- task/context-delivery identity needed for stronger stale/fresh and causal controls;
+- runtime task/context-delivery evidence needed beyond the now-captured task-artifact identity for stronger causal controls;
 - broader source kinds only when stable identity is provable.

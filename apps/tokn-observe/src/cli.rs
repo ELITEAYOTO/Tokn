@@ -167,6 +167,18 @@ pub enum Command {
         #[arg(long)]
         output_json: Option<PathBuf>,
     },
+    TaskInputHistory {
+        #[arg(long)]
+        project_id: Option<String>,
+        #[arg(long)]
+        workspace_id: Option<String>,
+        #[arg(long, default_value_t = 50)]
+        limit: usize,
+        #[arg(long)]
+        db: Option<PathBuf>,
+        #[arg(long)]
+        output_json: Option<PathBuf>,
+    },
     WorkspaceGitProvenanceHistory {
         #[arg(long)]
         project_id: Option<String>,
@@ -189,6 +201,8 @@ pub enum Command {
         parent_workspace_key: Option<String>,
         #[arg(long)]
         runtime_profile: Option<PathBuf>,
+        #[arg(long)]
+        task_input: Option<PathBuf>,
         #[arg(long)]
         db: Option<PathBuf>,
     },
