@@ -164,7 +164,8 @@ Reste M4 :
 - source mutation-operation timing + SourceMutationHistory V1 : ACCEPTED FOUNDATION, effect remains `NOT_VERIFIED` ;
 - run-boundary source version/hash from Runner BEFORE/AFTER snapshots + SourceVersionHistory V1 : ACCEPTED FOUNDATION ;
 - Workspace Git Provenance V0 (boundary HEAD fingerprint + dirty + explicit coverage) : ACCEPTED FOUNDATION ;
-- verified mutation effect/freshness, broader symbol/range identity, compaction/rediscovery and explicit cross-run comparison remain.
+- Source Mutation Window V0 (same-thread exact read-before -> completed mutation -> exact read-after, ambiguity fail-closed) : ACCEPTED CHRONOLOGY FOUNDATION; causality remains `NOT_PROVEN` ;
+- freshness/invalidation, broader symbol/range identity, compaction/rediscovery and explicit cross-run comparison remain.
 
 ## M4.5 - Context Identity + Shadow Foundations
 

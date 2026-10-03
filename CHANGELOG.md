@@ -1,3 +1,12 @@
+## 2026-10-03 - M4 Source Mutation Window V0
+
+- added a fail-closed same-thread mutation chronology reducer over ToolActivityHistory V3: exact same-source read before -> completed targeted mutation -> exact same-source read after;
+- exact before/after ContentFingerprint equality/difference is reported only under complete sequence + identity coverage;
+- intervening same-thread mutations and any same-run same-source cross-thread mutation force `UNKNOWN` because authoritative cross-agent ordering is unavailable;
+- every window explicitly keeps `causality_status=NOT_PROVEN`; content difference around a mutation is not relabeled as mutation causality, freshness, stale context, safe reuse or savings;
+- added read-only `tokn-observe source-mutation-window-history` without Store V2 migration or Measurement Contract V1 change;
+- added targeted analysis/CLI regressions and updated canonical M4 docs so freshness/invalidation is the next evidence-joining boundary.
+
 ## 2026-10-03 - Stability and Benchmark Readiness
 
 - installed/pinned local Rust workflow to match Rust 1.97.1 CI and added `scripts/dev-check.ps1`;

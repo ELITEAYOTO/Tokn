@@ -83,7 +83,7 @@ Un document historique ne doit pas remplacer une source de verite courante.
 - `design/SOURCE-IDENTITY-CONTENT-EVOLUTION.md`
   SourceStableId file V0, identite project-scoped stable entre clones et historique conservateur `UNCHANGED_OBSERVED` / `CHANGED_OBSERVED` / `UNKNOWN`.
 - `design/SOURCE-MUTATION-OBSERVATION.md`
-  ToolActivityHistory V3 + SourceMutationHistory V1 : timing d'operation de mutation observe, effet `NOT_VERIFIED`, aucune inference de freshness/staleness.
+  ToolActivityHistory V3 + SourceMutationHistory V1 + Source Mutation Window V0 : timing de mutation observe puis chronologie fail-closed read/mutation/read avec exact content equality/difference; effet causal reste `NOT_PROVEN`, aucune inference de freshness/staleness.
 - `design/SOURCE-VERSION-BOUNDARY.md`
   SourceVersionHistory V1 : versions BEFORE/AFTER issues des snapshots Runner, fingerprints project-scoped, comparaison fail-closed et aucune inference de freshness.
 - `design/WORKSPACE-GIT-PROVENANCE.md`

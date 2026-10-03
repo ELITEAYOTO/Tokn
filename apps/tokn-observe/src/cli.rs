@@ -117,6 +117,18 @@ pub enum Command {
         #[arg(long)]
         output_json: Option<PathBuf>,
     },
+    SourceMutationWindowHistory {
+        #[arg(long)]
+        project_id: Option<String>,
+        #[arg(long)]
+        workspace_id: Option<String>,
+        #[arg(long, default_value_t = 50)]
+        limit: usize,
+        #[arg(long)]
+        db: Option<PathBuf>,
+        #[arg(long)]
+        output_json: Option<PathBuf>,
+    },
     SourceVersionHistory {
         #[arg(long)]
         project_id: Option<String>,

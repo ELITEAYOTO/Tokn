@@ -53,6 +53,30 @@ Each event preserves:
 
 Events are ordered deterministically by run creation time, then observed timing when available, then activity identity.
 
+## Source Mutation Window V0
+
+The next observation-only reducer joins already-persisted ToolActivityHistory V3 evidence without changing Store V2 or Measurement Contract V1.
+
+`tokn-observe source-mutation-window-history` evaluates a mutation only when Tokn can conservatively anchor one logical source inside one run/thread chronology:
+- the mutation has an observed `SourceStableId`;
+- the mutation runtime status is `completed`;
+- mutation `started_seq` / `ended_seq` are directly captured;
+- an exact same-source `file_read` exists before the mutation and another after it in the same thread;
+- both selected reads have runtime status `completed` and complete observed `ContentFingerprint` identity;
+- no other same-thread mutation of that source can intervene between the selected reads;
+- no same-run mutation of that source exists on another thread, because cross-agent ordering is not currently provable.
+
+The reducer emits only:
+- `EXACT_CONTENT_EQUALITY_OBSERVED` when the exact read fingerprints before and after match;
+- `EXACT_CONTENT_DIFFERENCE_OBSERVED` when they differ;
+- `UNKNOWN` when any required chronology/identity evidence is incomplete or ambiguous.
+
+Every window keeps `causality_status = NOT_PROVEN`.
+A content difference around one completed mutation is stronger evidence than mutation intent alone, but it still does not prove that this tool call caused the bytes to change: an unobserved external writer, process, hook, filesystem side effect or other source may exist.
+Likewise, equality before/after does not prove the mutation had no transient effect because content could have changed and later returned to the same bytes.
+
+This window is therefore a chronology primitive for the later freshness/invalidation reducer, not a mutation-causality verdict.
+
 ## Content identity boundary
 
 SourceIdentityHistory remains restricted to `file_read` observations.
@@ -81,11 +105,11 @@ An observed mutation operation does not prove:
 - that a reread is redundant or avoidable.
 ## Next boundary
 
-Before Tokn can emit a real freshness or invalidation finding, it still needs evidence such as:
-- directly observable source version/hash plus workspace Git HEAD/dirty provenance are now accepted boundary evidence, but source-specific attribution is still required;
-- verified mutation effect rather than operation intent alone;
-- a chronological relation between reads, verified changes and later rediscovery;
-- broader runtime-neutral source kinds only when stable identity is provable;
-- explicit cross-run compatibility and provenance rules.
+Before Tokn can emit a real freshness or invalidation finding, it still needs to join the accepted evidence conservatively:
+- Source Mutation Window V0 provides a same-thread chronological read/mutation/read observation, but its causality remains `NOT_PROVEN`;
+- exact SourceVersion BEFORE/AFTER plus workspace Git HEAD/dirty provenance are accepted boundary evidence and must stay source/provenance scoped;
+- later rediscovery must be directly observable before Tokn can describe a stale-evidence/rediscovery sequence;
+- broader runtime-neutral source kinds are allowed only when stable identity is provable;
+- explicit cross-run compatibility and provenance rules remain required.
 
-Until then, mutation timing is an observation surface only. No optimizer, memory injection, cache/reuse decision or savings claim is authorized by this V0 contract.
+Until then, mutation timing/window evidence remains observation-only. No optimizer, memory injection, cache/reuse decision or savings claim is authorized by this V0 contract.

@@ -454,9 +454,10 @@ Next inside M4:
 3. ToolActivityHistory V3 + SourceMutationHistory V1 are ACCEPTED for directly observed mutation-operation timing; effect remains `NOT_VERIFIED` ;
 4. Run-Boundary Source Version V0 + SourceVersionHistory V1 are ACCEPTED from directly observed Runner BEFORE/AFTER snapshots ;
 5. Workspace Git Provenance V0 + WorkspaceGitProvenanceHistory V1 are ACCEPTED from directly observed Runner boundary snapshots ;
-6. add verified mutation effect plus freshness/invalidation semantics only where a direct chronology supports them ;
-7. add broader source kinds, compaction/rediscovery observations and explicit multi-run comparison primitives ;
-8. only after those observations are reliable, continue M4.5 then M5 Findings + Opportunity Analyzer.
+6. Source Mutation Window V0 is ACCEPTED as a fail-closed same-thread read-before -> mutation -> read-after chronology primitive; exact equality/difference is observed, while mutation causality remains `NOT_PROVEN` ;
+7. build freshness/invalidation semantics by joining this chronology with exact SourceVersion + Workspace Git Provenance and later rediscovery, preserving `UNKNOWN` / `NOT_CAPTURED` ;
+8. add broader source kinds, compaction/rediscovery observations and explicit multi-run comparison primitives ;
+9. only after those observations are reliable, continue M4.5 then M5 Findings + Opportunity Analyzer.
 
 Parallel implementation hardening, only if measurement justifies it:
 - benchmark current Codex raw-result retention with representative 1 MB / 10 MB / 50 MB and many-small-output fixtures;
@@ -466,7 +467,7 @@ Parallel implementation hardening, only if measurement justifies it:
 
 ## 2026-10-02 insertion - shadow before active optimizer
 
-Current M4 activity foundation, runtime-profile compatibility reducer, rate-limit history, Cross-Agent Evidence V2, exact result identity, conservative SourceStableId file V0, mutation-operation timing, run-boundary source versions and Workspace Git Provenance V0 are accepted. Next: fail-closed freshness with verified effect only where provable, broader source kinds, compaction/rediscovery and explicit cross-run primitives.
+Current M4 activity foundation, runtime-profile compatibility reducer, rate-limit history, Cross-Agent Evidence V2, exact result identity, conservative SourceStableId file V0, mutation-operation timing, run-boundary source versions, Workspace Git Provenance V0 and Source Mutation Window V0 are accepted. Next: fail-closed freshness/invalidation using only directly supported chronology/version/provenance evidence, broader source kinds, compaction/rediscovery and explicit cross-run primitives.
 
 Before Findings become interventions, introduce an observation-only shadow layer where useful:
 - repo/symbol index + Git/hash invalidation;
