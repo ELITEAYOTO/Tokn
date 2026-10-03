@@ -87,7 +87,10 @@ impl fmt::Display for CrossAgentEvidenceBuildError {
                 "unsupported ToolActivityHistory schema_version {actual}; expected {expected}"
             ),
             Self::ProjectFilterMismatch => {
-                write!(formatter, "HistoricalSnapshot and ToolActivityHistory project filters differ")
+                write!(
+                    formatter,
+                    "HistoricalSnapshot and ToolActivityHistory project filters differ"
+                )
             }
             Self::WorkspaceFilterMismatch => write!(
                 formatter,
@@ -104,16 +107,20 @@ pub fn build_cross_agent_evidence(
     activity_history: &ToolActivityHistory,
 ) -> Result<CrossAgentEvidenceReport, CrossAgentEvidenceBuildError> {
     if snapshot.schema_version != HISTORICAL_SNAPSHOT_SCHEMA_VERSION {
-        return Err(CrossAgentEvidenceBuildError::UnsupportedHistoricalSnapshotSchema {
-            actual: snapshot.schema_version,
-            expected: HISTORICAL_SNAPSHOT_SCHEMA_VERSION,
-        });
+        return Err(
+            CrossAgentEvidenceBuildError::UnsupportedHistoricalSnapshotSchema {
+                actual: snapshot.schema_version,
+                expected: HISTORICAL_SNAPSHOT_SCHEMA_VERSION,
+            },
+        );
     }
     if activity_history.schema_version != TOOL_ACTIVITY_HISTORY_SCHEMA_VERSION {
-        return Err(CrossAgentEvidenceBuildError::UnsupportedToolActivityHistorySchema {
-            actual: activity_history.schema_version,
-            expected: TOOL_ACTIVITY_HISTORY_SCHEMA_VERSION,
-        });
+        return Err(
+            CrossAgentEvidenceBuildError::UnsupportedToolActivityHistorySchema {
+                actual: activity_history.schema_version,
+                expected: TOOL_ACTIVITY_HISTORY_SCHEMA_VERSION,
+            },
+        );
     }
     if snapshot.project_filter != activity_history.project_filter {
         return Err(CrossAgentEvidenceBuildError::ProjectFilterMismatch);
@@ -146,7 +153,10 @@ pub fn build_cross_agent_evidence(
             per_thread: BTreeMap::new(),
         });
         entry.occurrences += 1;
-        *entry.per_thread.entry(activity.thread_id.clone()).or_default() += 1;
+        *entry
+            .per_thread
+            .entry(activity.thread_id.clone())
+            .or_default() += 1;
     }
 
     let mut overlaps = Vec::new();
@@ -230,7 +240,9 @@ fn relation_kind(
     second_thread_id: &str,
     agents: &BTreeMap<(String, String), &HistoricalAgentRecord>,
 ) -> CrossAgentRelationKind {
-    let first = agents.get(&(run_id.to_string(), first_thread_id.to_string())).copied();
+    let first = agents
+        .get(&(run_id.to_string(), first_thread_id.to_string()))
+        .copied();
     let second = agents
         .get(&(run_id.to_string(), second_thread_id.to_string()))
         .copied();
@@ -291,11 +303,7 @@ mod tests {
     const PROJECT: &str = "prj-0123456789abcdef01234567";
     const WORKSPACE: &str = "wsp-0123456789abcdef01234567";
 
-    fn agent(
-        thread_id: &str,
-        parent_thread_id: Option<&str>,
-        depth: u32,
-    ) -> HistoricalAgentRecord {
+    fn agent(thread_id: &str, parent_thread_id: Option<&str>, depth: u32) -> HistoricalAgentRecord {
         HistoricalAgentRecord {
             run_id: "run-1".into(),
             thread_id: thread_id.into(),
@@ -352,7 +360,10 @@ mod tests {
     #[test]
     fn reports_parent_child_operation_overlap_without_claiming_result_identity() {
         let report = build_cross_agent_evidence(
-            &snapshot(vec![agent("root", None, 0), agent("child", Some("root"), 1)]),
+            &snapshot(vec![
+                agent("root", None, 0),
+                agent("child", Some("root"), 1),
+            ]),
             &history(vec![
                 activity("run-1", "root", 0, Some("op-same")),
                 activity("run-1", "child", 0, Some("op-same")),
@@ -363,7 +374,10 @@ mod tests {
         let overlap = &report.overlaps[0];
         assert_eq!(overlap.occurrences, 2);
         assert_eq!(overlap.thread_count, 2);
-        assert_eq!(overlap.result_identity_coverage, ResultIdentityCoverage::NotCaptured);
+        assert_eq!(
+            overlap.result_identity_coverage,
+            ResultIdentityCoverage::NotCaptured
+        );
         assert_eq!(overlap.relations.len(), 1);
         assert_eq!(
             overlap.relations[0].relation,
@@ -465,10 +479,12 @@ mod tests {
         historical_snapshot.schema_version = 99;
         assert!(matches!(
             build_cross_agent_evidence(&historical_snapshot, &history(Vec::new())),
-            Err(CrossAgentEvidenceBuildError::UnsupportedHistoricalSnapshotSchema {
-                actual: 99,
-                ..
-            })
+            Err(
+                CrossAgentEvidenceBuildError::UnsupportedHistoricalSnapshotSchema {
+                    actual: 99,
+                    ..
+                }
+            )
         ));
     }
 }
