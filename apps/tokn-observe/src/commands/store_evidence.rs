@@ -2,14 +2,14 @@ use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Path, PathBuf};
 
 use anyhow::Context;
-use tokn_codex::session::read_session_tool_result_outputs;
+use tokn_codex::session::{extract_file_read_source_locator, read_session_tool_result_outputs};
 use tokn_domain::{
     AgentEvidence, EvidenceIdentityCoverage, MeasurementContractManifest, ModelRuntimeProfile,
     RunGroup, RunnerResult, RunnerSourceReport, SourceKind,
 };
 use tokn_storage::{
     Database, MeasurementStoreInput, RateLimitStoreInput, ToolActivityStoreInput,
-    fingerprint_bytes, private_id, scoped_fingerprint_bytes,
+    fingerprint_bytes, private_id, scoped_fingerprint_bytes, scoped_source_id_bytes,
 };
 
 use super::common::{db_path, open_db};
@@ -66,7 +66,12 @@ pub fn run(
         .transpose()?;
 
     let project_id = private_id("prj", project_key);
-    let tool_activities = build_tool_activities(&project_id, project_key, &session_members);
+    let tool_activities = build_tool_activities(
+        &project_id,
+        project_key,
+        result.selected_workspace.as_deref(),
+        &session_members,
+    );
     let rate_limit_snapshots = build_rate_limit_snapshots(&session_members);
     let workspace_id = private_id("wsp", &format!("{project_key}:{workspace_key}"));
     let parent_workspace_id =
@@ -131,6 +136,7 @@ pub fn run(
 fn build_tool_activities(
     project_id: &str,
     project_key: &str,
+    selected_workspace: Option<&str>,
     members: &[AgentEvidence],
 ) -> Vec<ToolActivityStoreInput> {
     let mut out = Vec::new();
@@ -167,6 +173,20 @@ fn build_tool_activities(
                 let workdir = workdir.trim();
                 (!workdir.is_empty()).then(|| private_id("cwd", &format!("{project_id}:{workdir}")))
             });
+            let source_locator = extract_file_read_source_locator(
+                tool,
+                member.cwd.as_deref(),
+                selected_workspace,
+            );
+            let source_stable_id = source_locator
+                .locator
+                .as_deref()
+                .map(|locator| scoped_source_id_bytes(project_key, locator.as_bytes()));
+            let source_identity_coverage = if source_stable_id.is_some() {
+                EvidenceIdentityCoverage::Observed
+            } else {
+                source_locator.coverage
+            };
             let base_call_id = base_source_call_id(&tool.tool_call_id);
             let (content_fingerprint, content_identity_coverage) = match &result_outputs {
                 Ok(outputs)
@@ -209,8 +229,8 @@ fn build_tool_activities(
                 original_token_count: tool.original_token_count,
                 operation_fingerprint,
                 workdir_fingerprint,
-                source_stable_id: None,
-                source_identity_coverage: EvidenceIdentityCoverage::NotCaptured,
+                source_stable_id,
+                source_identity_coverage,
                 content_fingerprint,
                 content_identity_coverage,
                 parse_error_present: tool.parse_error.is_some(),
@@ -347,7 +367,7 @@ mod tests {
         }];
 
         let project_id = "prj-0123456789abcdef01234567";
-        let activities = build_tool_activities(project_id, "fixture-project-key", &members);
+        let activities = build_tool_activities(project_id, "fixture-project-key", None, &members);
 
         assert_eq!(activities.len(), 2);
         assert!(
@@ -387,6 +407,65 @@ mod tests {
     }
 
     #[test]
+    fn source_identity_is_workspace_relative_stable_and_project_scoped() {
+        let missing_source = std::env::temp_dir()
+            .join("tokn-source-id-no-result.jsonl")
+            .to_string_lossy()
+            .to_string();
+        let member_a = AgentEvidence {
+            source_path: missing_source.clone(),
+            thread_id: "thread-a".into(),
+            cwd: Some(r"E:\clone-a\PROJECT".into()),
+            tools: vec![ToolObservation {
+                tool_call_id: "call-source-a#0".into(),
+                kind: "exec_command".into(),
+                category: "file_read".into(),
+                surface: "session_rollout".into(),
+                status: "completed".into(),
+                command: Some("Get-Content README.md".into()),
+                ..Default::default()
+            }],
+            ..Default::default()
+        };
+        let mut member_b = member_a.clone();
+        member_b.thread_id = "thread-b".into();
+        member_b.cwd = Some(r"E:\clone-b\PROJECT".into());
+        member_b.tools[0].tool_call_id = "call-source-b#0".into();
+
+        let project_id = "prj-0123456789abcdef01234567";
+        let left = build_tool_activities(
+            project_id,
+            "project-key-a",
+            Some(r"E:\clone-a\PROJECT"),
+            &[member_a],
+        );
+        let right = build_tool_activities(
+            project_id,
+            "project-key-a",
+            Some(r"E:\clone-b\PROJECT"),
+            &[member_b.clone()],
+        );
+        let other_project = build_tool_activities(
+            project_id,
+            "project-key-b",
+            Some(r"E:\clone-b\PROJECT"),
+            &[member_b],
+        );
+
+        assert_eq!(left[0].source_identity_coverage, EvidenceIdentityCoverage::Observed);
+        assert_eq!(left[0].source_stable_id, right[0].source_stable_id);
+        assert_ne!(left[0].source_stable_id, other_project[0].source_stable_id);
+        assert!(left[0]
+            .source_stable_id
+            .as_deref()
+            .is_some_and(|value| value.starts_with("src-v1-")));
+        let debug = format!("{left:?}{right:?}");
+        assert!(!debug.contains("clone-a"));
+        assert!(!debug.contains("clone-b"));
+        assert!(!debug.contains("README.md"));
+    }
+
+    #[test]
     fn result_identity_is_project_scoped_and_raw_output_is_not_projected() {
         let path =
             std::env::temp_dir().join(format!("tokn-result-identity-{}.jsonl", std::process::id()));
@@ -420,10 +499,10 @@ mod tests {
         };
         let project_id = "prj-0123456789abcdef01234567";
         let first =
-            build_tool_activities(project_id, "project-key-a", std::slice::from_ref(&member));
+            build_tool_activities(project_id, "project-key-a", None, std::slice::from_ref(&member));
         let second =
-            build_tool_activities(project_id, "project-key-a", std::slice::from_ref(&member));
-        let other_project = build_tool_activities(project_id, "project-key-b", &[member]);
+            build_tool_activities(project_id, "project-key-a", None, std::slice::from_ref(&member));
+        let other_project = build_tool_activities(project_id, "project-key-b", None, &[member]);
 
         assert_eq!(
             first[0].content_identity_coverage,
@@ -490,6 +569,7 @@ mod tests {
         let activities = build_tool_activities(
             "prj-0123456789abcdef01234567",
             "fixture-project-key",
+            None,
             &[member],
         );
         assert_eq!(activities.len(), 2);
@@ -518,6 +598,7 @@ mod tests {
         let activities = build_tool_activities(
             "prj-0123456789abcdef01234567",
             "fixture-project-key",
+            None,
             &[member],
         );
         assert_eq!(

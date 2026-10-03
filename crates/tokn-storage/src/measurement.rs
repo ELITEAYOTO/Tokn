@@ -17,6 +17,7 @@ use tokn_domain::{
 use crate::Database;
 
 const PRIVATE_ID_HEX_LEN: usize = 24;
+const SCOPED_FINGERPRINT_HEX_LEN: usize = 64;
 
 #[derive(Debug, Error)]
 pub enum MeasurementStoreError {
@@ -159,6 +160,18 @@ pub fn scoped_fingerprint_bytes(
     hasher.update(&[0]);
     hasher.update(bytes);
     format!("{prefix}-v1-{}", hasher.finalize().to_hex())
+}
+
+pub fn scoped_source_id_bytes(scope_key: &str, locator: &[u8]) -> String {
+    let key = blake3::derive_key(
+        "tokn.project-scoped-source-identity.v1",
+        scope_key.as_bytes(),
+    );
+    let mut hasher = blake3::Hasher::new_keyed(&key);
+    hasher.update(b"logical-source-locator-v1");
+    hasher.update(&[0]);
+    hasher.update(locator);
+    format!("src-v1-{}", hasher.finalize().to_hex())
 }
 
 impl Database {
@@ -1116,6 +1129,38 @@ fn validate_input(input: &MeasurementStoreInput) -> Result<(), MeasurementStoreE
         if let Some(value) = activity.workdir_fingerprint.as_deref() {
             validate_private_id("workdir_fingerprint", value, "cwd")?;
         }
+        match activity.source_stable_id.as_deref() {
+            Some(value) => {
+                validate_scoped_fingerprint("source_stable_id", value, "src")?;
+                if activity.source_identity_coverage != EvidenceIdentityCoverage::Observed {
+                    return Err(MeasurementStoreError::Invalid(
+                        "source_stable_id requires OBSERVED source identity coverage".into(),
+                    ));
+                }
+            }
+            None if activity.source_identity_coverage == EvidenceIdentityCoverage::Observed => {
+                return Err(MeasurementStoreError::Invalid(
+                    "OBSERVED source identity coverage requires source_stable_id".into(),
+                ));
+            }
+            None => {}
+        }
+        match activity.content_fingerprint.as_deref() {
+            Some(value) => {
+                validate_scoped_fingerprint("content_fingerprint", value, "cnt")?;
+                if activity.content_identity_coverage != EvidenceIdentityCoverage::Observed {
+                    return Err(MeasurementStoreError::Invalid(
+                        "content_fingerprint requires OBSERVED content identity coverage".into(),
+                    ));
+                }
+            }
+            None if activity.content_identity_coverage == EvidenceIdentityCoverage::Observed => {
+                return Err(MeasurementStoreError::Invalid(
+                    "OBSERVED content identity coverage requires content_fingerprint".into(),
+                ));
+            }
+            None => {}
+        }
     }
 
     for snapshot in &input.rate_limit_snapshots {
@@ -1206,6 +1251,27 @@ fn validate_private_id(name: &str, value: &str, prefix: &str) -> Result<(), Meas
     Ok(())
 }
 
+fn validate_scoped_fingerprint(
+    name: &str,
+    value: &str,
+    prefix: &str,
+) -> Result<(), MeasurementStoreError> {
+    let expected_prefix = format!("{prefix}-v1-");
+    let Some(hex) = value.strip_prefix(&expected_prefix) else {
+        return Err(MeasurementStoreError::Invalid(format!(
+            "{name} must be a privacy-preserving {prefix}-v1-<hex> fingerprint"
+        )));
+    };
+    if hex.len() != SCOPED_FINGERPRINT_HEX_LEN
+        || !hex.bytes().all(|byte| byte.is_ascii_hexdigit())
+    {
+        return Err(MeasurementStoreError::Invalid(format!(
+            "{name} must contain exactly {SCOPED_FINGERPRINT_HEX_LEN} hexadecimal characters"
+        )));
+    }
+    Ok(())
+}
+
 fn parse_identity_coverage(value: String) -> rusqlite::Result<EvidenceIdentityCoverage> {
     EvidenceIdentityCoverage::parse(&value).ok_or_else(|| {
         rusqlite::Error::FromSqlConversionFailure(
@@ -1262,6 +1328,26 @@ mod tests {
             "tokn-measurement-{name}-{}.sqlite3",
             std::process::id()
         ))
+    }
+
+    #[test]
+    fn scoped_identity_validator_accepts_only_versioned_project_scoped_fingerprints() {
+        let source = scoped_source_id_bytes("project-a", b"file:src/lib.rs");
+        let content = scoped_fingerprint_bytes(
+            "cnt",
+            "project-a",
+            "tool-result-output-v1",
+            b"fixture",
+        );
+        assert!(validate_scoped_fingerprint("source", &source, "src").is_ok());
+        assert!(validate_scoped_fingerprint("content", &content, "cnt").is_ok());
+        assert!(validate_scoped_fingerprint(
+            "source",
+            &private_id("src", "raw-path"),
+            "src"
+        )
+        .is_err());
+        assert!(validate_scoped_fingerprint("content", "cnt-v1-deadbeef", "cnt").is_err());
     }
 
     #[test]
