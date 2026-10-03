@@ -73,7 +73,9 @@ Un document historique ne doit pas remplacer une source de verite courante.
 - `design/HISTORICAL-CONTEXT-LEDGER.md`
   M4 en cours : HistoricalSnapshot/Context Ledger V1, coverage, lineage, CLI/MCP et limites explicites.
 - `design/CROSS-AGENT-EVIDENCE.md`
-  Cross-Agent Evidence V1 : chevauchement exact d'operations privacy-safe entre threads, lineage et garde-fou `NOT_CAPTURED` sur l'identite du resultat.
+  Cross-Agent Evidence V2 : chevauchement exact d'operations entre threads et comparaison d'identite de resultat uniquement sous preuve complete.
+- `design/CONTEXT-RESULT-IDENTITY.md`
+  Contrat M4/M4.5 : SourceStableId distinct de ContentFingerprint, coverage explicite et aucun stockage brut des outputs.
 - `design/SESSION-ROLLOUT-ADAPTER.md`
 - `design/AGENT-COST-ATTRIBUTION.md`
 - `design/WORKSPACE-TRACKING.md`
