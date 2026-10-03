@@ -220,6 +220,7 @@ fn exact_repetitions(activities: &[HistoricalToolActivityRecord]) -> Vec<ExactRe
 
 #[cfg(test)]
 mod tests {
+    use tokn_domain::EvidenceIdentityCoverage;
     use super::*;
 
     fn activity(
