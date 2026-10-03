@@ -1,3 +1,12 @@
+## 2026-10-03 - M4 core exit gate
+
+- accepted the Historical Analyzer + Context Ledger core without fabricating unavailable phase/compaction/delivery signals;
+- classified semantic phase timeline and detailed compaction as evidence-gated `NOT_CAPTURED`;
+- preserved runtime delivery and interpreted rediscovery/redundancy/freshness as `NOT_PROVEN`;
+- opened M4.5 observation-only work with Shadow Repository Index V0 design + measurement as the next bounded slice;
+- added `docs/design/M4-EXIT-GATE.md` and documentation consistency guards;
+- no Store, Measurement, Runner or runtime code changes.
+
 ## 2026-10-03 - M4 Cross-Run Source Re-read Evidence V0
 
 - added observation-only cross-run same-source re-read chronology over completed ToolActivityHistory V3 file reads with observed project-scoped SourceStableId;

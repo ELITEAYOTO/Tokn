@@ -35,8 +35,8 @@ if ($Cargo -notmatch '(?m)^version = "0\.1\.0"\r?$') {
 }
 Write-Host "[PASS] Cargo workspace version = 0.1.0"
 
-Assert-Contains "README.md" "**P0-P9 DONE ; Experiment 002 ACCEPTED ; Measurement Contract V1 FROZEN ; Store foundation DONE ; Local MCP transport prototype ACCEPTED ; Historical Analyzer + Context Ledger IN PROGRESS.**"
-Assert-Contains "STATUS.md" "Historical Analyzer + Context Ledger est IN PROGRESS"
+Assert-Contains "README.md" "**P0-P9 DONE ; Experiment 002 ACCEPTED ; Measurement Contract V1 FROZEN ; Store foundation DONE ; Local MCP transport prototype ACCEPTED ; M4 Historical Analyzer + Context Ledger CORE ACCEPTED / EVIDENCE-GATED EXTENSIONS ; M4.5 Context Identity + Shadow Foundations STARTED / OBSERVATION-ONLY.**"
+Assert-Contains "STATUS.md" "M4 Historical Analyzer + Context Ledger est CORE ACCEPTED avec EXTENSIONS EVIDENCE-GATED"
 Assert-Contains "STATUS.md" 'GitHub governance : `main` est actuellement non protegee (`protected=false`)'
 Assert-Contains "ROADMAP.md" "P9 golden replay/release validation : DONE"
 Assert-Contains "docs/plans/V0.1-IMPLEMENTATION-PLAN.md" "Status: **DONE - P0-P9 DONE**"
@@ -45,10 +45,10 @@ Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "P0-P9 : DONE"
 Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "Measurement Contract V1 : DONE / FROZEN"
 Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "Store foundation + ModelRuntimeProfile persistence : DONE"
 Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "Local MCP transport prototype : DONE / ACCEPTED"
-Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "Historical Analyzer + Context Ledger : IN PROGRESS"
-Assert-Contains "docs/plans/IMPLEMENTATION-PATH.md" "Historical Analyzer + Context Ledger IN PROGRESS"
+Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "Historical Analyzer + Context Ledger : CORE ACCEPTED / EVIDENCE-GATED EXTENSIONS"
+Assert-Contains "docs/plans/IMPLEMENTATION-PATH.md" "M4 Historical Analyzer + Context Ledger core is **ACCEPTED**"
 Assert-Contains "docs/plans/IMPLEMENTATION-PATH.md" "Status: DONE / TRANSPORT PROTOTYPE ACCEPTED"
-Assert-Contains "docs/plans/IMPLEMENTATION-PATH.md" "Status: IN PROGRESS"
+Assert-Contains "ROADMAP.md" "Statut : CORE ACCEPTED / EVIDENCE-GATED EXTENSIONS"
 Assert-Contains "docs/experiments/002-INSTRUMENTATION-VALIDATION.md" "Status: DONE / ACCEPTED"
 Assert-Contains "docs/design/MEASUREMENT-CONTRACT-V0.1.md" "Status: FROZEN V1 CONTRACT"
 Assert-Contains "docs/design/MODEL-RUNTIME-PROFILE.md" "Status: FROZEN V1 DOMAIN CONTRACT / PERSISTENCE IMPLEMENTED"
@@ -57,11 +57,11 @@ Assert-Contains "docs/design/LOCAL-MCP-PROTOTYPE.md" "Status: TRANSPORT PROTOTYP
 Assert-Contains "docs/design/LOCAL-MCP-PROTOTYPE.md" "tokn_context_ledger"
 Assert-Contains "docs/design/LOCAL-MCP-PROTOTYPE.md" 'turn granularity `NOT_CAPTURED`'
 Assert-Contains "docs/design/LOCAL-MCP-PROTOTYPE.md" 'retained-context status `UNKNOWN`'
-Assert-Contains "docs/design/HISTORICAL-CONTEXT-LEDGER.md" "Status: M4 IN PROGRESS / CONTEXT LEDGER V1 CORE ACCEPTED"
+Assert-Contains "docs/design/HISTORICAL-CONTEXT-LEDGER.md" "Status: M4 CORE ACCEPTED / EVIDENCE-GATED EXTENSIONS"
 Assert-Contains "docs/design/HISTORICAL-CONTEXT-LEDGER.md" "turn granularity is NOT_CAPTURED"
 Assert-Contains "docs/design/HISTORICAL-CONTEXT-LEDGER.md" "retained-context status remains UNKNOWN"
 Assert-Contains "docs/design/PLUGIN-ENGINE-INTEGRATION.md" "Status: LOCAL STDIO TRANSPORT PROTOTYPE ACCEPTED"
-Assert-Contains "docs/INDEX.md" "**P0-P9 DONE ; Experiment 002 ACCEPTED ; Measurement Contract V1 FROZEN ; Store foundation DONE ; Local MCP transport prototype ACCEPTED ; Historical Analyzer + Context Ledger IN PROGRESS.**"
+Assert-Contains "docs/INDEX.md" "**P0-P9 DONE ; Experiment 002 ACCEPTED ; Measurement Contract V1 FROZEN ; Store foundation DONE ; Local MCP transport prototype ACCEPTED ; M4 Historical Analyzer + Context Ledger CORE ACCEPTED / EVIDENCE-GATED EXTENSIONS ; M4.5 Context Identity + Shadow Foundations STARTED / OBSERVATION-ONLY.**"
 Assert-Contains "README.md" "Codex/Astra est le premier runtime valide, pas une dependance du domaine Tokn."
 Assert-Contains "ROADMAP.md" "## Cross-cutting multi-runtime gates"
 Assert-Contains "docs/decisions/ADR-006-MULTI-RUNTIME-CORE-ADAPTER-BOUNDARY.md" "Status: ACCEPTED"
@@ -93,10 +93,15 @@ Assert-Contains "docs/design/SOURCE-REREAD-EVIDENCE.md" '`redundancy_status = NO
 Assert-Contains "docs/design/SOURCE-REREAD-EVIDENCE.md" '`freshness_status = NOT_PROVEN`'
 Assert-Contains "docs/design/SOURCE-REREAD-EVIDENCE.md" '`tokn-observe source-reread-evidence`'
 Assert-Contains "docs/design/SOURCE-REREAD-EVIDENCE.md" '`run_created_at_unix`'
+Assert-Contains "docs/design/M4-EXIT-GATE.md" "Status: ACCEPTED / CORE COMPLETE WITH EVIDENCE-GATED EXTENSIONS"
+Assert-Contains "docs/design/M4-EXIT-GATE.md" 'semantic phase timeline: `NOT_CAPTURED`'
+Assert-Contains "docs/design/M4-EXIT-GATE.md" 'runtime task delivery: `NOT_PROVEN`'
+Assert-Contains "docs/design/M4-EXIT-GATE.md" "Shadow Repository Index V0 design + measurement contract"
 Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "Cross-Run Source Re-read Evidence V0: ACCEPTED CHRONOLOGY FOUNDATION."
 Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "Task Input Identity V0: ACCEPTED OBSERVATION FOUNDATION."
-Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "Cross-Run Comparability V0 et Task Input Identity V0 sont ACCEPTED OBSERVATION FOUNDATIONS"
-Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "ne construire une preuve de livraison runtime que depuis un vrai evenement rollout directement observe et fixtureable"
+Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "M4 exit boundary :"
+Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "Premier scope M4.5 :"
+Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "Shadow Repository Index V0 design + measurement contract"
 Assert-Contains "ROADMAP.md" '`tokn_status` + `tokn_recent_runs` + `tokn_context_ledger`'
 Assert-Contains "docs/plans/IMPLEMENTATION-PATH.md" "Task Input Identity V0 ACCEPTED OBSERVATION FOUNDATION"
 Assert-NotContains "docs/plans/NEXT-SESSION-CHECKLIST.md" "Cross-Run Comparability V0 est le slice courant"
@@ -111,7 +116,7 @@ Assert-Contains "docs/design/CONTEXT-RESULT-IDENTITY.md" "## Transient result id
 Assert-Contains "docs/strategy/CONTEXT-EFFICIENCY-STRATEGY.md" "## Buffer / replay architecture gates - 2026-10-03"
 Assert-Contains "README.md" "## Quickstart developpeur"
 Assert-Contains "SECURITY.md" "## Packaging"
-Assert-Contains "docs/MAINTENANCE.md" "Historical Analyzer + Context Ledger IN PROGRESS"
+Assert-Contains "docs/MAINTENANCE.md" "M4 Historical Analyzer + Context Ledger CORE ACCEPTED / EVIDENCE-GATED EXTENSIONS"
 Assert-Contains "docs/reference/PRIVACY.md" "## Current durable boundary"
 Assert-NotContains "docs/reference/PRIVACY.md" "V0.0 does not:"
 Assert-NotContains "docs/MAINTENANCE.md" "Ne pas lancer Experiment 002 avant P9"
@@ -134,6 +139,8 @@ $activeDocs = @(
     "docs/design/TOKN-STORE-V2.md",
     "docs/design/LOCAL-MCP-PROTOTYPE.md",
     "docs/design/HISTORICAL-CONTEXT-LEDGER.md",
+    "docs/design/M4-EXIT-GATE.md",
+    "docs/design/SOURCE-REREAD-EVIDENCE.md",
     "docs/design/PLUGIN-ENGINE-INTEGRATION.md",
     "docs/design/TARGET-ARCHITECTURE.md",
     "docs/design/MULTI-RUNTIME-CORE-AND-DATA-ARCHITECTURE.md",
@@ -172,6 +179,8 @@ $stale = @(
     "Historical Analyzer NEXT",
     "Historical Analyzer est NEXT",
     "Historical Analyzer + Context Ledger : NEXT",
+    "Historical Analyzer + Context Ledger IN PROGRESS",
+    "M4 IN PROGRESS / CONTEXT LEDGER V1 CORE ACCEPTED",
     "Context Ledger is NEXT",
     "P0-P7 DONE / P8 NEXT",
     "Cross-Agent Evidence V1",

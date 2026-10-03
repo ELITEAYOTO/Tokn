@@ -133,10 +133,10 @@ Resultat :
 
 ## M4 - Historical Analyzer + Context Ledger
 
-Statut : IN PROGRESS
+Statut : CORE ACCEPTED / EVIDENCE-GATED EXTENSIONS
 
 But :
-construire l'historique fiable par projet/run/agent/phase.
+construire l'historique fiable par projet/run/agent, et par phase seulement quand un marqueur autoritatif est directement observable.
 
 Valide dans M4 a ce jour :
 - ProjectIdentity et WorkspaceLineage ;
@@ -149,15 +149,15 @@ Valide dans M4 a ce jour :
 - per-turn reste `NOT_CAPTURED` dans Measurement Contract V1 ;
 - current retained-context occupancy reste `UNKNOWN`.
 
-Reste M4 :
-- granularite par tour seulement si un futur contrat la capture directement ;
+Extensions M4 evidence-gated :
+- granularite par tour : `NOT_CAPTURED` tant qu'un futur contrat ne la capture pas directement ;
 - rate-limit snapshots over time : ACCEPTED FOUNDATION ;
-- timeline de phases ;
+- phase timeline : `NOT_CAPTURED` tant qu'aucun marqueur de phase autoritatif n'est directement observe ;
 - file/tool activity graph : ACCEPTED FOUNDATION ;
 - repeated reads/searches/retries : exact-repeat foundation ACCEPTED ;
 - automatic ModelRuntimeProfile compatibility reducer : ACCEPTED FOUNDATION ;
 - parent/subagent exact operation overlap : ACCEPTED FOUNDATION ;
-- compaction events quand observables ;
+- compaction events : `NOT_CAPTURED` jusqu'a observation directe fixtureable ;
 - exact result/content identity foundation : ACCEPTED when directly observable ;
 - duplicate evidence may be reported only when complete observed result identity agrees ;
 - SourceStableId file-read V0 + observed content evolution history : ACCEPTED FOUNDATION ;

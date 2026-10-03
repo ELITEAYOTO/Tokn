@@ -17,7 +17,7 @@ Lire seulement :
 Les plans et matrices V0.1 restent des references de release/golden, pas le chemin de reprise courant.
 
 Etat actuel :
-**P0-P9 DONE ; Experiment 002 ACCEPTED ; Measurement Contract V1 FROZEN ; Store foundation DONE ; Local MCP transport prototype ACCEPTED ; Historical Analyzer + Context Ledger IN PROGRESS.**
+**P0-P9 DONE ; Experiment 002 ACCEPTED ; Measurement Contract V1 FROZEN ; Store foundation DONE ; Local MCP transport prototype ACCEPTED ; M4 Historical Analyzer + Context Ledger CORE ACCEPTED / EVIDENCE-GATED EXTENSIONS ; M4.5 Context Identity + Shadow Foundations STARTED / OBSERVATION-ONLY.**
 
 ## Organisation documentaire
 
@@ -75,7 +75,7 @@ Un document historique ne doit pas remplacer une source de verite courante.
 - `design/TOKN-STORE-V2.md`
   Fondation SQLite V2 : identities pseudonymisees, runs/agents/profiles/provenance et ingestion `store-evidence`.
 - `design/HISTORICAL-CONTEXT-LEDGER.md`
-  M4 en cours : HistoricalSnapshot/Context Ledger V1, coverage, lineage, CLI/MCP et limites explicites.
+  M4 core accepte : HistoricalSnapshot/Context Ledger V1, coverage, lineage, CLI/MCP et extensions evidence-gated explicites.
 - `design/CROSS-AGENT-EVIDENCE.md`
   Cross-Agent Evidence V2 : chevauchement exact d'operations entre threads et comparaison d'identite de resultat uniquement sous preuve complete.
 - `design/CONTEXT-RESULT-IDENTITY.md`
@@ -96,6 +96,8 @@ Un document historique ne doit pas remplacer une source de verite courante.
   Task Input Identity V0 : fondation M4 acceptee privacy-safe pour l'identite exacte de l'artefact de tache (`tsk-v1-*`); `delivery_status=NOT_PROVEN`, aucune persistance du prompt brut.
 - `design/SOURCE-REREAD-EVIDENCE.md`
   Cross-Run Source Re-read Evidence V0 : fondation chronologique acceptee observation-only ordonnant les relectures d'une SourceStableId entre runs uniquement avec timestamps rollout complets/parseables; rediscovery, redundancy et freshness restent `NOT_PROVEN`.
+- `design/M4-EXIT-GATE.md`
+  Gate de sortie M4 : coeur accepte, extensions phase/compaction/delivery/rediscovery evidence-gated, et conditions d'entree M4.5 sans heuristiques.
 - `design/SESSION-ROLLOUT-ADAPTER.md`
 - `design/AGENT-COST-ATTRIBUTION.md`
 - `design/WORKSPACE-TRACKING.md`

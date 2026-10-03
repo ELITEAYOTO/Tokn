@@ -2,7 +2,7 @@
 
 Status: ACTIVE EXECUTION PLAN
 Date: 2026-10-03
-Current state: P0-P9 DONE / Experiment 002 ACCEPTED / Measurement Contract V1 FROZEN / Store foundation DONE / Local MCP transport prototype ACCEPTED / Historical Analyzer + Context Ledger IN PROGRESS / Context-Result Identity V0 ACCEPTED / Source Freshness Evidence V0 ACCEPTED CORROBORATION FOUNDATION / Cross-Run Comparability V0 ACCEPTED OBSERVATION FOUNDATION / Task Input Identity V0 ACCEPTED OBSERVATION FOUNDATION
+Current state: P0-P9 DONE / Experiment 002 ACCEPTED / Measurement Contract V1 FROZEN / Store foundation DONE / Local MCP transport prototype ACCEPTED / M4 core ACCEPTED / M4.5 OBSERVATION-ONLY STARTED / Context-Result Identity V0 ACCEPTED / Source Freshness Evidence V0 ACCEPTED CORROBORATION FOUNDATION / Cross-Run Comparability V0 ACCEPTED OBSERVATION FOUNDATION / Task Input Identity V0 ACCEPTED OBSERVATION FOUNDATION
 
 ## Purpose
 
@@ -440,7 +440,7 @@ not a reason to widen scope prematurely.
 
 ## Current decision
 
-Immediate product work remains **Historical Analyzer + Context Ledger** observation-only.
+M4 Historical Analyzer + Context Ledger core is **ACCEPTED**. Immediate product work moves to **M4.5 Context Identity + Shadow Foundations** observation-only; unavailable M4 signals remain evidence-gated extensions.
 
 The Measurement Contract V1, Store V2 foundation and local MCP transport boundary are stable inputs.
 
@@ -453,7 +453,7 @@ Completed in the current slice:
 6. synthetic history tests + full release/golden regressions ;
 7. CLI + read-only MCP exposure, including direct target-Codex tool-call validation.
 
-Next inside M4:
+M4 core exit state:
 1. Context/Result Identity Foundation V0 is ACCEPTED; keep duplicate-evidence classification gated on complete observed identity ;
 2. SourceStableId file V0 + exact observed content-evolution history are ACCEPTED; broader source kinds remain evidence-gated ;
 3. ToolActivityHistory V3 + SourceMutationHistory V1 are ACCEPTED for directly observed mutation-operation timing; effect remains `NOT_VERIFIED` ;
@@ -464,8 +464,8 @@ Next inside M4:
 8. Cross-Run Comparability V0 is ACCEPTED OBSERVATION FOUNDATION: compare explicitly selected runs only on captured project/contract/runtime/SourceVersion BEFORE/Git BEFORE scope and keep `causal_claims_status=NOT_ESTABLISHED` ;
 9. Task Input Identity V0 is ACCEPTED OBSERVATION FOUNDATION: persist only project-scoped exact task-artifact identity/coverage, use the fail-closed Cross-Run task axis, and keep runtime delivery `NOT_PROVEN` ;
 10. Cross-Run Source Re-read Evidence V0 is ACCEPTED CHRONOLOGY FOUNDATION: order same-source reads across runs only with complete direct rollout timestamps; never use Store ingestion time and never upgrade the sequence into rediscovery/redundancy/freshness ;
-11. detailed compaction remains `NOT_CAPTURED` until directly observed; interpreted rediscovery and broader source kinds stay evidence-gated ;
-12. only after those observations are reliable, consider a stronger stale/fresh contract, then continue M4.5 and M5 Findings + Opportunity Analyzer.
+11. semantic phase timeline and detailed compaction remain `NOT_CAPTURED` until directly observed; interpreted rediscovery, runtime delivery and broader source kinds stay evidence-gated ;
+12. `docs/design/M4-EXIT-GATE.md` accepts the M4 core without upgrading those missing signals; M4.5 may proceed shadow/observation-only while stronger stale/fresh semantics remain evidence-gated.
 
 Parallel implementation hardening, only if measurement justifies it:
 - benchmark current Codex raw-result retention with representative 1 MB / 10 MB / 50 MB and many-small-output fixtures;

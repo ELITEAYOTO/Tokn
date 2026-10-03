@@ -149,7 +149,7 @@ Par defaut :
 ## Reprise
 
 Etat :
-**P0-P9 DONE ; Experiment 002 ACCEPTED ; Measurement Contract V1 FROZEN ; Store foundation DONE ; Local MCP transport prototype ACCEPTED ; Historical Analyzer + Context Ledger IN PROGRESS.**
+**P0-P9 DONE ; Experiment 002 ACCEPTED ; Measurement Contract V1 FROZEN ; Store foundation DONE ; Local MCP transport prototype ACCEPTED ; M4 Historical Analyzer + Context Ledger CORE ACCEPTED / EVIDENCE-GATED EXTENSIONS ; M4.5 Context Identity + Shadow Foundations STARTED / OBSERVATION-ONLY.**
 
 Lire :
 `INDEX.md` -> `../STATUS.md` -> `../ROADMAP.md` -> `plans/IMPLEMENTATION-PATH.md` -> `plans/NEXT-SESSION-CHECKLIST.md` -> `operations/DEVELOPMENT-WORKFLOW.md`.
