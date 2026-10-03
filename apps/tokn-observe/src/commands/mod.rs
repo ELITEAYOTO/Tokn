@@ -5,6 +5,7 @@ mod check_caps;
 mod common;
 mod compare;
 mod context_ledger;
+mod cross_agent_evidence;
 mod doctor;
 mod evaluate_validity;
 mod health;
@@ -56,6 +57,19 @@ pub fn run(cli: Cli) -> anyhow::Result<()> {
             db,
             output_json,
         } => activity_timeline::run(
+            project_id.as_deref(),
+            workspace_id.as_deref(),
+            limit,
+            db.as_deref(),
+            output_json.as_deref(),
+        ),
+        Command::CrossAgentEvidence {
+            project_id,
+            workspace_id,
+            limit,
+            db,
+            output_json,
+        } => cross_agent_evidence::run(
             project_id.as_deref(),
             workspace_id.as_deref(),
             limit,
