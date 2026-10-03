@@ -1,7 +1,7 @@
 # Shadow Repository Index V0
 
 Status: M4.5 ACCEPTED DESIGN / PREREQUISITES IMPLEMENTED / DIRECT_SCAN ACCEPTED REFERENCE FOUNDATION
-Date: 2026-10-03
+Date: 2026-10-04
 
 ## Purpose
 
@@ -194,9 +194,24 @@ Add them only after the measurement protocol identifies a specific recall/value 
 
 Implementation must probe actual SQLite FTS5 support at runtime/build validation before selecting an FTS candidate.
 
-If FTS5 is unavailable:
+Accepted capability implementation lives in the dedicated `tokn-shadow` crate so SQLite-specific derived-index mechanics do not contaminate `tokn-platform` or the normalized Measurement Store. `tokn-observe shadow-index-capabilities` exposes the report as JSON.
+
+The probe uses only an in-memory SQLite connection and real ephemeral operations. It observes separately:
+- SQLite version and `ENABLE_FTS5` compile option;
+- basic FTS5 create/insert/MATCH behavior;
+- `unicode61` tokenizer;
+- `trigram` tokenizer;
+- contentless tables;
+- contentless-delete behavior;
+- FTS5 integrity-check command.
+
+Capability states reuse the frozen benchmark vocabulary: `OBSERVED_AVAILABLE`, `OBSERVED_UNAVAILABLE`, `NOT_APPLICABLE`, `UNKNOWN`. Probe/runtime failures are represented as `UNKNOWN` plus static reason codes; raw SQLite error text is not part of the report. The report always declares `extension_loading_attempted=false` and `fallback_backend_id=DIRECT_SCAN_V0`.
+
+Current bundled validation observes SQLite 3.53.2 with every probed FTS5 capability above available. This is build/runtime evidence only, not a backend-selection decision; future builds must probe again.
+
+If FTS5 is unavailable or cannot be proven:
 - do not fail the whole Tokn product;
-- report the backend capability as unavailable;
+- keep the FTS candidate unavailable/unknown;
 - keep DIRECT_SCAN_V0 available for measurement/fallback;
 - do not dynamically load untrusted extensions to make the benchmark pass.
 

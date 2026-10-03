@@ -1,6 +1,6 @@
 # Tokn Roadmap
 
-Derniere mise a jour : **2026-10-03**
+Derniere mise a jour : **2026-10-04**
 
 ## North Star
 
@@ -193,7 +193,7 @@ It is the preferred basis for duplicate-evidence proof, rediscovery analysis and
 Shadow foundations:
 - Shadow Repository Index V0 : ACCEPTED DESIGN / PREREQUISITES IMPLEMENTED / DIRECT_SCAN ACCEPTED REFERENCE FOUNDATION; Git-backed file-level reference scan/query is implemented fail-closed with bounded corpus/query limits, exact `ixc-v1-*` current-file verification and no retained source-text corpus;
 - Shadow Index Benchmark Protocol V0 + ShadowIndexMeasurement V1 : ACCEPTED PRE-IMPLEMENTATION MEASUREMENT CONTRACT; DIRECT_SCAN reference before backend selection;
-- candidate backends remain DIRECT_SCAN_V0 / SQLite FTS5 lexical variants only after capability + benchmark gates; no backend is selected yet;
+- SQLite FTS5 runtime capability probe: ACCEPTED CAPABILITY FOUNDATION / FULL GATES PASS in `tokn-shadow`; current bundled build observes FTS5/unicode61/trigram/contentless-delete support with DIRECT_SCAN fallback, but no persistent backend is selected before benchmark gates;
 - Shadow Context Retrieval Engine: lexical/BM25 first only if measured value justifies the persistent index, then AST/LSP/graph;
 - embeddings only if measured recall/value justifies them;
 - Shadow Edit Strategy Analyzer without changing Astra behavior;

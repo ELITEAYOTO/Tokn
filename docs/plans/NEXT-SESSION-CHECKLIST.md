@@ -151,7 +151,7 @@ Next concrete work:
 1. SourceStableId shared derivation outside `tokn-storage`: **DONE**, exact `src-v1-*` golden preserved;
 2. local shadow cache root outside tracked/package artifacts: **DONE**, safe per-project segment only;
 3. DIRECT_SCAN_V0 reference semantics: **ACCEPTED REFERENCE FOUNDATION / FULL GATES PASS** on a sanitized temporary Git corpus;
-4. next bounded slice: add SQLite FTS5 capability probing with fail-closed DIRECT_SCAN fallback, then benchmark indexed candidates under the frozen protocol;
+4. SQLite FTS5 capability probe: **ACCEPTED CAPABILITY FOUNDATION / FULL GATES PASS**; next bounded slice is an indexed candidate benchmark implementation under the frozen protocol, with no backend promotion before quality/correctness/resource gates pass;
 5. keep all active context injection disabled and add future M4 phase/compaction/delivery evidence only when directly observable and fixtureable.
 
 Parallel descriptive work allowed now: prepare/collect 6-10 frozen native baseline tasks using `docs/benchmarks/BASELINE-PROTOCOL-V1.md`, starting with a >=3-run variance pilot per task and no active Tokn intervention.

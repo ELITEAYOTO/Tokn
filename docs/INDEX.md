@@ -1,6 +1,6 @@
 # Tokn Documentation Index
 
-Derniere mise a jour : **2026-10-03**
+Derniere mise a jour : **2026-10-04**
 
 Ce fichier est le point d'entree documentaire unique.
 
@@ -99,7 +99,7 @@ Un document historique ne doit pas remplacer une source de verite courante.
 - `design/M4-EXIT-GATE.md`
   Gate de sortie M4 : coeur accepte, extensions phase/compaction/delivery/rediscovery evidence-gated, et conditions d'entree M4.5 sans heuristiques.
 - `design/SHADOW-REPOSITORY-INDEX.md`
-  M4.5 Shadow Repository Index V0 : design measurement-first, file-level, DERIVED/rebuildable, separe du Store; prerequis identite/cache local implementes (`src-v1-*`, `ixc-v1-*`, shadow root), DIRECT_SCAN encore non implemente et FTS5 reste candidat seulement.
+  M4.5 Shadow Repository Index V0 : design measurement-first, file-level, DERIVED/rebuildable, separe du Store; DIRECT_SCAN est ACCEPTED REFERENCE FOUNDATION et le probe SQLite/FTS5 `tokn-shadow` est ACCEPTED CAPABILITY FOUNDATION, sans backend persistant selectionne.
 - `design/SESSION-ROLLOUT-ADAPTER.md`
 - `design/AGENT-COST-ATTRIBUTION.md`
 - `design/WORKSPACE-TRACKING.md`

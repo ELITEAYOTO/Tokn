@@ -67,6 +67,7 @@ Assert-Contains "ROADMAP.md" "## Cross-cutting multi-runtime gates"
 Assert-Contains "docs/decisions/ADR-006-MULTI-RUNTIME-CORE-ADAPTER-BOUNDARY.md" "Status: ACCEPTED"
 Assert-Contains "docs/design/MULTI-RUNTIME-CORE-AND-DATA-ARCHITECTURE.md" "one analytical brain, many runtime translators"
 Assert-Contains "docs/design/TARGET-ARCHITECTURE.md" "Runtime -> Runtime Adapter -> Normalized Contracts -> Tokn Core/Engine -> Tokn Store -> Query/Views"
+Assert-Contains "docs/design/ARCHITECTURE-OVERVIEW.md" "tokn-shadow : mecanique shadow DERIVED/rebuildable et probes backend, separes du Measurement Store"
 Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "SourceStableId"
 Assert-Contains "docs/design/MODEL-RUNTIME-PROFILE.md" "Token Semantics V2"
 Assert-Contains "docs/design/TOKN-STORE-V2.md" "## Current next boundary"
@@ -127,6 +128,14 @@ Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "Task Input Identity V0: 
 Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "M4 exit boundary :"
 Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "Premier scope M4.5 :"
 Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "DIRECT_SCAN_V0 est **ACCEPTED REFERENCE FOUNDATION**"
+Assert-Contains "STATUS.md" "capability probe SQLite/FTS5 est maintenant **ACCEPTED CAPABILITY FOUNDATION / FULL GATES PASS**"
+Assert-Contains "docs/design/SHADOW-REPOSITORY-INDEX.md" 'Accepted capability implementation lives in the dedicated `tokn-shadow` crate'
+Assert-Contains "docs/design/SHADOW-REPOSITORY-INDEX.md" '`extension_loading_attempted=false`'
+Assert-Contains "docs/design/SHADOW-REPOSITORY-INDEX.md" '`fallback_backend_id=DIRECT_SCAN_V0`'
+Assert-Contains "docs/benchmarks/SHADOW-INDEX-PROTOCOL-V0.md" '`tokn-observe shadow-index-capabilities`'
+Assert-Contains "docs/plans/IMPLEMENTATION-PATH.md" "FTS5 capability probe: **ACCEPTED CAPABILITY FOUNDATION / FULL GATES PASS**"
+Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "SQLite FTS5 capability probe: **ACCEPTED CAPABILITY FOUNDATION / FULL GATES PASS**"
+Assert-Contains "docs/INDEX.md" 'probe SQLite/FTS5 `tokn-shadow` est ACCEPTED CAPABILITY FOUNDATION'
 Assert-Contains "ROADMAP.md" '`tokn_status` + `tokn_recent_runs` + `tokn_context_ledger`'
 Assert-Contains "docs/plans/IMPLEMENTATION-PATH.md" "Task Input Identity V0 ACCEPTED OBSERVATION FOUNDATION"
 Assert-NotContains "docs/plans/NEXT-SESSION-CHECKLIST.md" "Cross-Run Comparability V0 est le slice courant"

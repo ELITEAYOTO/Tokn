@@ -9,6 +9,7 @@ members = [
   "crates/tokn-codex",
   "crates/tokn-analysis",
   "crates/tokn-storage",
+  "crates/tokn-shadow",
   "crates/tokn-report",
 ]
 

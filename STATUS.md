@@ -1,6 +1,6 @@
 # Tokn Observer - Status
 
-Derniere mise a jour : **2026-10-03**
+Derniere mise a jour : **2026-10-04**
 Release de travail : **V0.1 Measurement Hardening**
 Binaire/Cargo : **V0.1 / 0.1.0**
 
@@ -252,7 +252,7 @@ Le gate `docs/design/M4-EXIT-GATE.md` classe le coeur M4 comme **ACCEPTED**. Les
 
 ## Prochaine action
 
-Le design + contrat de mesure du **Shadow Repository Index V0** sont ACCEPTED. Les prerequis d'identite/cache sont en place et `DIRECT_SCAN_V0` est maintenant **ACCEPTED REFERENCE FOUNDATION** : enumeration Git top-level tracked + non-ignored untracked, chemins verifies sous la racine autorisee, exclusions explicites binary/non-UTF8/size, manifest sans source brute, `src-v1-*` + `ixc-v1-*`, query bornee et revalidation exacte du hash courant avec `REFRESH_REQUIRED` en cas de divergence. Le capability probe FTS5 reste `NOT STARTED`; aucun backend persistant n'est selectionne et aucune injection active de contexte n'existe.
+Le design + contrat de mesure du **Shadow Repository Index V0** sont ACCEPTED et `DIRECT_SCAN_V0` est **ACCEPTED REFERENCE FOUNDATION**. Le capability probe SQLite/FTS5 est maintenant **ACCEPTED CAPABILITY FOUNDATION / FULL GATES PASS** dans le crate dedie `tokn-shadow` et via `tokn-observe shadow-index-capabilities` : le build bundled courant observe SQLite 3.53.2, FTS5, `unicode61`, `trigram`, `contentless`, `contentless-delete` et `integrity-check` disponibles, sans chargement d'extension; toute indisponibilite/erreur reste fail-closed avec fallback `DIRECT_SCAN_V0`. Aucun backend FTS persistant n'est selectionne et aucune injection active de contexte n'existe.
 
 Cross-Run Source Re-read Evidence V0 reste **ACCEPTED CHRONOLOGY FOUNDATION** : `run_created_at_unix` n'est jamais une chronologie runtime et rediscovery/redundancy/freshness restent `NOT_PROVEN`. Task Input Identity V0 garde `delivery_status=NOT_PROVEN`. La compaction detaillee et la phase timeline restent `NOT_CAPTURED` tant qu'aucune preuve directe fixtureable n'existe.
 

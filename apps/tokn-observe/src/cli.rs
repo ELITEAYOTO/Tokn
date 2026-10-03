@@ -203,6 +203,10 @@ pub enum Command {
         #[arg(long)]
         output_json: Option<PathBuf>,
     },
+    ShadowIndexCapabilities {
+        #[arg(long)]
+        output_json: Option<PathBuf>,
+    },
     StoreEvidence {
         evidence_dir: PathBuf,
         #[arg(long)]
