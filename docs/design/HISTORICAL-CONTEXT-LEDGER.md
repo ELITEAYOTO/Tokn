@@ -161,7 +161,7 @@ Re-ingestion replaces the run-owned snapshot set deterministically, duplicate ag
 
 CLI: `tokn-observe rate-limit-history`.
 
-Automatic runtime compatibility, rate-limit history, Cross-Agent Evidence V2, exact result identity, conservative SourceStableId file V0, mutation-operation timing, run-boundary SourceVersionHistory V1 and Workspace Git Provenance V0 are accepted foundations. Remaining M4 work is fail-closed freshness/invalidation and verified mutation effect where provable, broader source kinds, rediscovery/compaction and explicit cross-run analysis, not per-turn token invention.
+Automatic runtime compatibility, rate-limit history, Cross-Agent Evidence V2, exact result identity, conservative SourceStableId file V0, mutation-operation timing, Source Mutation Window V0, run-boundary SourceVersionHistory V1 and Workspace Git Provenance V0 are accepted foundations. Remaining M4 work is fail-closed freshness/invalidation that preserves mutation causality as `NOT_PROVEN`, broader source kinds, rediscovery/compaction and explicit cross-run analysis, not per-turn token invention.
 
 ## Accepted Cross-Agent Evidence V2 slice - 2026-10-03
 
@@ -192,6 +192,16 @@ For conservative single-target `Set-Content` / `Add-Content` operations, Tokn ca
 SourceMutationHistory V1 emits the run/thread/source identity, observed timing coverage and tool status. It deliberately reports `effect_status=NOT_VERIFIED`: a completed tool call is not proof that durable file content changed.
 
 CLI: `tokn-observe source-mutation-history`. No freshness, staleness, invalidation effect, safe reuse or savings claim follows from this operation evidence alone.
+
+## Accepted Source Mutation Window V0 slice - 2026-10-03
+
+`source-mutation-window-history` joins already persisted ToolActivityHistory V3 evidence only when one same-thread SourceStableId has a sequenced exact read before a completed mutation and a sequenced exact read after it. Both reads must carry complete exact ContentFingerprint identity.
+
+The reducer reports `EXACT_CONTENT_EQUALITY_OBSERVED` or `EXACT_CONTENT_DIFFERENCE_OBSERVED` only when the window is unambiguous. Missing sequence/content evidence, another same-thread same-source mutation in the selected window, or any same-run same-source mutation on another thread makes the observation `UNKNOWN` because cross-agent order is not authoritative.
+
+Every result carries `causality_status=NOT_PROVEN`. This is a chronology primitive for later freshness/invalidation work, not proof that the mutation caused the observed content difference or that equality means no transient change occurred.
+
+CLI: `tokn-observe source-mutation-window-history`. No Store migration or Measurement Contract V1 change is required.
 
 ## Accepted Run-Boundary Source Version V0 slice - 2026-10-03
 

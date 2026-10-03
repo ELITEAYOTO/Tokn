@@ -335,7 +335,8 @@ Accepted M4 additions:
 - `tokn-observe source-identity-history` read-only JSON surface;
 - Source Mutation Observation V0: conservative `Set-Content` / `Add-Content` target identity plus rollout timing when directly observed;
 - SourceMutationHistory V1 preserves `tool_status` but keeps `effect_status=NOT_VERIFIED`;
-- `tokn-observe source-mutation-history` read-only JSON surface;
+- Source Mutation Window V0 joins exact same-source same-thread read-before -> completed mutation -> read-after sequence evidence and reports exact content equality/difference only under complete unambiguous coverage; cross-thread/intervening mutation ambiguity fails to `UNKNOWN`, and causality remains `NOT_PROVEN`;
+- `tokn-observe source-mutation-history` + `tokn-observe source-mutation-window-history` read-only JSON surfaces;
 - Run-Boundary Source Version V0 from Runner BEFORE/AFTER workspace snapshots;
 - SourceVersionHistory V1 stores project-scoped `ver-v1-*` fingerprints keyed by the same SourceStableId, never raw paths or raw snapshot SHA-256 values;
 - source boundary reducer reports `UNCHANGED_OBSERVED` / `CHANGED_OBSERVED` only with both boundaries, otherwise `UNKNOWN`;
@@ -347,8 +348,8 @@ Accepted M4 additions:
 - `tokn-observe cross-agent-evidence` read-only JSON analysis surface.
 
 Next M4 work:
-- verified mutation effect only where directly observable, without promoting tool completion into file-change proof;
-- freshness/invalidation semantics that join read timing + exact SourceVersion + Workspace Git Provenance + later rediscovery while preserving `UNKNOWN` / `NOT_CAPTURED`;
+- Source Mutation Window V0 is now the accepted chronology primitive; do not relabel its exact before/after content difference as causal mutation proof;
+- freshness/invalidation semantics should now join this read/mutation/read chronology + exact SourceVersion + Workspace Git Provenance + later rediscovery while preserving `UNKNOWN` / `NOT_CAPTURED`;
 - broader source kinds plus compaction/rediscovery only when directly observable;
 - explicit cross-run comparison primitives with compatible provenance scope.
 

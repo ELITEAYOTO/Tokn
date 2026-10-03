@@ -128,13 +128,13 @@ SourceStableId file V0 + SourceIdentityHistory V1: ACCEPTED FOUNDATION.
 ToolActivityHistory V3 + SourceMutationHistory V1: ACCEPTED FOUNDATION. Mutation-operation timing may be observed; mutation effect remains `NOT_VERIFIED`.
 Run-Boundary Source Version V0 + SourceVersionHistory V1: ACCEPTED FOUNDATION. BEFORE/AFTER snapshot versions are directly observed; missing boundaries remain `UNKNOWN`, and no mutation causality/freshness is inferred.
 Workspace Git Provenance V0 + WorkspaceGitProvenanceHistory V1: ACCEPTED FOUNDATION. BEFORE/AFTER snapshots now carry directly observed HEAD/dirty evidence when available; legacy absence is `NOT_CAPTURED`, attempted but unprovable Git state is `UNKNOWN`, and raw Git SHA values are not persisted in SQLite.
+Source Mutation Window V0: ACCEPTED CHRONOLOGY FOUNDATION. Same-thread exact read-before -> completed mutation -> exact read-after can report exact content equality/difference only under complete unambiguous sequence/identity evidence; intervening or cross-thread same-source mutation makes the window `UNKNOWN`, and causality always remains `NOT_PROVEN`.
 Stability/benchmark readiness: local Rust toolchain + dev-check + package hardening + Benchmark Baseline Protocol V1 are ACCEPTED/PREPARED; this does not claim token savings.
 
 Next concrete work:
-1. verified mutation effect only where directly observable;
-2. freshness/invalidation semantics joining read timing + exact SourceVersion + Workspace Git Provenance + later rediscovery while preserving `UNKNOWN`/`NOT_CAPTURED`;
-3. broader source kinds, compaction and rediscovery only when directly observed;
-4. explicit cross-run comparison with compatible evidence/provenance scope.
+1. freshness/invalidation semantics joining Source Mutation Window chronology + exact SourceVersion + Workspace Git Provenance + later rediscovery while preserving `UNKNOWN`/`NOT_CAPTURED`;
+2. broader source kinds, compaction and rediscovery only when directly observed;
+3. explicit cross-run comparison with compatible evidence/provenance scope.
 
 Parallel descriptive work allowed now: prepare/collect 6-10 frozen native baseline tasks using `docs/benchmarks/BASELINE-PROTOCOL-V1.md`, starting with a >=3-run variance pilot per task and no active Tokn intervention.
 Repository-admin housekeeping: protect `main` so PR + green CI are required before merge.

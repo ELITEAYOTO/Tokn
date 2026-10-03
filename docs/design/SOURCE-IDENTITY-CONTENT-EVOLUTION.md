@@ -72,8 +72,9 @@ Its content evolution values are:
 ## Next boundary
 
 Still required before a real freshness/rediscovery finding:
-- run-boundary source version/hash and workspace Git HEAD/dirty provenance are now accepted from Runner snapshots; source-specific causality remains unproven;
-- verified mutation effect and freshness/invalidation semantics rather than operation intent alone;
+- run-boundary source version/hash and workspace Git HEAD/dirty provenance are accepted from Runner snapshots; source-specific causality remains unproven;
+- Source Mutation Window V0 now provides fail-closed same-thread read/mutation/read chronology with exact content equality/difference, but mutation causality remains `NOT_PROVEN`;
+- freshness/invalidation semantics must join those observations without upgrading chronology into causality;
 - broader runtime-neutral source kinds such as symbol/range identities only when provable;
 - compaction/context-management evidence where observable;
 - chronological rediscovery events;
