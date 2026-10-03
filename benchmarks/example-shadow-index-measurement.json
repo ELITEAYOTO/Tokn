@@ -1,0 +1,185 @@
+{
+  "schema_version": 1,
+  "measurement_id": "shadow-index-fixture-direct-scan-001",
+  "run_order": 1,
+  "observed_at": "2026-10-03T20:00:00Z",
+  "tokn": {
+    "commit": "0000000000000000000000000000000000000000",
+    "version": "0.1.0"
+  },
+  "corpus": {
+    "corpus_id": "fixture-shadow-index-v0",
+    "repository_ref": "sanitized-fixture",
+    "commit": "1111111111111111111111111111111111111111",
+    "worktree_status": "CLEAN",
+    "discovered_files": 8,
+    "eligible_files": 6,
+    "skipped_files": 2,
+    "eligible_bytes": 16384,
+    "source_bytes_read": 16384,
+    "skipped_by_reason": {
+      "binary": 1,
+      "ignored": 1
+    },
+    "policy_id": "shadow-index-fixture-corpus-policy-v1"
+  },
+  "condition": {
+    "mode": "DIRECT_SCAN",
+    "backend_id": "DIRECT_SCAN_V0",
+    "tokenizer_id": null,
+    "configuration_id": "shadow-index-fixture-policy-v1"
+  },
+  "capability": {
+    "fts5": "NOT_APPLICABLE",
+    "contentless_delete": "NOT_APPLICABLE",
+    "integrity_check": "NOT_APPLICABLE"
+  },
+  "build": {
+    "elapsed_ms": 2.4,
+    "source_bytes_read": 16384,
+    "index_bytes": 0,
+    "peak_rss_bytes": null,
+    "cpu_ms": null,
+    "files_skipped": 2,
+    "files_processed": 6
+  },
+  "refresh": null,
+  "query_config": {
+    "query_count": 2,
+    "k_values": [
+      1,
+      5,
+      10
+    ],
+    "cache_state": "UNKNOWN",
+    "query_set_id": "shadow-index-fixture-queries-v1",
+    "gold_set_id": "shadow-index-fixture-gold-v1",
+    "timing_repetitions_per_query": 3
+  },
+  "queries": [
+    {
+      "query_id": "q-identifier-001",
+      "query_kind": "IDENTIFIER",
+      "requested_k": 5,
+      "expected_relevant_count": 1,
+      "relevant_returned_count": 1,
+      "first_relevant_rank": 1,
+      "reciprocal_rank": 1.0,
+      "no_match_correct": null,
+      "latency_samples_ms": [
+        0.58,
+        0.6,
+        0.62
+      ]
+    },
+    {
+      "query_id": "q-negative-001",
+      "query_kind": "NO_MATCH",
+      "requested_k": 5,
+      "expected_relevant_count": 0,
+      "relevant_returned_count": 0,
+      "first_relevant_rank": null,
+      "reciprocal_rank": 0.0,
+      "no_match_correct": true,
+      "latency_samples_ms": [
+        0.38,
+        0.4,
+        0.42
+      ]
+    }
+  ],
+  "aggregate": {
+    "sample_count": 6,
+    "latency_ms": {
+      "p25": 0.415,
+      "p50": 0.5,
+      "p75": 0.585,
+      "p95": 0.615
+    },
+    "recall_at_k": [
+      {
+        "k": 1,
+        "recall": 1.0
+      },
+      {
+        "k": 5,
+        "recall": 1.0
+      },
+      {
+        "k": 10,
+        "recall": 1.0
+      }
+    ],
+    "mrr": 1.0,
+    "no_match_accuracy": 1.0
+  },
+  "correctness": {
+    "suite_id": "shadow-index-fixture-correctness-v1",
+    "cases": [
+      {
+        "case_id": "TRACKED_CONTENT_EDIT",
+        "status": "PASS",
+        "notes": []
+      },
+      {
+        "case_id": "DIRTY_UNCHANGED_HEAD",
+        "status": "PASS",
+        "notes": []
+      },
+      {
+        "case_id": "ADDED_TRACKED_FILE",
+        "status": "PASS",
+        "notes": []
+      },
+      {
+        "case_id": "NON_IGNORED_UNTRACKED_FILE",
+        "status": "PASS",
+        "notes": []
+      },
+      {
+        "case_id": "FILE_DELETION",
+        "status": "PASS",
+        "notes": []
+      },
+      {
+        "case_id": "FILE_RENAME",
+        "status": "PASS",
+        "notes": []
+      },
+      {
+        "case_id": "QUERY_AFTER_REFRESH",
+        "status": "PASS",
+        "notes": []
+      },
+      {
+        "case_id": "HASH_MISMATCH_QUERY_VERIFICATION",
+        "status": "PASS",
+        "notes": []
+      },
+      {
+        "case_id": "INDEX_DELETE_REBUILD",
+        "status": "NOT_APPLICABLE",
+        "notes": [
+          "DIRECT_SCAN_V0 has no persistent index."
+        ]
+      },
+      {
+        "case_id": "GIT_PROVENANCE_FALLBACK",
+        "status": "PASS",
+        "notes": []
+      }
+    ],
+    "gate_status": "PASS"
+  },
+  "decision_gate": {
+    "quality_floor_predeclared": true,
+    "resource_budgets_predeclared": true,
+    "thresholds_ref": "shadow-index-fixture-thresholds-v1",
+    "verdict": "BASELINE_ONLY",
+    "notes": [
+      "Sanitized schema example only; not a backend-selection result."
+    ],
+    "quality_gate_status": "NOT_APPLICABLE",
+    "resource_gate_status": "NOT_APPLICABLE"
+  }
+}

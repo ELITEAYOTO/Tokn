@@ -275,7 +275,7 @@ Observed exit evidence:
 
 ## Phase G - Historical Analyzer + Context Ledger
 
-Status: IN PROGRESS
+Status: CORE ACCEPTED / EVIDENCE-GATED EXTENSIONS
 
 Accepted current slice:
 - HistoricalSnapshot V1 from Store V2 ;
@@ -307,6 +307,28 @@ Phase G evidence status:
 - repeated reads/searches/retries: exact-repeat foundation accepted, richer analysis remaining;
 - exact result identity: foundation accepted; duplicate evidence remains allowed only when complete observed identity proves equality;
 - interpreted rediscovery remains future work beyond the direct re-read chronology primitive.
+
+## Phase G.5 - Context Identity + Shadow Foundations
+
+Status: STARTED / OBSERVATION-ONLY
+
+Accepted pre-implementation slice:
+- Shadow Repository Index V0 design: file-level first, DERIVED/local/rebuildable, separate from Measurement Store;
+- exact current-file hash verification before returning source text;
+- Git/hash incremental invalidation with fail-closed verification/rebuild fallback;
+- DIRECT_SCAN_V0 reference condition before persistent backend selection;
+- SQLite FTS5 unicode61/trigram are measurement candidates only; no backend is selected;
+- Shadow Index Benchmark Protocol V0 + ShadowIndexMeasurement V1 freeze retrieval/build/refresh/resource/privacy metrics before implementation;
+- no MCP retrieval tool, no active runtime hook, no context injection and no token-savings claim.
+
+Implementation prerequisites:
+1. reuse the exact existing SourceStableId derivation without making the shadow index depend on Store internals or duplicating the algorithm;
+2. define a separate versioned IndexContentHash domain for whole-file bytes;
+3. define local index location/retention outside tracked/package artifacts;
+4. implement bounded DIRECT_SCAN_V0 corpus/query semantics and sanitized gold fixtures;
+5. capability-probe FTS5 and benchmark candidates only after the reference path exists.
+
+Exit toward active shadow retrieval requires a backend to meet every predeclared quality/correctness/resource gate. Active context injection remains a later separate gate.
 
 ## Phase H - Findings + Opportunity Analyzer V0
 
@@ -420,7 +442,7 @@ No learned policy self-deploys.
 
 ## What not to build now
 
-Current non-goals while Historical Analyzer + Context Ledger is IN PROGRESS:
+Current non-goals while M4.5 shadow foundations are observation-only:
 - production plugin package;
 - permanent local daemon;
 - GUI;

@@ -191,8 +191,10 @@ This foundation must not require durable raw tool-output storage.
 It is the preferred basis for duplicate-evidence proof, rediscovery analysis and later memory.
 
 Shadow foundations:
-- local repo/symbol index, content hashes and Git incremental invalidation;
-- Shadow Context Retrieval Engine: lexical/BM25 first, then AST/LSP/graph;
+- Shadow Repository Index V0 : ACCEPTED DESIGN / MEASUREMENT-FIRST / IMPLEMENTATION NOT STARTED; file-level, local/rebuildable, separate from Measurement Store, exact hash verification + Git incremental invalidation;
+- Shadow Index Benchmark Protocol V0 + ShadowIndexMeasurement V1 : ACCEPTED PRE-IMPLEMENTATION MEASUREMENT CONTRACT; DIRECT_SCAN reference before backend selection;
+- candidate backends remain DIRECT_SCAN_V0 / SQLite FTS5 lexical variants only after capability + benchmark gates; no backend is selected yet;
+- Shadow Context Retrieval Engine: lexical/BM25 first only if measured value justifies the persistent index, then AST/LSP/graph;
 - embeddings only if measured recall/value justifies them;
 - Shadow Edit Strategy Analyzer without changing Astra behavior;
 - Context Package candidates with provenance, freshness and expand/fallback paths.

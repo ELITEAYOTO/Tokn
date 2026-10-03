@@ -1,3 +1,13 @@
+## 2026-10-03 - M4.5 Shadow Repository Index pre-implementation design
+
+- accepted a measurement-first Shadow Repository Index V0 design without implementing active retrieval;
+- separated shadow DERIVED index state from the normalized Measurement Store and kept V0 file-level only;
+- froze DIRECT_SCAN_V0 as the reference condition and SQLite FTS5 unicode61/trigram as candidates only;
+- required exact current-file hash verification, Git/hash incremental invalidation and fail-closed fallback before source text is returned;
+- documented the SourceStableId reuse prerequisite and a separate future IndexContentHash domain;
+- added Shadow Index Benchmark Protocol V0, `Tokn ShadowIndexMeasurement V1`, a sanitized example and validation guards, including repeated latency samples, frozen corpus/query/gold references and explicit correctness/quality/resource promotion gates;
+- no Measurement Contract, Store schema, Runner contract, MCP/runtime hook or active context injection change.
+
 ## 2026-10-03 - M4 core exit gate
 
 - accepted the Historical Analyzer + Context Ledger core without fabricating unavailable phase/compaction/delivery signals;
