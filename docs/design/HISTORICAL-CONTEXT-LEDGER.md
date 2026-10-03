@@ -126,10 +126,10 @@ Before M4 can be marked DONE:
 - phase timeline from direct evidence ;
 - parent/subagent exact-operation overlap : ACCEPTED FOUNDATION ;
 - repeated reads/searches/retries : exact-repeat foundation ACCEPTED ;
-- compaction observations where directly available ;
+- detailed compaction chronology remains `NOT_CAPTURED` until a real diagnostic event can be observed and fixture-tested ;
 - duplicate-evidence finding remains deferred even when exact result identity is observed, because identity alone does not prove redundancy or waste ;
-- rediscovery across runs ;
-- explicit cross-run comparison primitives.
+- rediscovery across runs only when directly observable ;
+- Cross-Run Comparability V0 is the current candidate explicit comparison primitive.
 
 Per-turn history requires a future directly evidenced contract if the product truly
 needs it. It must not be backfilled heuristically into V1.
@@ -232,4 +232,14 @@ Observed outputs distinguish exact change+reread, change+reread plus changed run
 
 Every record keeps `freshness_status=NOT_PROVEN` and `invalidation_status=NOT_PROVEN`. The slice does not claim model-context retention, staleness, required invalidation, safe reuse or savings.
 
-No Store V2 migration or Measurement Contract V1 change is required. Direct compaction/rediscovery evidence and explicit cross-run comparison remain the next M4 boundary.
+No Store V2 migration or Measurement Contract V1 change is required. Cross-Run Comparability V0 is now accepted separately; direct compaction/rediscovery evidence remains the next M4 boundary only when directly observable.
+
+## Accepted Cross-Run Comparability V0 observation slice - 2026-10-03
+
+`tokn-observe cross-run-comparison` compares two explicitly selected historical runs over existing read-only Store evidence. The V0 captured-scope axes are project identity, supported Measurement/Evidence versions, RuntimeProfileCompatibility V1, exact SourceVersion BEFORE state and Workspace Git BEFORE provenance.
+
+SourceStableId, source-version and Git fingerprints are project-scoped; when project ids differ Tokn reports project mismatch and does not compare those fingerprints. Source BEFORE PASS requires two non-empty identical observed source sets with equal exact versions. Asymmetric captured sets remain `UNKNOWN`. Git BEFORE PASS requires observed equal HEAD plus both worktrees clean; same HEAD with dirty worktrees remains `UNKNOWN`.
+
+`observed_scope_compatible=true` is deliberately narrower than experiment validity. Every report keeps `causal_claims_status=NOT_ESTABLISHED`: task/prompt identity, external dependencies, single-primary-variable control, quality and terminal compatibility remain separate evidence gates.
+
+Detailed compaction chronology is not implemented from speculation. The Diagnostic parser can count kinds containing `compaction`, but retained real traces and current sanitized fixtures contain no detailed compaction event sample. Diagnostic `seq` is not assumed comparable to session-rollout `seq`; detailed compaction remains `NOT_CAPTURED` until real evidence supports a versioned adapter contract.

@@ -1,3 +1,14 @@
+## 2026-10-03 - M4 Cross-Run Comparability V0
+
+- added an observation-only cross-run comparability reducer over HistoricalSnapshot V1, SourceVersionHistory V1 and WorkspaceGitProvenanceHistory V1;
+- compares two explicit run ids on same-project scope, frozen Measurement/Evidence versions, accepted RuntimeProfileCompatibility V1, exact BEFORE source versions and BEFORE Git provenance;
+- project-scoped SourceStableId/SourceVersion/Git fingerprints are never compared across different projects;
+- source-state PASS requires non-empty identical observed source sets with equal exact versions; asymmetric capture remains `UNKNOWN` and observed version differences `FAIL`;
+- Git BEFORE PASS requires observed equal HEAD plus both worktrees clean; equal HEAD with dirty worktrees remains `UNKNOWN`;
+- every report keeps `causal_claims_status=NOT_ESTABLISHED`; task identity, single-variable control, outcome ranking and savings remain outside this primitive;
+- added read-only `tokn-observe cross-run-comparison` with bounded history lookup and fail-closed missing/same-run/schema/scope handling;
+- compaction detail remains `NOT_CAPTURED`: current retained real traces and sanitized fixtures contain no detailed compaction event sample, so no speculative event schema or cross-stream seq join is introduced.
+
 ## 2026-10-03 - M4 Source Freshness Evidence V0
 
 - added an observation-only Source Freshness Evidence V0 reducer joining Source Mutation Window V0, SourceVersionHistory V1 and WorkspaceGitProvenanceHistory V1 without changing Store V2 or Measurement Contract V1;

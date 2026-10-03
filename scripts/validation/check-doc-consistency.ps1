@@ -78,6 +78,10 @@ Assert-Contains "docs/design/SOURCE-FRESHNESS-EVIDENCE.md" "Status: M4 ACCEPTED 
 Assert-Contains "docs/design/SOURCE-FRESHNESS-EVIDENCE.md" 'freshness_status = NOT_PROVEN'
 Assert-Contains "docs/design/SOURCE-FRESHNESS-EVIDENCE.md" 'invalidation_status = NOT_PROVEN'
 Assert-Contains "docs/design/SOURCE-FRESHNESS-EVIDENCE.md" '`tokn-observe source-freshness-evidence`'
+Assert-Contains "docs/design/CROSS-RUN-COMPARABILITY.md" "Status: M4 ACCEPTED OBSERVATION FOUNDATION / OBSERVATION-ONLY"
+Assert-Contains "docs/design/CROSS-RUN-COMPARABILITY.md" '`causal_claims_status = NOT_ESTABLISHED`'
+Assert-Contains "docs/design/CROSS-RUN-COMPARABILITY.md" '`tokn-observe cross-run-comparison`'
+Assert-Contains "docs/design/CROSS-RUN-COMPARABILITY.md" 'Detailed compaction chronology remains `NOT_CAPTURED`'
 Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "Workspace Git Provenance V0 + WorkspaceGitProvenanceHistory V1: ACCEPTED FOUNDATION."
 Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "Source Mutation Window V0: ACCEPTED CHRONOLOGY FOUNDATION."
 Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "Source Freshness Evidence V0:"
@@ -116,6 +120,7 @@ $activeDocs = @(
     "docs/design/MULTI-RUNTIME-CORE-AND-DATA-ARCHITECTURE.md",
     "docs/design/WORKSPACE-GIT-PROVENANCE.md",
     "docs/design/SOURCE-FRESHNESS-EVIDENCE.md",
+    "docs/design/CROSS-RUN-COMPARABILITY.md",
     "docs/design/CONTEXT-RESULT-IDENTITY.md",
     "docs/design/CROSS-AGENT-EVIDENCE.md",
     "docs/decisions/ADR-006-MULTI-RUNTIME-CORE-ADAPTER-BOUNDARY.md",

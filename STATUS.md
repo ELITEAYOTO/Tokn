@@ -6,7 +6,7 @@ Binaire/Cargo : **V0.1 / 0.1.0**
 
 ## Resume
 
-**P0-P9 DONE. Experiment 002 est ACCEPTED. Measurement Contract V1 est FROZEN. Store foundation est DONE. Local MCP transport prototype est ACCEPTED. Historical Analyzer + Context Ledger est IN PROGRESS ; Context/Result Identity V0, Cross-Agent Evidence V2, Source Mutation Observation V0, Run-Boundary Source Version V0 et Workspace Git Provenance V0 sont ACCEPTED FOUNDATIONS ; Source Freshness Evidence V0 est ACCEPTED CORROBORATION FOUNDATION / observation-only avec freshness/invalidation toujours `NOT_PROVEN`.**
+**P0-P9 DONE. Experiment 002 est ACCEPTED. Measurement Contract V1 est FROZEN. Store foundation est DONE. Local MCP transport prototype est ACCEPTED. Historical Analyzer + Context Ledger est IN PROGRESS ; Context/Result Identity V0, Cross-Agent Evidence V2, Source Mutation Observation V0, Run-Boundary Source Version V0 et Workspace Git Provenance V0 sont ACCEPTED FOUNDATIONS ; Source Freshness Evidence V0 est ACCEPTED CORROBORATION FOUNDATION ; Cross-Run Comparability V0 est ACCEPTED OBSERVATION FOUNDATION.**
 
 Le projet est revenu sur une direction unique :
 mesurer l'efficacite du contexte sans reduire la capacite d'Astra.
@@ -248,10 +248,10 @@ Limites explicites du contrat V1 :
 
 ## Prochaine action
 
-Continuer **M4** a partir de Source Freshness Evidence V0, qui joint maintenant la chronologie read/mutation/reread avec SourceVersion et Workspace Git sans produire de verdict `FRESH` / `STALE`.
-La prochaine preuve manquante est la compaction/rediscovery directement observable, puis la comparaison cross-run explicite avec scope/provenance compatibles. Un vrai verdict de fraicheur/invalidation restera interdit tant que la relation entre contexte fourni/utilise et etat source ulterieur n'est pas directement prouvee.
+Continuer **M4** avec Cross-Run Comparability V0, qui compare deux runs explicitement nommes uniquement sur les conditions effectivement capturees : project scope, versions de contrat, runtime/profile, SourceVersion BEFORE et Git BEFORE.
+La compaction detaillee reste `NOT_CAPTURED` : le parser diagnostic sait compter un kind contenant `compaction`, mais aucune trace reelle locale ni fixture sanitisee conservee ne fournit actuellement un evenement detaille permettant un contrat fiable. Ne pas relier artificiellement le `seq` diagnostic au `seq` rollout.
 
-La mutation-operation peut maintenant etre datee quand le rollout fournit un timestamp, mais son effet reste `NOT_VERIFIED`; Source Freshness Evidence garde `freshness_status=NOT_PROVEN` et `invalidation_status=NOT_PROVEN`. Ces fondations preparent un Context Twin V0 sans pretendre connaitre la memoire interne d'Astra.
+Meme quand le scope observe est compatible, `causal_claims_status=NOT_ESTABLISHED` : l'identite de tache/prompt, les dependances externes et le controle d'une variable primaire restent hors de ce reducer. Source Freshness Evidence garde en parallele `freshness_status=NOT_PROVEN` et `invalidation_status=NOT_PROVEN`.
 Ne pas persister les tool outputs bruts par defaut uniquement pour obtenir une identite.
 Ne pas creer artificiellement du per-turn a partir des agregats V1.
 Ne pas commencer M5 Findings + Opportunity Analyzer tant que ces observations historiques ne sont pas fiables.
@@ -337,7 +337,8 @@ Accepted M4 additions:
 - SourceMutationHistory V1 preserves `tool_status` but keeps `effect_status=NOT_VERIFIED`;
 - Source Mutation Window V0 joins exact same-source same-thread read-before -> completed mutation -> read-after sequence evidence and reports exact content equality/difference only under complete unambiguous coverage; cross-thread/intervening mutation ambiguity fails to `UNKNOWN`, and causality remains `NOT_PROVEN`;
 - Source Freshness Evidence V0 joins mutation-window chronology + exact SourceVersion BEFORE/AFTER + Workspace Git HEAD/dirty provenance without comparing ContentFingerprint and SourceVersionFingerprint directly; it may report change+reread corroboration, but freshness/invalidation remain `NOT_PROVEN`;
-- `tokn-observe source-mutation-history` + `tokn-observe source-mutation-window-history` + `tokn-observe source-freshness-evidence` read-only JSON surfaces;
+- Cross-Run Comparability V0 compares explicit baseline/candidate runs on captured project/contract/runtime/BEFORE-source/BEFORE-Git scope, never compares project-scoped fingerprints across projects, and keeps `causal_claims_status=NOT_ESTABLISHED`;
+- `tokn-observe source-mutation-history` + `tokn-observe source-mutation-window-history` + `tokn-observe source-freshness-evidence` + `tokn-observe cross-run-comparison` read-only JSON surfaces;
 - Run-Boundary Source Version V0 from Runner BEFORE/AFTER workspace snapshots;
 - SourceVersionHistory V1 stores project-scoped `ver-v1-*` fingerprints keyed by the same SourceStableId, never raw paths or raw snapshot SHA-256 values;
 - source boundary reducer reports `UNCHANGED_OBSERVED` / `CHANGED_OBSERVED` only with both boundaries, otherwise `UNKNOWN`;
@@ -349,9 +350,9 @@ Accepted M4 additions:
 - `tokn-observe cross-agent-evidence` read-only JSON analysis surface.
 
 Next M4 work:
-- Source Freshness Evidence V0 is now the candidate corroboration layer over Source Mutation Window + SourceVersion + Workspace Git; keep `freshness_status` / `invalidation_status` at `NOT_PROVEN`;
-- add directly observable compaction/rediscovery evidence before any stale-context interpretation;
-- add explicit cross-run comparison primitives with compatible evidence/provenance scope;
+- Cross-Run Comparability V0 is an ACCEPTED OBSERVATION FOUNDATION for captured scope/provenance; even PASS keeps `causal_claims_status=NOT_ESTABLISHED`;
+- detailed compaction chronology remains `NOT_CAPTURED` until a real event sample is available; rediscovery must likewise be directly observable before interpretation;
+- task/context-delivery identity remains required before stronger stale/fresh or causal controls;
 - broader source kinds remain allowed only when stable identity is directly provable.
 
 Stability / benchmark readiness 2026-10-03:

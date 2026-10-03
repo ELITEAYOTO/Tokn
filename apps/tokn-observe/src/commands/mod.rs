@@ -6,6 +6,7 @@ mod common;
 mod compare;
 mod context_ledger;
 mod cross_agent_evidence;
+mod cross_run_comparison;
 mod doctor;
 mod evaluate_validity;
 mod health;
@@ -65,6 +66,21 @@ pub fn run(cli: Cli) -> anyhow::Result<()> {
         } => activity_timeline::run(
             project_id.as_deref(),
             workspace_id.as_deref(),
+            limit,
+            db.as_deref(),
+            output_json.as_deref(),
+        ),
+        Command::CrossRunComparison {
+            baseline_run_id,
+            candidate_run_id,
+            project_id,
+            limit,
+            db,
+            output_json,
+        } => cross_run_comparison::run(
+            &baseline_run_id,
+            &candidate_run_id,
+            project_id.as_deref(),
             limit,
             db.as_deref(),
             output_json.as_deref(),
