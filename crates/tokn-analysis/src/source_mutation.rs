@@ -1,7 +1,9 @@
 use std::fmt;
 
 use serde::{Deserialize, Serialize};
-use tokn_domain::{EvidenceIdentityCoverage, TOOL_ACTIVITY_HISTORY_SCHEMA_VERSION, ToolActivityHistory};
+use tokn_domain::{
+    EvidenceIdentityCoverage, TOOL_ACTIVITY_HISTORY_SCHEMA_VERSION, ToolActivityHistory,
+};
 
 pub const SOURCE_MUTATION_HISTORY_SCHEMA_VERSION: u64 = 1;
 
@@ -61,10 +63,12 @@ pub fn build_source_mutation_history(
     history: &ToolActivityHistory,
 ) -> Result<SourceMutationHistoryReport, SourceMutationHistoryBuildError> {
     if history.schema_version != TOOL_ACTIVITY_HISTORY_SCHEMA_VERSION {
-        return Err(SourceMutationHistoryBuildError::UnsupportedToolActivityHistorySchema {
-            actual: history.schema_version,
-            expected: TOOL_ACTIVITY_HISTORY_SCHEMA_VERSION,
-        });
+        return Err(
+            SourceMutationHistoryBuildError::UnsupportedToolActivityHistorySchema {
+                actual: history.schema_version,
+                expected: TOOL_ACTIVITY_HISTORY_SCHEMA_VERSION,
+            },
+        );
     }
 
     let mut events = history
@@ -149,8 +153,14 @@ mod tests {
         };
         let report = build_source_mutation_history(&history(vec![activity])).expect("report");
         assert_eq!(report.events.len(), 1);
-        assert_eq!(report.events[0].timing_coverage, MutationTimingCoverage::Observed);
-        assert_eq!(report.events[0].effect_status, MutationEffectStatus::NotVerified);
+        assert_eq!(
+            report.events[0].timing_coverage,
+            MutationTimingCoverage::Observed
+        );
+        assert_eq!(
+            report.events[0].effect_status,
+            MutationEffectStatus::NotVerified
+        );
     }
 
     #[test]
@@ -165,7 +175,10 @@ mod tests {
             ..Default::default()
         };
         let report = build_source_mutation_history(&history(vec![activity])).expect("report");
-        assert_eq!(report.events[0].timing_coverage, MutationTimingCoverage::NotCaptured);
+        assert_eq!(
+            report.events[0].timing_coverage,
+            MutationTimingCoverage::NotCaptured
+        );
         assert!(report.events[0].observed_at.is_none());
     }
 
@@ -176,9 +189,11 @@ mod tests {
             source_identity_coverage: EvidenceIdentityCoverage::NotCaptured,
             ..Default::default()
         };
-        assert!(build_source_mutation_history(&history(vec![activity]))
-            .expect("report")
-            .events
-            .is_empty());
+        assert!(
+            build_source_mutation_history(&history(vec![activity]))
+                .expect("report")
+                .events
+                .is_empty()
+        );
     }
 }

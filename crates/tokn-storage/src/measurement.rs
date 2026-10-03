@@ -1126,8 +1126,14 @@ fn validate_input(input: &MeasurementStoreInput) -> Result<(), MeasurementStoreE
                 )));
             }
         }
-        if activity.observed_at.as_deref().is_some_and(|value| value.trim().is_empty()) {
-            return Err(MeasurementStoreError::Invalid("tool activity observed_at cannot be empty".into()));
+        if activity
+            .observed_at
+            .as_deref()
+            .is_some_and(|value| value.trim().is_empty())
+        {
+            return Err(MeasurementStoreError::Invalid(
+                "tool activity observed_at cannot be empty".into(),
+            ));
         }
         if let Some(value) = activity.operation_fingerprint.as_deref() {
             validate_private_id("operation_fingerprint", value, "op")?;

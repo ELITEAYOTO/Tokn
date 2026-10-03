@@ -210,7 +210,9 @@ fn apply_tool_activity_migrations(conn: &Connection) -> rusqlite::Result<()> {
 
     match current.as_deref() {
         Some("3") => Ok(()),
-        Some("2") => conn.execute_batch(include_str!("../migrations/0005_tool_activity_timing.sql")),
+        Some("2") => {
+            conn.execute_batch(include_str!("../migrations/0005_tool_activity_timing.sql"))
+        }
         Some("1") => {
             conn.execute_batch(include_str!("../migrations/0004_context_identity.sql"))?;
             conn.execute_batch(include_str!("../migrations/0005_tool_activity_timing.sql"))
