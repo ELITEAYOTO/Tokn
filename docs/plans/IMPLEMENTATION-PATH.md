@@ -312,7 +312,7 @@ Phase G evidence status:
 
 Status: STARTED / OBSERVATION-ONLY
 
-Accepted pre-implementation slice:
+Accepted design + implementation-prerequisite slice:
 - Shadow Repository Index V0 design: file-level first, DERIVED/local/rebuildable, separate from Measurement Store;
 - exact current-file hash verification before returning source text;
 - Git/hash incremental invalidation with fail-closed verification/rebuild fallback;
@@ -321,12 +321,12 @@ Accepted pre-implementation slice:
 - Shadow Index Benchmark Protocol V0 + ShadowIndexMeasurement V1 freeze retrieval/build/refresh/resource/privacy metrics before implementation;
 - no MCP retrieval tool, no active runtime hook, no context injection and no token-savings claim.
 
-Implementation prerequisites:
-1. reuse the exact existing SourceStableId derivation without making the shadow index depend on Store internals or duplicating the algorithm;
-2. define a separate versioned IndexContentHash domain for whole-file bytes;
-3. define local index location/retention outside tracked/package artifacts;
-4. implement bounded DIRECT_SCAN_V0 corpus/query semantics and sanitized gold fixtures;
-5. capability-probe FTS5 and benchmark candidates only after the reference path exists.
+Implementation prerequisites/state:
+1. shared SourceStableId derivation: **DONE** in `tokn-domain::identity`, Store compatibility re-export retained and `src-v1-*` golden locked;
+2. separate whole-file IndexContentHash: **DONE** as project-scoped `ixc-v1-*`;
+3. local shadow cache root: **DONE** via `observer_shadow_index_root()` + safe per-project segment, with no backend filename selected;
+4. bounded DIRECT_SCAN_V0 corpus/query semantics + sanitized gold fixtures: **NEXT / NOT STARTED**;
+5. FTS5 capability probe + candidate benchmark: **NOT STARTED**, only after the reference path exists.
 
 Exit toward active shadow retrieval requires a backend to meet every predeclared quality/correctness/resource gate. Active context injection remains a later separate gate.
 

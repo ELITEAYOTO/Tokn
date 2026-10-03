@@ -19,6 +19,9 @@ use tokn_domain::{
     WorkspaceGitProvenanceHistory,
 };
 
+#[cfg(test)]
+use tokn_domain::scoped_source_id_bytes;
+
 use crate::Database;
 
 const PRIVATE_ID_HEX_LEN: usize = 24;
@@ -219,18 +222,6 @@ pub fn scoped_task_input_bytes(scope_key: &str, bytes: &[u8]) -> String {
     hasher.update(&[0]);
     hasher.update(bytes);
     format!("tsk-v1-{}", hasher.finalize().to_hex())
-}
-
-pub fn scoped_source_id_bytes(scope_key: &str, locator: &[u8]) -> String {
-    let key = blake3::derive_key(
-        "tokn.project-scoped-source-identity.v1",
-        scope_key.as_bytes(),
-    );
-    let mut hasher = blake3::Hasher::new_keyed(&key);
-    hasher.update(b"logical-source-locator-v1");
-    hasher.update(&[0]);
-    hasher.update(locator);
-    format!("src-v1-{}", hasher.finalize().to_hex())
 }
 
 pub fn scoped_source_version_bytes(scope_key: &str, snapshot_sha256: &[u8]) -> String {
