@@ -1,11 +1,13 @@
 # Tokn Roadmap
 
-Derniere mise a jour : **2026-10-01**
+Derniere mise a jour : **2026-10-03**
 
 ## North Star
 
-Maximiser le travail utile et la qualite obtenus par token,
-sans reduire arbitrairement la capacite d'Astra.
+Court terme : maximiser le travail utile et la qualite obtenus par token, sans reduire arbitrairement la capacite du modele.
+
+North Star long terme : **meme ou meilleure qualite pour un cout agent total plus faible**
+(tokens, temps, retries, duplication, failures), avec quality gate avant efficiency.
 
 Ordre obligatoire :
 **mesurer -> prouver -> expliquer -> experimenter -> optimiser -> automatiser.**
@@ -168,7 +170,9 @@ Purpose: bridge M4 evidence to later optimization without changing Astra behavio
 Context Identity / Context Twin V0 seed:
 - privacy-safe evidence/context IDs for directly observed items;
 - project-scoped keyed content/result fingerprints when content is transiently available;
-- source identity + range/symbol + source version/hash/commit when known;
+- SourceStableId quand une source logique stable est observable ;
+- ContentFingerprint privacy-safe pour la version/resultat observe, separe de l'identite stable ;
+- range/symbol + source version/hash/commit when known;
 - provenance, freshness and invalidation state;
 - agent/run distribution only when directly observed;
 - `UNKNOWN` / `NOT_CAPTURED` when delivery, freshness or result identity cannot be proven.
@@ -291,6 +295,27 @@ Only if simpler deterministic/statistical approaches plateau and enough data exi
 
 No learned policy self-deploys. Shadow, causal A/B, quality gate, runtime compatibility, rollback and monitoring remain mandatory promotion gates.
 
+## Cross-cutting multi-runtime gates
+
+These gates do not renumber M9/M10.
+
+Now / M4-M4.5:
+- all new evidence/context types use runtime-neutral naming where possible;
+- provider-specific parsing/semantics stay outside generic reducers;
+- capability/evidence checks are preferred to runtime-name checks;
+- do not perform a speculative adapter refactor while only Codex is real evidence.
+
+Before runtime #2:
+- Runtime Adapter Contract V1;
+- Token Semantics V2;
+- Runtime Capability Manifest V1;
+- sanitized Conformance Fixture Kit + contract tests.
+
+Runtime #2 must test and correct the Core/Adapter separation using real evidence.
+Runtime #3 is the architecture maturity milestone: principal reducers should need little or no provider-specific modification.
+A public Adapter SDK is deferred until at least 2-3 real adapters have exercised the internal contract.
+
+Canonical design: `docs/design/MULTI-RUNTIME-CORE-AND-DATA-ARCHITECTURE.md` and ADR-006.
 ## Regle de passage
 
 Une phase est DONE uniquement si:

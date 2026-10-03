@@ -1,6 +1,6 @@
 # Tokn Observer - Status
 
-Derniere mise a jour : **2026-10-01**
+Derniere mise a jour : **2026-10-03**
 Release de travail : **V0.1 Measurement Hardening**
 Binaire/Cargo : **V0.1 / 0.1.0**
 
@@ -37,7 +37,7 @@ but the already-installed Visual Studio Build Tools 2022 toolchain is complete
 and is the validated build environment.
 
 Maintainability audit : CLEAN / NO MAJOR REFACTOR REQUIRED.
-Git local : main, aucun remote.
+Git local : `main` aligne sur `origin/main` (GitHub).
 
 ## V0.1
 
@@ -246,7 +246,7 @@ Limites explicites du contrat V1 :
 ## Prochaine action
 
 Continuer **M4** avec une fondation d'identite contexte/resultat evidence-bounded :
-IDs privacy-safe, fingerprint de contenu/resultat seulement quand directement observable,
+`SourceStableId` quand une source logique stable est observable, `ContentFingerprint` privacy-safe seulement quand le contenu/resultat est directement observable,
 source/version/provenance/fraicheur/invalidation, puis compaction/rediscovery et comparaison cross-run explicite.
 
 Cette fondation doit preparer un Context Twin V0 sans pretendre connaitre la memoire interne d'Astra.
@@ -337,3 +337,12 @@ Long-term strategy review 2026-10-03 ACCEPTED as direction:
 - M5 includes Opportunity Analyzer V0;
 - deterministic counterfactual replay + policy schema precede expensive A/B;
 - AutoLab/ML stays a later offline-first track, not current M4-M6 scope.
+Multi-runtime architecture review 2026-10-03 ACCEPTED as design direction:
+- one provider-neutral analytical Core, many thin Runtime Adapters;
+- capability/evidence-driven analysis instead of provider-name branching in generic reducers;
+- runtime / model / provider / host / configuration remain distinct identities;
+- `SourceStableId` and privacy-safe `ContentFingerprint` stay distinct in future Context Identity;
+- before runtime #2: Runtime Adapter Contract V1, Token Semantics V2, Runtime Capability Manifest V1 and sanitized conformance fixtures;
+- runtime #2 validates the abstractions; runtime #3 is the maturity test before any public Adapter SDK;
+- normalized-event design is a logical/rebuildability direction, not a Store V2 rewrite mandate;
+- UI/MCP/query surfaces should consume shared Core/Query contracts rather than couple directly to SQLite.

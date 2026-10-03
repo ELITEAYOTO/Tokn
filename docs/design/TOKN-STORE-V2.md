@@ -1,7 +1,7 @@
 # Tokn Store V2
 
 Status: FOUNDATION IMPLEMENTED
-Date: 2026-10-01
+Date: 2026-10-03
 Store schema version: 2
 
 ## Purpose
@@ -210,11 +210,15 @@ Unit tests additionally validate:
 - legacy path migration physically removes path strings after VACUUM;
 - unknown future Store versions are refused.
 
-## Next boundary
+## Current next boundary
 
-Store foundation is sufficient for the next prototype:
+The local MCP transport prototype is already accepted. Store V2 now feeds M4 historical analysis and the next Context/Result Identity foundation.
 
-Codex integration -> command-launched local MCP adapter -> shared Rust Engine/Store.
+Multi-runtime storage rule:
+- do not rewrite Store V2 speculatively;
+- new durable normalized evidence should be replay/rebuild friendly;
+- provider-specific raw artifacts remain non-durable by default unless a measured feature requires bounded retention;
+- future CLI/MCP/UI consumers should prefer shared Store/Query contracts rather than direct SQLite coupling;
+- Token Semantics V2 and adapter contracts precede serious runtime #2 ingestion.
 
-The MCP layer must remain thin.
-It must not duplicate Runner, Store or analysis logic.
+The MCP/integration layers remain thin and must not duplicate Runner, Store or analysis logic.

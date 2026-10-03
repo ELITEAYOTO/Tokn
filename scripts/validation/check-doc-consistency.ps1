@@ -61,6 +61,14 @@ Assert-Contains "docs/design/HISTORICAL-CONTEXT-LEDGER.md" "turn granularity is 
 Assert-Contains "docs/design/HISTORICAL-CONTEXT-LEDGER.md" "retained-context status remains UNKNOWN"
 Assert-Contains "docs/design/PLUGIN-ENGINE-INTEGRATION.md" "Status: LOCAL STDIO TRANSPORT PROTOTYPE ACCEPTED"
 Assert-Contains "docs/INDEX.md" "**P0-P9 DONE ; Experiment 002 ACCEPTED ; Measurement Contract V1 FROZEN ; Store foundation DONE ; Local MCP transport prototype ACCEPTED ; Historical Analyzer + Context Ledger IN PROGRESS.**"
+Assert-Contains "README.md" "Codex/Astra est le premier runtime valide, pas une dependance du domaine Tokn."
+Assert-Contains "ROADMAP.md" "## Cross-cutting multi-runtime gates"
+Assert-Contains "docs/decisions/ADR-006-MULTI-RUNTIME-CORE-ADAPTER-BOUNDARY.md" "Status: ACCEPTED"
+Assert-Contains "docs/design/MULTI-RUNTIME-CORE-AND-DATA-ARCHITECTURE.md" "one analytical brain, many runtime translators"
+Assert-Contains "docs/design/TARGET-ARCHITECTURE.md" "Runtime -> Runtime Adapter -> Normalized Contracts -> Tokn Core/Engine -> Tokn Store -> Query/Views"
+Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "SourceStableId"
+Assert-Contains "docs/design/MODEL-RUNTIME-PROFILE.md" "Token Semantics V2"
+Assert-Contains "docs/design/TOKN-STORE-V2.md" "## Current next boundary"
 
 $activeDocs = @(
     "README.md",
@@ -78,6 +86,8 @@ $activeDocs = @(
     "docs/design/HISTORICAL-CONTEXT-LEDGER.md",
     "docs/design/PLUGIN-ENGINE-INTEGRATION.md",
     "docs/design/TARGET-ARCHITECTURE.md",
+    "docs/design/MULTI-RUNTIME-CORE-AND-DATA-ARCHITECTURE.md",
+    "docs/decisions/ADR-006-MULTI-RUNTIME-CORE-ADAPTER-BOUNDARY.md",
     "docs/INDEX.md"
 )
 $stale = @(

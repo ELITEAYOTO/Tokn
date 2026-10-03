@@ -1,14 +1,14 @@
 # Tokn Target Architecture
 
 Status: ACCEPTED DESIGN DIRECTION
-Date: 2026-10-01
+Date: 2026-10-03
 Current state: P0-P9 DONE / Experiment 002 ACCEPTED / Measurement Contract V1 FROZEN / Store V2 foundation DONE / Local MCP transport prototype ACCEPTED / Historical Analyzer + Context Ledger IN PROGRESS
 
 ## Principle
 
 Tokn is organized around a runtime-independent analytical engine.
 
-Runtime -> Adapter/Evidence -> Tokn Engine -> Tokn Store -> Reports/Findings
+Runtime -> Runtime Adapter -> Normalized Contracts -> Tokn Core/Engine -> Tokn Store -> Query/Views
 
 UI and plugin surfaces consume this architecture; they do not replace it.
 
@@ -33,8 +33,12 @@ Missing evidence remains explicitly UNKNOWN.
 
 ### Runtime adapters
 
-Adapters translate runtime-specific artifacts into normalized Tokn inputs.
+Adapters translate runtime-specific artifacts into normalized Tokn contracts.
 Codex is the first target adapter, not a dependency of the domain model.
+
+Adapters own detection, parsing, capability mapping, provider token-semantics translation, runtime-profile construction, provenance, sanitization and adapter diagnostics. They do not classify waste, rank opportunities, run causal comparisons or choose policies.
+
+Generic reducers prefer capability/evidence checks over runtime-name branches. Provider-specific concepts remain adapter-local until a genuinely generic versioned Core concept is justified.
 
 ### ModelRuntimeProfile registry
 
@@ -43,6 +47,8 @@ observability gaps, historical baselines, recurring patterns, provenance
 and confidence.
 
 A missing capability must not be inferred as zero, false or unsupported.
+
+A future RuntimeCapabilityManifest should preserve evidence-aware states such as OBSERVED, SUPPORTED, NOT_CAPTURED, UNKNOWN and NOT_APPLICABLE instead of reducing capabilities to booleans.
 
 ### Tokn Store
 
@@ -53,6 +59,10 @@ usage summaries, provenance and ModelRuntimeProfile V1.
 Findings, Experiment Lab and richer historical structures remain deferred until their
 consumer contracts are justified.
 
+### Query / exposure boundary
+
+CLI, MCP, future Desktop/Web UI and exports should consume shared Core/Query contracts rather than read SQLite schema directly.
+A future internal Tokn Query API may expose run summaries, timelines, ledgers, findings, opportunities, runtime-cohort comparisons, policy performance and adapter health without requiring a network service.
 ### Codex integration
 
 Codex integration is a thin activation/observation/presentation layer.
@@ -139,3 +149,12 @@ The active path remains separate: only validated policies may enter Advisor and 
 AutoLab is a later offline-first subsystem over versioned/rebuildable data: Experience Bank, Feature Store, DatasetManifest, holdouts, Policy Registry and drift handling. It does not require ML initially and never self-deploys learned policies.
 
 Learned methods are ordered by complexity and evidence: simple statistics/deterministic rules before contextual bandits, Bayesian optimization, learning-to-rank, calibrated surrogates, offline evolutionary search and any optional specialized LLM analyst.
+## Multi-runtime design boundary - 2026-10-03
+
+Canonical detail: `MULTI-RUNTIME-CORE-AND-DATA-ARCHITECTURE.md` and ADR-006.
+
+Context Identity must keep stable logical source identity separate from privacy-safe content/result fingerprints so “same source, changed content” is representable.
+
+Before runtime #2 is analysis-ready: Runtime Adapter Contract V1, Token Semantics V2, Runtime Capability Manifest V1 and sanitized conformance fixtures are required. Runtime #2 validates/refines the abstraction; runtime #3 is the maturity test before any public adapter SDK.
+
+Normalized events are a logical/rebuildability boundary, not a mandate to rewrite Store V2. Cross-runtime comparisons are descriptive benchmarks unless the causal experiment contract is actually satisfied.

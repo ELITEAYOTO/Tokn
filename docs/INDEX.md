@@ -1,17 +1,19 @@
 # Tokn Documentation Index
 
-Derniere mise a jour : **2026-10-01**
+Derniere mise a jour : **2026-10-03**
 
 Ce fichier est le point d'entree documentaire unique.
 
 ## Reprendre le developpement en 5 documents
 
 Lire seulement :
-1. `../STATUS.md` - ou en est le projet ;
-2. `../ROADMAP.md` - ordre des prochaines phases ;
-3. `plans/V0.1-IMPLEMENTATION-PLAN.md` - comment finir V0.1 ;
-4. `plans/V0.1-TEST-MATRIX.md` - gates obligatoires ;
-5. `plans/NEXT-SESSION-CHECKLIST.md` - prochaine action concrete.
+1. `../STATUS.md` - ou en est reellement le projet ;
+2. `../ROADMAP.md` - ordre des prochaines phases et gates ;
+3. `plans/IMPLEMENTATION-PATH.md` - chemin d execution courant ;
+4. `plans/NEXT-SESSION-CHECKLIST.md` - prochaine action concrete ;
+5. `design/MULTI-RUNTIME-CORE-AND-DATA-ARCHITECTURE.md` - contraintes architecturales durables pour les nouveaux contrats.
+
+Les plans et matrices V0.1 restent des references de release/golden, pas le chemin de reprise courant.
 
 Etat actuel :
 **P0-P9 DONE ; Experiment 002 ACCEPTED ; Measurement Contract V1 FROZEN ; Store foundation DONE ; Local MCP transport prototype ACCEPTED ; Historical Analyzer + Context Ledger IN PROGRESS.**
@@ -57,6 +59,8 @@ Un document historique ne doit pas remplacer une source de verite courante.
   Seule une preuve experimentale suffisante autorise une conclusion causale.
 - `decisions/ADR-005-HYBRID-TOKN-ARCHITECTURE.md`
   Le moteur Rust reste la source de verite analytique ; les integrations restent des couches minces.
+- `decisions/ADR-006-MULTI-RUNTIME-CORE-ADAPTER-BOUNDARY.md`
+  Core provider-neutral, Runtime Adapters minces, capability-driven analysis et gates avant runtime #2.
 
 ## Design - mesure
 
@@ -92,6 +96,8 @@ Il n'est plus la direction principale d'optimisation.
 - `design/FIRST-TOOL-ANALYZER-VISION.md`
 - `design/TARGET-ARCHITECTURE.md`
   Architecture cible Engine / Store / adapters / integrations.
+- `design/MULTI-RUNTIME-CORE-AND-DATA-ARCHITECTURE.md`
+  Contrat long terme runtime-neutral : adapters/capabilities, normalized evidence, data/query/index boundaries et gates multi-runtime.
 - `design/PLUGIN-ENGINE-INTEGRATION.md`
   Transport local valide : adapter MCP stdio process-bound, sans daemon impose.
 - `design/LOCAL-MCP-PROTOTYPE.md`
@@ -158,4 +164,5 @@ Les chats ne sont jamais la source de verite du projet.
 
 - `audits/2026-10-02-CLAUDE-HANDOFF-REVIEW.md` - current-code review of the Claude handoff and accepted/deferred recommendations.
 - `audits/2026-10-03-LONG-TERM-AUTOLAB-REVIEW.md` - review of owner-supplied AutoLab, Intelligence Layer, data/ML and optimizer strategy research; accepted sequencing changes and deferred ideas.
+- Multi-runtime research is distilled into ADR-006 + `design/MULTI-RUNTIME-CORE-AND-DATA-ARCHITECTURE.md`; the uploaded research itself is not an implementation-status source.
 - Long-term Context Compiler / shadow guardrails are folded into ROADMAP, TARGET-ARCHITECTURE and CONTEXT-EFFICIENCY-STRATEGY instead of duplicating a second canonical design document.

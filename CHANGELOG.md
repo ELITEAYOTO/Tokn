@@ -793,3 +793,13 @@ P6 remains IN PROGRESS until one controlled real PreToolUse callback proves the 
 - added future offline-first AutoLab phases for Experience Bank, Feature Store, DatasetManifest, holdouts, drift and policy learning;
 - kept event sourcing as a compatibility/rebuildability direction rather than a current Store rewrite;
 - kept ML, embeddings, evolutionary search and a specialized Tokn LLM outside the current M4-M6 critical path.
+## 2026-10-03 - multi-runtime Core / data architecture
+
+- accepted a provider-neutral Core / thin Runtime Adapter boundary as a durable architecture decision;
+- added ADR-006 and a canonical multi-runtime design covering capabilities, normalized evidence, data/query/index boundaries and runtime maturity gates;
+- separated future `SourceStableId` from privacy-safe `ContentFingerprint` in Context Identity design;
+- added pre-runtime-#2 gates: Runtime Adapter Contract V1, Token Semantics V2, Runtime Capability Manifest V1 and sanitized conformance fixtures;
+- defined runtime #2 as an abstraction-validation exercise and runtime #3 as the maturity gate before a public Adapter SDK;
+- kept normalized-event/event-sourcing ideas as rebuildability direction rather than a Store V2 rewrite;
+- broadened the long-term North Star to same-or-better quality for lower total agent cost while preserving the current token-efficiency focus;
+- refreshed README, roadmap, status, implementation path, next-session checklist and context-efficiency strategy so the next coding slice remains Context/Result Identity V0.
