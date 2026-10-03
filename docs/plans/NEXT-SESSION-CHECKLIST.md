@@ -43,10 +43,10 @@ Le core deja valide ne doit pas etre refait :
 Context/Result Identity Foundation V0 : ACCEPTED FOUNDATION.
 
 Prochain scope :
-- Source Freshness Evidence V0 est le join observation-only courant sur Source Mutation Window + SourceVersion + Workspace Git ;
-- garder `freshness_status` / `invalidation_status` a `NOT_PROVEN` tant que le contexte fourni/utilise n'est pas directement relie a un etat source ulterieur ;
-- compaction/rediscovery uniquement quand directement observable ;
-- comparaison explicite multi-run avec coverage/comparability/provenance explicites ;
+- Cross-Run Comparability V0 est le slice courant : comparaison baseline/candidate explicite sur project/contract/runtime/SourceVersion BEFORE/Git BEFORE ;
+- meme un scope observe compatible garde `causal_claims_status=NOT_ESTABLISHED` tant que task identity et single-primary-variable ne sont pas prouves ;
+- compaction detaillee reste `NOT_CAPTURED` faute d'evenement reel/fixture sanitisee ; rediscovery uniquement quand directement observable ;
+- garder Source Freshness `freshness_status` / `invalidation_status` a `NOT_PROVEN` tant que le contexte fourni/utilise n'est pas directement relie a un etat source ulterieur ;
 - SourceStableId seulement quand une identite logique stable est directement observable.
 
 Aucune heuristique de finding tant que ces observations historiques ne sont pas fiables.
@@ -131,11 +131,13 @@ Run-Boundary Source Version V0 + SourceVersionHistory V1: ACCEPTED FOUNDATION. B
 Workspace Git Provenance V0 + WorkspaceGitProvenanceHistory V1: ACCEPTED FOUNDATION. BEFORE/AFTER snapshots now carry directly observed HEAD/dirty evidence when available; legacy absence is `NOT_CAPTURED`, attempted but unprovable Git state is `UNKNOWN`, and raw Git SHA values are not persisted in SQLite.
 Source Mutation Window V0: ACCEPTED CHRONOLOGY FOUNDATION. Same-thread exact read-before -> completed mutation -> exact read-after can report exact content equality/difference only under complete unambiguous sequence/identity evidence; intervening or cross-thread same-source mutation makes the window `UNKNOWN`, and causality always remains `NOT_PROVEN`.
 Source Freshness Evidence V0: ACCEPTED CORROBORATION FOUNDATION / OBSERVATION-ONLY. It joins Source Mutation Window + SourceVersion BEFORE/AFTER + Workspace Git provenance, reports only observed change/reread corroboration, never compares ContentFingerprint to SourceVersionFingerprint directly, and keeps freshness/invalidation `NOT_PROVEN`.
+Cross-Run Comparability V0: ACCEPTED OBSERVATION FOUNDATION / OBSERVATION-ONLY. It compares explicit baseline/candidate runs only on captured project/contract/runtime/SourceVersion BEFORE/Git BEFORE state; project-scoped fingerprints are never compared across projects and causal claims remain `NOT_ESTABLISHED`.
+Detailed compaction chronology: `NOT_CAPTURED` until a real diagnostic event sample exists; diagnostic-trace seq and session-rollout seq are not assumed comparable.
 Stability/benchmark readiness: local Rust toolchain + dev-check + package hardening + Benchmark Baseline Protocol V1 are ACCEPTED/PREPARED; this does not claim token savings.
 
 Next concrete work:
-1. directly observable compaction/rediscovery evidence before any stale-context interpretation;
-2. explicit cross-run comparison with compatible evidence/provenance scope;
+1. keep task identity/single-variable causal controls separate from the accepted cross-run scope primitive;
+2. capture compaction/rediscovery only when directly observed and fixtureable;
 3. broader source kinds only when stable identity is directly provable;
 4. only then evaluate whether evidence is sufficient for a stronger stale/fresh contract.
 

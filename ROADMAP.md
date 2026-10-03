@@ -166,7 +166,8 @@ Reste M4 :
 - Workspace Git Provenance V0 (boundary HEAD fingerprint + dirty + explicit coverage) : ACCEPTED FOUNDATION ;
 - Source Mutation Window V0 (same-thread exact read-before -> completed mutation -> exact read-after, ambiguity fail-closed) : ACCEPTED CHRONOLOGY FOUNDATION; causality remains `NOT_PROVEN` ;
 - Source Freshness Evidence V0 : ACCEPTED CORROBORATION FOUNDATION / observation-only join of mutation-window chronology + SourceVersion BEFORE/AFTER + Workspace Git provenance; change/reread corroboration may be observed but `freshness_status` and `invalidation_status` remain `NOT_PROVEN` ;
-- broader symbol/range identity, directly observable compaction/rediscovery, explicit cross-run comparison and any future real stale/fresh verdict remain.
+- Cross-Run Comparability V0 : ACCEPTED OBSERVATION FOUNDATION / observation-only comparison of captured starting-state/runtime scope; project-scoped fingerprints are compared only inside one project and `causal_claims_status` remains `NOT_ESTABLISHED` ;
+- detailed compaction chronology remains `NOT_CAPTURED` until a real diagnostic event can be observed/sanitized; broader symbol/range identity, rediscovery and any future real stale/fresh verdict remain.
 
 ## M4.5 - Context Identity + Shadow Foundations
 

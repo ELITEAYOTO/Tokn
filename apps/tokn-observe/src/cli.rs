@@ -69,6 +69,20 @@ pub enum Command {
         #[arg(long)]
         output_json: Option<PathBuf>,
     },
+    CrossRunComparison {
+        #[arg(long)]
+        baseline_run_id: String,
+        #[arg(long)]
+        candidate_run_id: String,
+        #[arg(long)]
+        project_id: Option<String>,
+        #[arg(long, default_value_t = 50)]
+        limit: usize,
+        #[arg(long)]
+        db: Option<PathBuf>,
+        #[arg(long)]
+        output_json: Option<PathBuf>,
+    },
     CrossAgentEvidence {
         #[arg(long)]
         project_id: Option<String>,

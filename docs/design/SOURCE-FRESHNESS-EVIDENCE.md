@@ -92,4 +92,4 @@ It does not add raw paths, raw file bytes, raw tool outputs, raw Git commit hash
 
 A real stale/fresh or invalidation verdict still requires evidence that is not currently captured authoritatively, especially the relation between earlier supplied/used context and later source state.
 
-Next M4 work should therefore focus on directly observable rediscovery/compaction events and explicit cross-run comparison primitives with compatible provenance scope. Until those contracts exist, `NOT_PROVEN` is the correct freshness/invalidation state.
+Cross-Run Comparability V0 is now accepted as a separate captured-scope/provenance primitive and still does not establish task identity or causality. Next M4 work should focus on directly observable rediscovery/compaction events plus task/context-delivery identity. Until those contracts exist, `NOT_PROVEN` is the correct freshness/invalidation state.
