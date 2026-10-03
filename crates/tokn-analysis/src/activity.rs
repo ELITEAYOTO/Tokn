@@ -242,6 +242,7 @@ mod tests {
             surface: "session_rollout".into(),
             requester_type: None,
             status: "completed".into(),
+            observed_at: None,
             started_seq,
             ended_seq: started_seq.map(|value| value + 1),
             invocation_payload_bytes: None,
