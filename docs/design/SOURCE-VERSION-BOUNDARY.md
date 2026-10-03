@@ -65,11 +65,13 @@ Neither result is a freshness verdict. Workspace-level HEAD/dirty boundary prove
 
 ## Next evidence needed
 
-Before Tokn can emit freshness/invalidation findings it still needs, where directly observable:
-- Workspace Git provenance is now available as boundary evidence, but must be joined conservatively with exact source versions and chronology;
-- a verified chronological relation between reads, source changes and later rediscovery;
-- mutation-effect evidence stronger than mutation-operation intent;
-- explicit coverage/comparability rules across runs;
+Source Freshness Evidence V0 now joins exact source boundary comparison with Source Mutation Window chronology and Workspace Git provenance without comparing `ContentFingerprint` and `SourceVersionFingerprint` directly.
+This is corroboration only: even a read-content difference plus `CHANGED_OBSERVED` boundary keeps freshness/invalidation `NOT_PROVEN`.
+
+Before a stronger freshness contract Tokn still needs, where directly observable:
+- compaction/rediscovery evidence;
+- explicit coverage/comparability/provenance rules across runs;
+- evidence tying supplied/used context to later source state;
 - broader source kinds only when stable identity is provable.
 
 These additions must preserve `UNKNOWN` / `NOT_CAPTURED` rather than turning absence of evidence into a positive claim.

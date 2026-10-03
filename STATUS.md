@@ -6,7 +6,7 @@ Binaire/Cargo : **V0.1 / 0.1.0**
 
 ## Resume
 
-**P0-P9 DONE. Experiment 002 est ACCEPTED. Measurement Contract V1 est FROZEN. Store foundation est DONE. Local MCP transport prototype est ACCEPTED. Historical Analyzer + Context Ledger est IN PROGRESS ; Context/Result Identity V0, Cross-Agent Evidence V2, Source Mutation Observation V0, Run-Boundary Source Version V0 et Workspace Git Provenance V0 sont ACCEPTED FOUNDATIONS.**
+**P0-P9 DONE. Experiment 002 est ACCEPTED. Measurement Contract V1 est FROZEN. Store foundation est DONE. Local MCP transport prototype est ACCEPTED. Historical Analyzer + Context Ledger est IN PROGRESS ; Context/Result Identity V0, Cross-Agent Evidence V2, Source Mutation Observation V0, Run-Boundary Source Version V0 et Workspace Git Provenance V0 sont ACCEPTED FOUNDATIONS ; Source Freshness Evidence V0 est ACCEPTED CORROBORATION FOUNDATION / observation-only avec freshness/invalidation toujours `NOT_PROVEN`.**
 
 Le projet est revenu sur une direction unique :
 mesurer l'efficacite du contexte sans reduire la capacite d'Astra.
@@ -248,10 +248,10 @@ Limites explicites du contrat V1 :
 
 ## Prochaine action
 
-Continuer **M4** a partir des fondations d'identite, de mutation-operation, de version source et de provenance Git workspace aux frontieres du run maintenant acceptees :
-construire ensuite les semantiques de fraicheur/invalidation fail-closed seulement quand une chronologie read -> changement prouve -> rediscovery est observable, puis compaction/rediscovery et comparaison cross-run explicite.
+Continuer **M4** a partir de Source Freshness Evidence V0, qui joint maintenant la chronologie read/mutation/reread avec SourceVersion et Workspace Git sans produire de verdict `FRESH` / `STALE`.
+La prochaine preuve manquante est la compaction/rediscovery directement observable, puis la comparaison cross-run explicite avec scope/provenance compatibles. Un vrai verdict de fraicheur/invalidation restera interdit tant que la relation entre contexte fourni/utilise et etat source ulterieur n'est pas directement prouvee.
 
-La mutation-operation peut maintenant etre datee quand le rollout fournit un timestamp, mais son effet reste `NOT_VERIFIED`. Cette fondation doit preparer un Context Twin V0 sans pretendre connaitre la memoire interne d'Astra.
+La mutation-operation peut maintenant etre datee quand le rollout fournit un timestamp, mais son effet reste `NOT_VERIFIED`; Source Freshness Evidence garde `freshness_status=NOT_PROVEN` et `invalidation_status=NOT_PROVEN`. Ces fondations preparent un Context Twin V0 sans pretendre connaitre la memoire interne d'Astra.
 Ne pas persister les tool outputs bruts par defaut uniquement pour obtenir une identite.
 Ne pas creer artificiellement du per-turn a partir des agregats V1.
 Ne pas commencer M5 Findings + Opportunity Analyzer tant que ces observations historiques ne sont pas fiables.
@@ -336,7 +336,8 @@ Accepted M4 additions:
 - Source Mutation Observation V0: conservative `Set-Content` / `Add-Content` target identity plus rollout timing when directly observed;
 - SourceMutationHistory V1 preserves `tool_status` but keeps `effect_status=NOT_VERIFIED`;
 - Source Mutation Window V0 joins exact same-source same-thread read-before -> completed mutation -> read-after sequence evidence and reports exact content equality/difference only under complete unambiguous coverage; cross-thread/intervening mutation ambiguity fails to `UNKNOWN`, and causality remains `NOT_PROVEN`;
-- `tokn-observe source-mutation-history` + `tokn-observe source-mutation-window-history` read-only JSON surfaces;
+- Source Freshness Evidence V0 joins mutation-window chronology + exact SourceVersion BEFORE/AFTER + Workspace Git HEAD/dirty provenance without comparing ContentFingerprint and SourceVersionFingerprint directly; it may report change+reread corroboration, but freshness/invalidation remain `NOT_PROVEN`;
+- `tokn-observe source-mutation-history` + `tokn-observe source-mutation-window-history` + `tokn-observe source-freshness-evidence` read-only JSON surfaces;
 - Run-Boundary Source Version V0 from Runner BEFORE/AFTER workspace snapshots;
 - SourceVersionHistory V1 stores project-scoped `ver-v1-*` fingerprints keyed by the same SourceStableId, never raw paths or raw snapshot SHA-256 values;
 - source boundary reducer reports `UNCHANGED_OBSERVED` / `CHANGED_OBSERVED` only with both boundaries, otherwise `UNKNOWN`;
@@ -348,10 +349,10 @@ Accepted M4 additions:
 - `tokn-observe cross-agent-evidence` read-only JSON analysis surface.
 
 Next M4 work:
-- Source Mutation Window V0 is now the accepted chronology primitive; do not relabel its exact before/after content difference as causal mutation proof;
-- freshness/invalidation semantics should now join this read/mutation/read chronology + exact SourceVersion + Workspace Git Provenance + later rediscovery while preserving `UNKNOWN` / `NOT_CAPTURED`;
-- broader source kinds plus compaction/rediscovery only when directly observable;
-- explicit cross-run comparison primitives with compatible provenance scope.
+- Source Freshness Evidence V0 is now the candidate corroboration layer over Source Mutation Window + SourceVersion + Workspace Git; keep `freshness_status` / `invalidation_status` at `NOT_PROVEN`;
+- add directly observable compaction/rediscovery evidence before any stale-context interpretation;
+- add explicit cross-run comparison primitives with compatible evidence/provenance scope;
+- broader source kinds remain allowed only when stable identity is directly provable.
 
 Stability / benchmark readiness 2026-10-03:
 - local Rust 1.97.1 toolchain installed and aligned with CI;

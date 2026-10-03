@@ -88,6 +88,8 @@ Un document historique ne doit pas remplacer une source de verite courante.
   SourceVersionHistory V1 : versions BEFORE/AFTER issues des snapshots Runner, fingerprints project-scoped, comparaison fail-closed et aucune inference de freshness.
 - `design/WORKSPACE-GIT-PROVENANCE.md`
   Workspace Git Provenance V0 : HEAD/dirty aux frontieres Runner, `git-v1-*` durable, coverage explicite et aucune inference de freshness.
+- `design/SOURCE-FRESHNESS-EVIDENCE.md`
+  Source Freshness Evidence V0 : join observation-only de la chronologie read/mutation/reread, SourceVersion et provenance Git; change/reread peut etre corrobore, mais freshness/invalidation restent `NOT_PROVEN`.
 - `design/SESSION-ROLLOUT-ADAPTER.md`
 - `design/AGENT-COST-ATTRIBUTION.md`
 - `design/WORKSPACE-TRACKING.md`

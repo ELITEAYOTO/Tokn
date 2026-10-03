@@ -20,6 +20,7 @@ mod resolve_workspace;
 mod runner;
 mod sessions;
 mod simulate_caps;
+mod source_freshness_evidence;
 mod source_identity_history;
 mod source_mutation_history;
 mod source_mutation_window_history;
@@ -88,6 +89,19 @@ pub fn run(cli: Cli) -> anyhow::Result<()> {
             db,
             output_json,
         } => rate_limit_history::run(
+            project_id.as_deref(),
+            workspace_id.as_deref(),
+            limit,
+            db.as_deref(),
+            output_json.as_deref(),
+        ),
+        Command::SourceFreshnessEvidence {
+            project_id,
+            workspace_id,
+            limit,
+            db,
+            output_json,
+        } => source_freshness_evidence::run(
             project_id.as_deref(),
             workspace_id.as_deref(),
             limit,
