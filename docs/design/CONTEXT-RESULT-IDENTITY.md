@@ -58,8 +58,10 @@ Cross-Agent Evidence schema V2 groups exact operation overlap as before, then su
 
 ## Remaining boundary
 
+SourceStableId file V0 is now implemented for conservative simple `Get-Content` reads that resolve inside the Runner selected workspace. The durable ID is project-scoped and the raw workspace-relative locator is not persisted. See `SOURCE-IDENTITY-CONTENT-EVOLUTION.md`.
+
 Still not solved by V0:
-- general SourceStableId extraction;
+- broader SourceStableId extraction beyond the conservative file-read subset;
 - range/symbol identity;
 - source version/commit semantics across runtimes;
 - freshness/invalidation;

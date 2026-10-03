@@ -306,7 +306,7 @@ GitHub validation for branch `m4-activity-history` at `fa1d831` is PASS:
 - documentation consistency PASS.
 
 Accepted M4 additions:
-- ToolActivityHistory V1 additive schema;
+- ToolActivityHistory V2 additive schema;
 - privacy-safe project-scoped operation/workdir fingerprints;
 - ActivityTimeline V1 per agent;
 - exact repeated-operation observations across runs/threads;
@@ -325,11 +325,15 @@ Accepted M4 additions:
 - `OBSERVED` / `PARTIAL` / `NOT_CAPTURED` / `UNKNOWN` result-identity semantics;
 - Cross-Agent result comparison is `SAME` or `DIFFERENT` only under complete observed identity, otherwise `UNKNOWN`;
 - raw tool outputs are never persisted by the identity slice;
+- SourceStableId file V0 derived from workspace-relative simple `Get-Content` evidence under the selected workspace;
+- source IDs use a project-scoped source-specific derivation domain distinct from content fingerprints;
+- SourceIdentityHistory V1 reports `UNCHANGED_OBSERVED` / `CHANGED_OBSERVED` only under complete exact content identity, otherwise `UNKNOWN`;
+- `tokn-observe source-identity-history` read-only JSON surface;
 - `tokn-observe cross-agent-evidence` read-only JSON analysis surface.
 
 Next M4 work:
-- SourceStableId extraction only where a stable logical source is directly observable;
-- freshness/invalidation, compaction/rediscovery only when directly observable;
+- source version/invalidation timing and broader source kinds only when directly observable;
+- compaction/rediscovery only when directly observable;
 - explicit cross-run comparison primitives.
 
 Before Experiment 003: characterize run-to-run variance, predeclare multidimensional quality gates, and measure Tokn overhead for any injected/default-active integration.

@@ -123,10 +123,12 @@ Automatic ModelRuntimeProfile compatibility reducer: ACCEPTED FOUNDATION.
 Rate-limit snapshot ingestion + RateLimitHistory V1: ACCEPTED FOUNDATION.
 Cross-Agent Evidence V2 exact-operation + result-identity comparison: ACCEPTED FOUNDATION.
 Exact content/result identity is now `OBSERVED` only for unambiguous one-operation/one-result evidence; ambiguous or unavailable cases remain explicit.
+SourceStableId file V0 + SourceIdentityHistory V1: ACCEPTED FOUNDATION.
+`source-identity-history` reports exact observed content evolution without claiming freshness, staleness or safe reuse.
 
 Next concrete work:
-1. stable logical source identity only where directly observable;
-2. provenance/source version/freshness/invalidation with `UNKNOWN`/`NOT_CAPTURED` preserved;
+1. source version / directly observed invalidation timing and broader source kinds only where provable;
+2. provenance/freshness semantics with `UNKNOWN`/`NOT_CAPTURED` preserved;
 3. compaction/rediscovery only when directly observed;
 4. explicit cross-run comparison with compatible evidence scope.
 

@@ -127,7 +127,7 @@ Before M4 can be marked DONE:
 - parent/subagent exact-operation overlap : ACCEPTED FOUNDATION ;
 - repeated reads/searches/retries : exact-repeat foundation ACCEPTED ;
 - compaction observations where directly available ;
-- duplicate evidence : remaining because result identity is `NOT_CAPTURED` ;
+- duplicate-evidence finding remains deferred even when exact result identity is observed, because identity alone does not prove redundancy or waste ;
 - rediscovery across runs ;
 - explicit cross-run comparison primitives.
 
@@ -161,7 +161,7 @@ Re-ingestion replaces the run-owned snapshot set deterministically, duplicate ag
 
 CLI: `tokn-observe rate-limit-history`.
 
-Automatic runtime compatibility, rate-limit history and Cross-Agent Evidence V2 with exact result identity are accepted foundations. Remaining M4 work is stable logical source identity where observable, rediscovery/compaction and explicit cross-run analysis, not per-turn token invention.
+Automatic runtime compatibility, rate-limit history, Cross-Agent Evidence V2, exact result identity and conservative SourceStableId file V0 are accepted foundations. Remaining M4 work is source version/invalidation evidence, broader source kinds where provable, rediscovery/compaction and explicit cross-run analysis, not per-turn token invention.
 
 ## Accepted Cross-Agent Evidence V2 slice - 2026-10-03
 
@@ -174,3 +174,11 @@ Lineage is reported as direct parent/child, ancestor/descendant, sibling, other 
 When every overlap occurrence has directly observed exact result identity, Cross-Agent Evidence V2 can report `SAME` or `DIFFERENT`. Partial, ambiguous or unavailable identity stays `PARTIAL`, `NOT_CAPTURED` or `UNKNOWN`; identity alone never becomes a savings/waste claim.
 
 CLI: `tokn-observe cross-agent-evidence`.
+
+## Accepted Source Identity + Content Evolution V0 slice - 2026-10-03
+
+For conservative single-file `Get-Content` observations, the Codex adapter can resolve a workspace-relative logical locator under the Runner selected workspace and project-scope it into `src-v1-*` without persisting the raw locator. The same relative source across project clones therefore keeps one logical identity while another project scope receives another identity.
+
+`SourceIdentityHistory V1` groups those stable sources and reports occurrence/run/thread counts plus exact content-identity coverage. `UNCHANGED_OBSERVED` means every captured occurrence had complete exact identity and one fingerprint; `CHANGED_OBSERVED` means complete exact identity contained multiple fingerprints; incomplete evidence stays `UNKNOWN`. Neither value claims freshness, retained context, unnecessary rereads or safe memory reuse.
+
+CLI: `tokn-observe source-identity-history`.

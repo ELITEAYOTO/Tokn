@@ -813,3 +813,13 @@ P6 remains IN PROGRESS until one controlled real PreToolUse callback proves the 
 - kept normalized-event/event-sourcing ideas as rebuildability direction rather than a Store V2 rewrite;
 - broadened the long-term North Star to same-or-better quality for lower total agent cost while preserving the current token-efficiency focus;
 - refreshed README, roadmap, status, implementation path, next-session checklist and context-efficiency strategy so the next coding slice remains Context/Result Identity V0.
+
+## 2026-10-03 - M4 stable source identity foundation
+
+- added conservative SourceStableId V0 extraction for simple single-file Codex `Get-Content` reads resolved under the Runner selected workspace;
+- derives project-scoped `src-v1-*` identities from transient workspace-relative locators without persisting raw paths;
+- uses a source-specific keyed derivation domain separate from exact content/result fingerprints;
+- added Store fail-closed validation for observed scoped source/content identities;
+- added SourceIdentityHistory V1 and `tokn-observe source-identity-history`;
+- reports only exact observed content evolution (`UNCHANGED_OBSERVED`, `CHANGED_OBSERVED`, `UNKNOWN`) and explicitly does not claim freshness, staleness, redundancy, retained context or safe reuse;
+- branch validation passed privacy, rustfmt, strict Clippy, workspace tests, release/provenance, MCP smoke, Experiment 001/002 and documentation gates before documentation finalization.
