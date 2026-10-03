@@ -1,4 +1,4 @@
-﻿name: M4 Source Identity Validation
+name: M4 Source Identity Validation
 
 on:
   push:
@@ -43,9 +43,17 @@ jobs:
         shell: pwsh
         run: ./scripts/validation/check-repo-publication.ps1
 
-      - name: Format, clippy and tests
+      - name: Format check
         shell: pwsh
-        run: ./scripts/test.ps1
+        run: ./scripts/with-msvc.cmd cargo fmt --all -- --check
+
+      - name: Clippy strict
+        shell: pwsh
+        run: ./scripts/with-msvc.cmd cargo clippy --workspace --all-targets -- -D warnings
+
+      - name: Workspace tests
+        shell: pwsh
+        run: ./scripts/with-msvc.cmd cargo test --workspace
 
       - name: Release build with provenance
         shell: pwsh
