@@ -3,8 +3,7 @@ use std::fmt;
 
 use serde::{Deserialize, Serialize};
 use tokn_domain::{
-    EvidenceIdentityCoverage, HistoricalToolActivityRecord, TOOL_ACTIVITY_HISTORY_SCHEMA_VERSION,
-    ToolActivityHistory,
+    HistoricalToolActivityRecord, TOOL_ACTIVITY_HISTORY_SCHEMA_VERSION, ToolActivityHistory,
 };
 
 pub const ACTIVITY_TIMELINE_SCHEMA_VERSION: u64 = 1;
