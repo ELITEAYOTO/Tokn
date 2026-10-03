@@ -94,6 +94,8 @@ Un document historique ne doit pas remplacer une source de verite courante.
   Cross-Run Comparability V0 : comparaison observation-only de deux runs sur project/contract/runtime/SourceVersion BEFORE/Git BEFORE, et Task Input Identity quand directement capture; fingerprints project-scoped non compares entre projets et causalite toujours `NOT_ESTABLISHED`.
 - `design/TASK-INPUT-IDENTITY.md`
   Task Input Identity V0 : fondation M4 acceptee privacy-safe pour l'identite exacte de l'artefact de tache (`tsk-v1-*`); `delivery_status=NOT_PROVEN`, aucune persistance du prompt brut.
+- `design/SOURCE-REREAD-EVIDENCE.md`
+  Cross-Run Source Re-read Evidence V0 : fondation chronologique acceptee observation-only ordonnant les relectures d'une SourceStableId entre runs uniquement avec timestamps rollout complets/parseables; rediscovery, redundancy et freshness restent `NOT_PROVEN`.
 - `design/SESSION-ROLLOUT-ADAPTER.md`
 - `design/AGENT-COST-ATTRIBUTION.md`
 - `design/WORKSPACE-TRACKING.md`

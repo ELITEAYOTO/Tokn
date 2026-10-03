@@ -1,3 +1,14 @@
+## 2026-10-03 - M4 Cross-Run Source Re-read Evidence V0
+
+- added observation-only cross-run same-source re-read chronology over completed ToolActivityHistory V3 file reads with observed project-scoped SourceStableId;
+- orders run read windows only from complete parseable rollout `observed_at` timestamps and explicitly excludes Store `run_created_at_unix` ingestion time from runtime chronology;
+- moved the dependency-free RFC3339 offset/fraction parser from the Codex adapter into `tokn-domain`, with Codex retaining a thin re-export and unchanged adapter behavior;
+- hardened the shared parser against malformed non-ASCII UTF-8 input so invalid timestamps fail to `None` instead of risking string-slice panics;
+- strict chronology requires non-overlapping run read windows; missing/partial/malformed timestamps or overlapping/equal windows fail closed without a directional reread;
+- exact content equality/difference compares only the earlier last-read and later first-read boundaries under complete ContentFingerprint identity;
+- every transition keeps rediscovery/redundancy/freshness `NOT_PROVEN`; no forgetting, waste, safe-reuse or savings claim is emitted;
+- added read-only `tokn-observe source-reread-evidence`; no Store migration or Measurement Contract V1 change.
+
 ## 2026-10-03 - M4 health audit / documentation state sync
 
 - re-audited clean `main` after Task Input Identity V0 acceptance: no new product `unsafe`/`panic!`/`todo!`/`unimplemented!` debt found and no Measurement Contract/Runner schema change required;

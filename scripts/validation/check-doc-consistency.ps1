@@ -87,6 +87,13 @@ Assert-Contains "docs/design/TASK-INPUT-IDENTITY.md" "Status: M4 ACCEPTED OBSERV
 Assert-Contains "docs/design/TASK-INPUT-IDENTITY.md" '`delivery_status = NOT_PROVEN`'
 Assert-Contains "docs/design/TASK-INPUT-IDENTITY.md" '`tokn-observe task-input-history`'
 Assert-Contains "docs/design/TASK-INPUT-IDENTITY.md" '`causal_claims_status = NOT_ESTABLISHED`'
+Assert-Contains "docs/design/SOURCE-REREAD-EVIDENCE.md" "Status: M4 ACCEPTED CHRONOLOGY FOUNDATION / OBSERVATION-ONLY"
+Assert-Contains "docs/design/SOURCE-REREAD-EVIDENCE.md" '`rediscovery_status = NOT_PROVEN`'
+Assert-Contains "docs/design/SOURCE-REREAD-EVIDENCE.md" '`redundancy_status = NOT_PROVEN`'
+Assert-Contains "docs/design/SOURCE-REREAD-EVIDENCE.md" '`freshness_status = NOT_PROVEN`'
+Assert-Contains "docs/design/SOURCE-REREAD-EVIDENCE.md" '`tokn-observe source-reread-evidence`'
+Assert-Contains "docs/design/SOURCE-REREAD-EVIDENCE.md" '`run_created_at_unix`'
+Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "Cross-Run Source Re-read Evidence V0: ACCEPTED CHRONOLOGY FOUNDATION."
 Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "Task Input Identity V0: ACCEPTED OBSERVATION FOUNDATION."
 Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "Cross-Run Comparability V0 et Task Input Identity V0 sont ACCEPTED OBSERVATION FOUNDATIONS"
 Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "ne construire une preuve de livraison runtime que depuis un vrai evenement rollout directement observe et fixtureable"

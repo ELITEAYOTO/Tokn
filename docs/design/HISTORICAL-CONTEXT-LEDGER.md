@@ -128,7 +128,7 @@ Before M4 can be marked DONE:
 - repeated reads/searches/retries : exact-repeat foundation ACCEPTED ;
 - detailed compaction chronology remains `NOT_CAPTURED` until a real diagnostic event can be observed and fixture-tested ;
 - duplicate-evidence finding remains deferred even when exact result identity is observed, because identity alone does not prove redundancy or waste ;
-- rediscovery across runs only when directly observable ;
+- Cross-Run Source Re-read Evidence V0 is an accepted chronology primitive for directly observable same-source reads across runs; interpreted rediscovery remains unproven ;
 - Cross-Run Comparability V0 is an accepted explicit comparison primitive; Task Input Identity V0 is an accepted extension for directly captured frozen task-artifact identity.
 
 Per-turn history requires a future directly evidenced contract if the product truly
@@ -253,3 +253,11 @@ Detailed compaction chronology is not implemented from speculation. The Diagnost
 Cross-Run Comparability consumes TaskInputHistory as `TASK_INPUT_IDENTITY`: matching complete observed identities pass, different complete observed identities fail, and incomplete/asymmetric capture stays `UNKNOWN`. Across project scopes the fingerprints are not compared. `causal_claims_status` remains `NOT_ESTABLISHED` even when task-artifact identity passes.
 
 This accepted slice uses additive Store migration `0008_task_input_identity.sql`; Measurement Contract V1, RunnerRequest V1 and Evidence Layout V1 remain frozen and unchanged. The canonical full gate, golden replay, documentation consistency and privacy checks passed before promotion.
+
+## Accepted Cross-Run Source Re-read Evidence V0 slice - 2026-10-03
+
+`tokn-observe source-reread-evidence` consumes ToolActivityHistory V3 only. It groups completed file reads with observed project-scoped SourceStableId by project/source/run, parses direct rollout `observed_at` values through the shared runtime-neutral RFC3339 parser, and emits a cross-run re-read chain only when every eligible read timestamp is present/valid and run read windows are strictly non-overlapping.
+
+`run_created_at_unix` is explicitly excluded from chronology because it records Store ingestion time. Missing timestamps keep timing `PARTIAL` / `NOT_CAPTURED`; malformed observed timestamps are explicit `INVALID_OBSERVED_TIMESTAMP`; overlapping/equal run windows emit no directional re-read transition.
+
+When a strict transition exists, exact content relation is computed only between the earlier run's last observed boundary read and the later run's first observed boundary read, with complete ContentFingerprint coverage required for equality/difference. Every transition keeps `rediscovery_status=NOT_PROVEN`, `redundancy_status=NOT_PROVEN` and `freshness_status=NOT_PROVEN`. No Store migration or Measurement Contract V1 change is introduced. The canonical full gate, targeted regressions, command smoke, documentation consistency and privacy checks passed before promotion.

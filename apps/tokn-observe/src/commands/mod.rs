@@ -25,6 +25,7 @@ mod source_freshness_evidence;
 mod source_identity_history;
 mod source_mutation_history;
 mod source_mutation_window_history;
+mod source_reread_evidence;
 mod source_version_history;
 mod store_evidence;
 mod task_input_history;
@@ -158,6 +159,19 @@ pub fn run(cli: Cli) -> anyhow::Result<()> {
             db,
             output_json,
         } => source_mutation_window_history::run(
+            project_id.as_deref(),
+            workspace_id.as_deref(),
+            limit,
+            db.as_deref(),
+            output_json.as_deref(),
+        ),
+        Command::SourceRereadEvidence {
+            project_id,
+            workspace_id,
+            limit,
+            db,
+            output_json,
+        } => source_reread_evidence::run(
             project_id.as_deref(),
             workspace_id.as_deref(),
             limit,

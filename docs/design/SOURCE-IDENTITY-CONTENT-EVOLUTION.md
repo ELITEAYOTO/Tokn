@@ -1,4 +1,4 @@
-﻿# Source Identity + Observed Content Evolution V0
+# Source Identity + Observed Content Evolution V0
 
 Status: M4 ACCEPTED FOUNDATION / M4.5 SEED
 Date: 2026-10-03
@@ -77,7 +77,7 @@ Still required before a real freshness/rediscovery finding:
 - freshness/invalidation semantics must join those observations without upgrading chronology into causality;
 - broader runtime-neutral source kinds such as symbol/range identities only when provable;
 - compaction/context-management evidence where observable;
-- chronological rediscovery events;
-- explicit compatible cross-run comparison.
+- Cross-Run Source Re-read Evidence V0 is now an accepted chronological re-read primitive; it uses direct rollout timestamps and keeps rediscovery/redundancy/freshness `NOT_PROVEN`;
+- explicit compatible cross-run comparison is accepted separately.
 
 These remain observation-only. No optimizer, memory injection or savings claim follows from this V0 contract.
