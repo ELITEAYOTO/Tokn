@@ -168,7 +168,8 @@ Reste M4 :
 - Source Freshness Evidence V0 : ACCEPTED CORROBORATION FOUNDATION / observation-only join of mutation-window chronology + SourceVersion BEFORE/AFTER + Workspace Git provenance; change/reread corroboration may be observed but `freshness_status` and `invalidation_status` remain `NOT_PROVEN` ;
 - Cross-Run Comparability V0 : ACCEPTED OBSERVATION FOUNDATION / observation-only comparison of captured starting-state/runtime scope; project-scoped fingerprints are compared only inside one project and `causal_claims_status` remains `NOT_ESTABLISHED` ;
 - Task Input Identity V0 : ACCEPTED OBSERVATION FOUNDATION; exact task-artifact bytes can be represented by project-scoped `tsk-v1-*` identity without raw prompt/path persistence, Cross-Run gains `TASK_INPUT_IDENTITY`, but runtime delivery remains `NOT_PROVEN` and causality `NOT_ESTABLISHED` ;
-- detailed compaction chronology remains `NOT_CAPTURED` until a real diagnostic event can be observed/sanitized; broader symbol/range identity, rediscovery and any future real stale/fresh verdict remain.
+- Cross-Run Source Re-read Evidence V0 : ACCEPTED CHRONOLOGY FOUNDATION; same project-scoped source may be ordered across distinct runs only from complete parseable rollout `observed_at` evidence, never Store ingestion time; rediscovery/redundancy/freshness remain `NOT_PROVEN` ;
+- detailed compaction chronology remains `NOT_CAPTURED` until a real diagnostic event can be observed/sanitized; broader symbol/range identity, interpreted rediscovery and any future real stale/fresh verdict remain.
 
 ## M4.5 - Context Identity + Shadow Foundations
 

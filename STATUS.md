@@ -6,7 +6,7 @@ Binaire/Cargo : **V0.1 / 0.1.0**
 
 ## Resume
 
-**P0-P9 DONE. Experiment 002 est ACCEPTED. Measurement Contract V1 est FROZEN. Store foundation est DONE. Local MCP transport prototype est ACCEPTED. Historical Analyzer + Context Ledger est IN PROGRESS ; Context/Result Identity V0, Cross-Agent Evidence V2, Source Mutation Observation V0, Run-Boundary Source Version V0 et Workspace Git Provenance V0 sont ACCEPTED FOUNDATIONS ; Source Freshness Evidence V0 est ACCEPTED CORROBORATION FOUNDATION ; Cross-Run Comparability V0 est ACCEPTED OBSERVATION FOUNDATION ; Task Input Identity V0 est ACCEPTED OBSERVATION FOUNDATION.**
+**P0-P9 DONE. Experiment 002 est ACCEPTED. Measurement Contract V1 est FROZEN. Store foundation est DONE. Local MCP transport prototype est ACCEPTED. Historical Analyzer + Context Ledger est IN PROGRESS ; Context/Result Identity V0, Cross-Agent Evidence V2, Source Mutation Observation V0, Run-Boundary Source Version V0 et Workspace Git Provenance V0 sont ACCEPTED FOUNDATIONS ; Source Freshness Evidence V0 est ACCEPTED CORROBORATION FOUNDATION ; Cross-Run Comparability V0 et Task Input Identity V0 sont ACCEPTED OBSERVATION FOUNDATIONS ; Cross-Run Source Re-read Evidence V0 est ACCEPTED CHRONOLOGY FOUNDATION.**
 
 Le projet est revenu sur une direction unique :
 mesurer l'efficacite du contexte sans reduire la capacite d'Astra.
@@ -249,7 +249,8 @@ Limites explicites du contrat V1 :
 
 ## Prochaine action
 
-Task Input Identity V0 est maintenant **ACCEPTED OBSERVATION FOUNDATION** : l'identite exacte de l'artefact de tache est projetee en `tsk-v1-*` project-scopee via `store-evidence --task-input`, sans persister le prompt brut ni son chemin. `task-input-history` expose explicitement `delivery_status=NOT_PROVEN`. La prochaine frontiere causale reste une preuve directe de livraison runtime + controle d'une variable primaire, pas une extrapolation depuis l'identite d'artefact.
+Cross-Run Source Re-read Evidence V0 est maintenant **ACCEPTED CHRONOLOGY FOUNDATION** : il peut decrire une meme SourceStableId relue dans un run distinct uniquement quand les timestamps rollout `observed_at` donnent un ordre strict complet. `run_created_at_unix` est une heure d'ingestion Store et ne doit jamais servir de chronologie runtime. Les statuts rediscovery/redundancy/freshness restent `NOT_PROVEN`.
+Task Input Identity V0 reste **ACCEPTED OBSERVATION FOUNDATION** avec `delivery_status=NOT_PROVEN`; la frontiere causale reste une preuve directe de livraison runtime + controle d'une variable primaire.
 La compaction detaillee reste `NOT_CAPTURED` : le parser diagnostic sait compter un kind contenant `compaction`, mais aucune trace reelle locale ni fixture sanitisee conservee ne fournit actuellement un evenement detaille permettant un contrat fiable. Ne pas relier artificiellement le `seq` diagnostic au `seq` rollout.
 
 Cross-Run ajoute `TASK_INPUT_IDENTITY`, mais meme quand tous les axes observes passent, `causal_claims_status=NOT_ESTABLISHED` : l'identite d'artefact ne prouve pas la livraison runtime, les dependances externes ni le controle d'une variable primaire. Source Freshness Evidence garde en parallele `freshness_status=NOT_PROVEN` et `invalidation_status=NOT_PROVEN`.
@@ -352,7 +353,8 @@ Accepted M4 additions:
 
 Next M4 work:
 - Cross-Run Comparability V0 is an ACCEPTED OBSERVATION FOUNDATION for captured scope/provenance; even PASS keeps `causal_claims_status=NOT_ESTABLISHED`;
-- detailed compaction chronology remains `NOT_CAPTURED` until a real event sample is available; rediscovery must likewise be directly observable before interpretation;
+- Cross-Run Source Re-read Evidence V0 is ACCEPTED CHRONOLOGY FOUNDATION: only complete parseable rollout timestamps can order same-source reads across runs; Store ingestion time is not runtime order and rediscovery/redundancy/freshness remain `NOT_PROVEN`;
+- detailed compaction chronology remains `NOT_CAPTURED` until a real event sample is available; interpreted rediscovery requires stronger context-delivery/retention evidence;
 - task/context-delivery identity remains required before stronger stale/fresh or causal controls;
 - broader source kinds remain allowed only when stable identity is directly provable.
 

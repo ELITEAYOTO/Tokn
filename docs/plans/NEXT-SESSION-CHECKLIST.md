@@ -134,14 +134,16 @@ Source Mutation Window V0: ACCEPTED CHRONOLOGY FOUNDATION. Same-thread exact rea
 Source Freshness Evidence V0: ACCEPTED CORROBORATION FOUNDATION / OBSERVATION-ONLY. It joins Source Mutation Window + SourceVersion BEFORE/AFTER + Workspace Git provenance, reports only observed change/reread corroboration, never compares ContentFingerprint to SourceVersionFingerprint directly, and keeps freshness/invalidation `NOT_PROVEN`.
 Cross-Run Comparability V0: ACCEPTED OBSERVATION FOUNDATION / OBSERVATION-ONLY. It compares explicit baseline/candidate runs only on captured project/contract/runtime/SourceVersion BEFORE/Git BEFORE state; project-scoped fingerprints are never compared across projects and causal claims remain `NOT_ESTABLISHED`.
 Task Input Identity V0: ACCEPTED OBSERVATION FOUNDATION. `store-evidence --task-input` derives project-scoped `tsk-v1-*` exact artifact identity without persisting raw task/path; `task-input-history` exposes `delivery_status=NOT_PROVEN`, and Cross-Run adds a fail-closed `TASK_INPUT_IDENTITY` axis while causal claims remain `NOT_ESTABLISHED`.
+Cross-Run Source Re-read Evidence V0: ACCEPTED CHRONOLOGY FOUNDATION. `source-reread-evidence` orders same project-scoped SourceStableId reads across distinct runs only under complete parseable rollout `observed_at`; Store ingestion time is never runtime chronology and rediscovery/redundancy/freshness remain `NOT_PROVEN`.
 Detailed compaction chronology: `NOT_CAPTURED` until a real diagnostic event sample exists; diagnostic-trace seq and session-rollout seq are not assumed comparable.
 Stability/benchmark readiness: local Rust toolchain + dev-check + package hardening + Benchmark Baseline Protocol V1 are ACCEPTED/PREPARED; this does not claim token savings.
 
 Next concrete work:
-1. keep runtime task-delivery evidence and single-variable causal control separate from accepted artifact identity; do not upgrade `delivery_status=NOT_PROVEN` without direct evidence;
-2. capture compaction/rediscovery only when directly observed and fixtureable;
-3. broader source kinds only when stable identity is directly provable;
-4. only then evaluate whether evidence is sufficient for a stronger stale/fresh contract.
+1. keep interpreted rediscovery separate from accepted source re-read chronology; do not upgrade rediscovery/redundancy/freshness without direct context-delivery/retention evidence;
+2. keep runtime task-delivery evidence and single-variable causal control separate from accepted artifact identity; do not upgrade `delivery_status=NOT_PROVEN` without direct evidence;
+3. capture detailed compaction only when directly observed and fixtureable;
+4. broader source kinds only when stable identity is directly provable;
+5. only then evaluate whether evidence is sufficient for interpreted rediscovery or a stronger stale/fresh contract.
 
 Parallel descriptive work allowed now: prepare/collect 6-10 frozen native baseline tasks using `docs/benchmarks/BASELINE-PROTOCOL-V1.md`, starting with a >=3-run variance pilot per task and no active Tokn intervention.
 Repository-admin housekeeping: protect `main` so PR + green CI are required before merge.

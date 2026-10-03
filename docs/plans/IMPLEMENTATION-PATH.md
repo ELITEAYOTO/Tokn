@@ -302,10 +302,11 @@ Phase G evidence status:
 - Source Freshness Evidence V0: ACCEPTED CORROBORATION FOUNDATION / observation-only over mutation-window + SourceVersion + Workspace Git, with freshness/invalidation still `NOT_PROVEN`;
 - Cross-Run Comparability V0: ACCEPTED OBSERVATION FOUNDATION / observation-only scope comparison over project/contract/runtime/SourceVersion BEFORE/Git BEFORE; even PASS keeps causal claims `NOT_ESTABLISHED`;
 - Task Input Identity V0: ACCEPTED OBSERVATION FOUNDATION; exact frozen task-artifact identity is project-scoped/privacy-safe, runtime delivery remains `NOT_PROVEN`, and Cross-Run causality remains `NOT_ESTABLISHED`;
+- Cross-Run Source Re-read Evidence V0: ACCEPTED CHRONOLOGY FOUNDATION; same-source cross-run order requires complete parseable rollout timestamps, while rediscovery/redundancy/freshness stay `NOT_PROVEN`;
 - detailed compaction chronology: `NOT_CAPTURED` until a real diagnostic event is observed/sanitized; diagnostic seq is not assumed comparable to rollout seq;
 - repeated reads/searches/retries: exact-repeat foundation accepted, richer analysis remaining;
 - exact result identity: foundation accepted; duplicate evidence remains allowed only when complete observed identity proves equality;
-- rediscovery remains directly-evidenced future work.
+- interpreted rediscovery remains future work beyond the direct re-read chronology primitive.
 
 ## Phase H - Findings + Opportunity Analyzer V0
 
@@ -462,8 +463,9 @@ Next inside M4:
 7. Source Freshness Evidence V0 is ACCEPTED CORROBORATION FOUNDATION: join the accepted chronology with exact SourceVersion + Workspace Git provenance, report only observed change/reread corroboration, and keep `freshness_status` / `invalidation_status` at `NOT_PROVEN` ;
 8. Cross-Run Comparability V0 is ACCEPTED OBSERVATION FOUNDATION: compare explicitly selected runs only on captured project/contract/runtime/SourceVersion BEFORE/Git BEFORE scope and keep `causal_claims_status=NOT_ESTABLISHED` ;
 9. Task Input Identity V0 is ACCEPTED OBSERVATION FOUNDATION: persist only project-scoped exact task-artifact identity/coverage, use the fail-closed Cross-Run task axis, and keep runtime delivery `NOT_PROVEN` ;
-10. detailed compaction remains `NOT_CAPTURED` until directly observed; rediscovery and broader source kinds stay evidence-gated ;
-11. only after those observations are reliable, consider a stronger stale/fresh contract, then continue M4.5 and M5 Findings + Opportunity Analyzer.
+10. Cross-Run Source Re-read Evidence V0 is ACCEPTED CHRONOLOGY FOUNDATION: order same-source reads across runs only with complete direct rollout timestamps; never use Store ingestion time and never upgrade the sequence into rediscovery/redundancy/freshness ;
+11. detailed compaction remains `NOT_CAPTURED` until directly observed; interpreted rediscovery and broader source kinds stay evidence-gated ;
+12. only after those observations are reliable, consider a stronger stale/fresh contract, then continue M4.5 and M5 Findings + Opportunity Analyzer.
 
 Parallel implementation hardening, only if measurement justifies it:
 - benchmark current Codex raw-result retention with representative 1 MB / 10 MB / 50 MB and many-small-output fixtures;
@@ -473,7 +475,7 @@ Parallel implementation hardening, only if measurement justifies it:
 
 ## 2026-10-02 insertion - shadow before active optimizer
 
-Current M4 activity foundation, runtime-profile compatibility reducer, rate-limit history, Cross-Agent Evidence V2, exact result identity, conservative SourceStableId file V0, mutation-operation timing, run-boundary source versions, Workspace Git Provenance V0 and Source Mutation Window V0 are accepted. Source Freshness Evidence V0 is the accepted corroboration foundation; it does not emit `FRESH` / `STALE`. Cross-Run Comparability V0 is accepted and does not establish causality. Task Input Identity V0 is an accepted extension: it can prove frozen task-artifact equality when directly captured, while runtime delivery remains `NOT_PROVEN`. Detailed compaction remains `NOT_CAPTURED` until a real event can be fixture-tested; rediscovery and broader stable source kinds remain evidence-gated.
+Current M4 activity foundation, runtime-profile compatibility reducer, rate-limit history, Cross-Agent Evidence V2, exact result identity, conservative SourceStableId file V0, mutation-operation timing, run-boundary source versions, Workspace Git Provenance V0 and Source Mutation Window V0 are accepted. Source Freshness Evidence V0 is the accepted corroboration foundation; it does not emit `FRESH` / `STALE`. Cross-Run Comparability V0 is accepted and does not establish causality. Task Input Identity V0 is an accepted extension: it can prove frozen task-artifact equality when directly captured, while runtime delivery remains `NOT_PROVEN`. Cross-Run Source Re-read Evidence V0 is an accepted chronology primitive and does not label later reads as rediscovery or redundancy. Detailed compaction remains `NOT_CAPTURED` until a real event can be fixture-tested; interpreted rediscovery and broader stable source kinds remain evidence-gated.
 
 Before Findings become interventions, introduce an observation-only shadow layer where useful:
 - repo/symbol index + Git/hash invalidation;
