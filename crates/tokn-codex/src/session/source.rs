@@ -22,6 +22,20 @@ impl StableSourceLocatorObservation {
     }
 }
 
+
+pub fn file_source_locator_from_relative_path(
+    relative_path: &str,
+    selected_workspace: Option<&str>,
+) -> StableSourceLocatorObservation {
+    let Some(workspace) = selected_workspace.filter(|value| !value.trim().is_empty()) else {
+        return StableSourceLocatorObservation::not_captured();
+    };
+    let Some(relative) = workspace_relative_path(relative_path, Some(workspace), workspace) else {
+        return StableSourceLocatorObservation::not_captured();
+    };
+    StableSourceLocatorObservation::observed(format!("file:{relative}"))
+}
+
 pub fn extract_file_source_locator(
     tool: &ToolObservation,
     agent_cwd: Option<&str>,
@@ -350,6 +364,21 @@ mod tests {
         let observed = extract_file_mutation_source_locator(&value, None, Some(r"E:\repo\PROJECT"));
         assert_eq!(observed.coverage, EvidenceIdentityCoverage::Observed);
         assert_eq!(observed.locator.as_deref(), Some("file:src/example.rs"));
+    }
+
+    #[test]
+    fn snapshot_relative_locator_matches_across_windows_clones() {
+        let left = file_source_locator_from_relative_path(
+            "Src/Example.rs",
+            Some(r"E:\clone-a\PROJECT"),
+        );
+        let right = file_source_locator_from_relative_path(
+            "src/example.rs",
+            Some(r"E:\clone-b\PROJECT"),
+        );
+        assert_eq!(left.coverage, EvidenceIdentityCoverage::Observed);
+        assert_eq!(left.locator, right.locator);
+        assert_eq!(left.locator.as_deref(), Some("file:src/example.rs"));
     }
 
     #[test]

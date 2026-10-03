@@ -5,6 +5,7 @@ use crate::{EvidenceIdentityCoverage, ModelRuntimeProfile, TokenTotals};
 pub const HISTORICAL_SNAPSHOT_SCHEMA_VERSION: u64 = 1;
 pub const TOOL_ACTIVITY_HISTORY_SCHEMA_VERSION: u64 = 3;
 pub const RATE_LIMIT_HISTORY_SCHEMA_VERSION: u64 = 1;
+pub const SOURCE_VERSION_HISTORY_SCHEMA_VERSION: u64 = 1;
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct HistoricalWorkspaceRecord {
@@ -100,6 +101,57 @@ impl Default for RateLimitHistory {
             workspace_filter: None,
             run_limit: 0,
             snapshots: Vec::new(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum SourceVersionBoundary {
+    Before,
+    After,
+}
+
+impl SourceVersionBoundary {
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::Before => "BEFORE",
+            Self::After => "AFTER",
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct HistoricalSourceVersionRecord {
+    pub version_id: String,
+    pub run_id: String,
+    pub project_id: String,
+    pub workspace_id: String,
+    pub source_stable_id: String,
+    pub boundary: SourceVersionBoundary,
+    pub version_fingerprint: String,
+    pub snapshot_observed_at: Option<String>,
+    pub bytes: u64,
+    pub run_created_at_unix: i64,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct SourceVersionHistory {
+    pub schema_version: u64,
+    pub project_filter: Option<String>,
+    pub workspace_filter: Option<String>,
+    pub run_limit: u64,
+    pub versions: Vec<HistoricalSourceVersionRecord>,
+}
+
+impl Default for SourceVersionHistory {
+    fn default() -> Self {
+        Self {
+            schema_version: SOURCE_VERSION_HISTORY_SCHEMA_VERSION,
+            project_filter: None,
+            workspace_filter: None,
+            run_limit: 0,
+            versions: Vec::new(),
         }
     }
 }
