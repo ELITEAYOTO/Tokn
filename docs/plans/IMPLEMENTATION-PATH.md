@@ -326,7 +326,7 @@ Implementation prerequisites/state:
 2. separate whole-file IndexContentHash: **DONE** as project-scoped `ixc-v1-*`;
 3. local shadow cache root: **DONE** via `observer_shadow_index_root()` + safe per-project segment, with no backend filename selected;
 4. bounded DIRECT_SCAN_V0 corpus/query semantics + sanitized Git fixture: **ACCEPTED REFERENCE FOUNDATION / FULL GATES PASS**;
-5. FTS5 capability probe + candidate benchmark: **NEXT / NOT STARTED**; DIRECT_SCAN remains the fail-closed reference/fallback.
+5. FTS5 capability probe: **ACCEPTED CAPABILITY FOUNDATION / FULL GATES PASS** via `tokn-shadow` + `tokn-observe shadow-index-capabilities`; indexed candidate implementation/benchmark is **NEXT / NOT STARTED**. DIRECT_SCAN remains the fail-closed reference/fallback.
 
 Exit toward active shadow retrieval requires a backend to meet every predeclared quality/correctness/resource gate. Active context injection remains a later separate gate.
 

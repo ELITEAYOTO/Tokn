@@ -1,7 +1,7 @@
 # Shadow Repository Index Benchmark Protocol V0
 
 Status: M4.5 ACCEPTED PRE-IMPLEMENTATION MEASUREMENT CONTRACT
-Date: 2026-10-03
+Date: 2026-10-04
 
 ## Purpose
 
@@ -165,6 +165,8 @@ Record separately:
 
 Do not dynamically load untrusted SQLite extensions to convert an unavailable capability into a passing result.
 
+`tokn-observe shadow-index-capabilities` is the candidate capability surface. It must keep `extension_loading_attempted=false`, report the fallback as `DIRECT_SCAN_V0`, and reuse the benchmark capability labels rather than inventing a second status vocabulary.
+
 ## Resource guardrails
 
 Benchmark tooling must respect the same local safety discipline as development:
@@ -249,6 +251,6 @@ Current prerequisite state:
 2. SourceStableId derivation reuse: **RESOLVED** in `tokn-domain::identity`, byte-compatible with existing `src-v1-*`;
 3. local shadow cache root: **RESOLVED** under `observer_shadow_index_root()` / safe per-project cache segment;
 4. direct-scan reference semantics + sanitized Git fixture: **ACCEPTED REFERENCE FOUNDATION / FULL GATES PASS**;
-5. FTS capability probing + indexed candidate benchmark: **NEXT / NOT STARTED**, with DIRECT_SCAN retained as the fallback/reference.
+5. FTS capability probing: **ACCEPTED CAPABILITY FOUNDATION / FULL GATES PASS** with runtime-observed in-memory probes and DIRECT_SCAN fallback; indexed candidate implementation/benchmark is **NEXT / NOT STARTED**.
 
 Even after an index backend becomes eligible, active runtime context injection remains a separate future gate.

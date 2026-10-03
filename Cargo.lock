@@ -646,6 +646,7 @@ dependencies = [
  "tokn-ingest",
  "tokn-platform",
  "tokn-report",
+ "tokn-shadow",
  "tokn-storage",
  "tracing",
  "tracing-subscriber",
@@ -667,6 +668,15 @@ dependencies = [
  "tokn-analysis",
  "tokn-domain",
  "tokn-storage",
+]
+
+[[package]]
+name = "tokn-shadow"
+version = "0.1.0"
+dependencies = [
+ "rusqlite",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]

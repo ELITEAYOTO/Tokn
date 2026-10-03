@@ -1,7 +1,7 @@
 # Tokn Architecture Overview
 
 Status: REFERENCE OVERVIEW
-Derniere mise a jour : 2026-09-30
+Derniere mise a jour : 2026-10-04
 
 Ce document donne une vue d'ensemble et oriente vers les contrats canoniques.
 Architecture cible long terme : `TARGET-ARCHITECTURE.md`.
@@ -25,7 +25,8 @@ Crates :
 - tokn-ingest : streaming JSONL borne ;
 - tokn-codex : adapters Codex ;
 - tokn-analysis : ledger, invariants, attribution ;
-- tokn-storage : SQLite local ;
+- tokn-storage : Measurement Store SQLite local ;
+- tokn-shadow : mecanique shadow DERIVED/rebuildable et probes backend, separes du Measurement Store ;
 - tokn-report : rendu ;
 - tokn-observe : composition CLI.
 

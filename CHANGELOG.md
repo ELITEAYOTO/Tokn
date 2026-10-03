@@ -1,3 +1,12 @@
+## 2026-10-04 - M4.5 SQLite FTS5 capability probe accepted
+
+- added dedicated `tokn-shadow` crate for SQLite-specific derived-index capability mechanics, separate from Measurement Store and platform filesystem primitives;
+- added runtime in-memory probes for SQLite version, `ENABLE_FTS5`, basic FTS5 MATCH, `unicode61`, `trigram`, contentless, contentless-delete and FTS5 integrity-check behavior;
+- capability output reuses frozen benchmark labels and fails closed to `UNKNOWN`/static reason codes instead of leaking raw SQLite errors;
+- added `tokn-observe shadow-index-capabilities` JSON diagnostic; the report never loads extensions and always declares `DIRECT_SCAN_V0` fallback;
+- current bundled build observes SQLite 3.53.2 with all probed FTS5 capabilities available; this is capability evidence only, not backend selection;
+- no persistent FTS database/table layout, Store migration, Measurement Contract change, MCP/runtime hook, context injection or token-savings claim.
+
 ## 2026-10-04 - M4.5 DIRECT_SCAN_V0 candidate reference
 
 - implemented bounded Git-backed DIRECT_SCAN_V0 corpus enumeration in `tokn-platform` without a persistent index or retained source-text corpus;

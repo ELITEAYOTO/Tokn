@@ -20,6 +20,7 @@ mod report;
 mod resolve_workspace;
 mod runner;
 mod sessions;
+mod shadow_index_capabilities;
 mod simulate_caps;
 mod source_freshness_evidence;
 mod source_identity_history;
@@ -217,6 +218,9 @@ pub fn run(cli: Cli) -> anyhow::Result<()> {
             db.as_deref(),
             output_json.as_deref(),
         ),
+        Command::ShadowIndexCapabilities { output_json } => {
+            shadow_index_capabilities::run(output_json.as_deref())
+        }
         Command::StoreEvidence {
             evidence_dir,
             project_key,
