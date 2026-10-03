@@ -80,12 +80,14 @@ Missing data never becomes unsupported automatically.
 
 ## RateLimitSnapshot
 
+Status: M4 ACCEPTED FOUNDATION / HISTORY INGESTION IMPLEMENTED
+
 Current Codex evidence supports a separate rate-limit snapshot.
 
 Observed candidate fields:
 
 - limit_id;
-- limit_name when available;
+- limit_name when available upstream (not retained by current Tokn history);
 - primary.used_percent;
 - primary.window_minutes;
 - primary.resets_at;
@@ -100,10 +102,18 @@ Observed candidate fields:
 - plan_type when exposed;
 - rate_limit_reached_type.
 
-Tokn should store only fields required for diagnostics.
+Tokn stores only fields required for diagnostics.
 
-The initial analyzer needs percentage/window/reset information;
-it does not need monetary credit balances or account identifiers.
+Current retained subset:
+- observation timestamp;
+- limit_id;
+- primary/secondary used_percent, window_minutes and resets_at;
+- rate_limit_reached_type when exposed.
+
+Current M4 history deliberately does not retain limit_name, credit fields, plan/account identity, individual monetary limits or spend-control state.
+The analyzer needs percentage/window/reset information; it does not need monetary credit balances or account identifiers.
+
+CLI: `tokn-observe rate-limit-history`. Re-ingestion is idempotent per run and no missing snapshot is invented or backfilled.
 
 A rate-limit snapshot is not the same metric as:
 - logical token usage;

@@ -46,6 +46,22 @@ pub struct KeyedTokenUsage {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct RateLimitWindowObservation {
+    pub used_percent: String,
+    pub window_minutes: Option<i64>,
+    pub resets_at: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct RateLimitSnapshotObservation {
+    pub observed_at: String,
+    pub limit_id: Option<String>,
+    pub primary: Option<RateLimitWindowObservation>,
+    pub secondary: Option<RateLimitWindowObservation>,
+    pub rate_limit_reached_type: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct AgentEvidence {
     pub source_path: String,
     pub thread_id: String,
@@ -58,6 +74,8 @@ pub struct AgentEvidence {
     pub cwd: Option<String>,
     pub cli_version: Option<String>,
     pub usages: Vec<KeyedTokenUsage>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub rate_limit_snapshots: Vec<RateLimitSnapshotObservation>,
     pub tools: Vec<ToolObservation>,
     pub tool_parse_failures: u64,
     pub terminal: TerminalObservation,

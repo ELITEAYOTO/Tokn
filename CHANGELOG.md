@@ -761,3 +761,15 @@ P6 remains IN PROGRESS until one controlled real PreToolUse callback proves the 
 - `causal_compatible` becomes true only for an aggregate PASS;
 - added regression tests for equal profiles, mismatches, incomplete configuration, asymmetric evidence and unsupported schemas;
 - full publication privacy, rustfmt, strict Clippy, workspace tests, release/provenance, MCP smoke, Experiment 001/002 and documentation gates passed on the validation branch.
+
+## 2026-10-03 - M4 rate-limit history foundation
+
+- added direct extraction of Codex `token_count.rate_limits` evidence without inventing missing snapshots;
+- added additive rate-limit observations to AgentEvidence with backward-compatible empty omission;
+- persists only limit_id, primary/secondary percentage-window-reset evidence and reached type;
+- deliberately excludes limit_name, credit balances, plan/account identity and other unneeded product metadata;
+- added idempotent `rate_limit_snapshots_v2` ingestion with deterministic privacy-safe snapshot IDs;
+- added RateLimitHistory V1 filtered by privacy-preserving project/workspace identity;
+- added `tokn-observe rate-limit-history` JSON output;
+- collapses duplicate copies observed across agents without collapsing distinct limit identities/windows;
+- added parser privacy/minimization, idempotence, filtering and empty-history regressions.

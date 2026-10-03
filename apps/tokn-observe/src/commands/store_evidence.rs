@@ -1,3 +1,4 @@
+use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
 
 use anyhow::Context;
@@ -6,7 +7,8 @@ use tokn_domain::{
     RunnerSourceReport, SourceKind,
 };
 use tokn_storage::{
-    Database, MeasurementStoreInput, ToolActivityStoreInput, fingerprint_bytes, private_id,
+    Database, MeasurementStoreInput, RateLimitStoreInput, ToolActivityStoreInput,
+    fingerprint_bytes, private_id,
 };
 
 use super::common::{db_path, open_db};
@@ -64,6 +66,7 @@ pub fn run(
 
     let project_id = private_id("prj", project_key);
     let tool_activities = build_tool_activities(&project_id, &session_members);
+    let rate_limit_snapshots = build_rate_limit_snapshots(&session_members);
     let workspace_id = private_id("wsp", &format!("{project_key}:{workspace_key}"));
     let parent_workspace_id =
         parent_workspace_key.map(|key| private_id("wsp", &format!("{project_key}:{key}")));
@@ -83,6 +86,7 @@ pub fn run(
         group,
         profile,
         tool_activities,
+        rate_limit_snapshots,
     };
 
     let db = match db_override {
@@ -97,6 +101,10 @@ pub fn run(
     println!("  workspace_id: {}", summary.workspace_id);
     println!("  agents: {}", summary.agent_count);
     println!("  tool_activities: {}", summary.tool_activity_count);
+    println!(
+        "  rate_limit_snapshots: {}",
+        summary.rate_limit_snapshot_count
+    );
     println!("  source_id: {}", summary.source_id);
     println!(
         "  profile_id: {}",
@@ -177,6 +185,50 @@ fn build_tool_activities(
     out
 }
 
+fn build_rate_limit_snapshots(members: &[AgentEvidence]) -> Vec<RateLimitStoreInput> {
+    let mut out = Vec::new();
+    let mut seen = BTreeSet::new();
+
+    for member in members {
+        for snapshot in &member.rate_limit_snapshots {
+            let item = RateLimitStoreInput {
+                observed_at: snapshot.observed_at.clone(),
+                limit_id: snapshot.limit_id.clone(),
+                primary_used_percent: snapshot
+                    .primary
+                    .as_ref()
+                    .map(|window| window.used_percent.clone()),
+                primary_window_minutes: snapshot
+                    .primary
+                    .as_ref()
+                    .and_then(|window| window.window_minutes),
+                primary_resets_at: snapshot
+                    .primary
+                    .as_ref()
+                    .and_then(|window| window.resets_at.clone()),
+                secondary_used_percent: snapshot
+                    .secondary
+                    .as_ref()
+                    .map(|window| window.used_percent.clone()),
+                secondary_window_minutes: snapshot
+                    .secondary
+                    .as_ref()
+                    .and_then(|window| window.window_minutes),
+                secondary_resets_at: snapshot
+                    .secondary
+                    .as_ref()
+                    .and_then(|window| window.resets_at.clone()),
+                rate_limit_reached_type: snapshot.rate_limit_reached_type.clone(),
+            };
+            if seen.insert(item.clone()) {
+                out.push(item);
+            }
+        }
+    }
+
+    out
+}
+
 fn repeat_relevant_category(category: &str) -> bool {
     matches!(category, "file_read" | "search" | "directory_list" | "git")
 }
@@ -201,7 +253,7 @@ fn source_kind_label(kind: &SourceKind) -> &'static str {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use tokn_domain::ToolObservation;
+    use tokn_domain::{RateLimitSnapshotObservation, RateLimitWindowObservation, ToolObservation};
 
     #[test]
     fn source_kind_labels_match_serialized_contract() {
@@ -287,5 +339,37 @@ mod tests {
         ] {
             assert!(!repeat_relevant_category(category));
         }
+    }
+
+    #[test]
+    fn rate_limit_storage_projection_deduplicates_agent_copies() {
+        let snapshot = RateLimitSnapshotObservation {
+            observed_at: "2026-10-03T07:15:00Z".into(),
+            limit_id: Some("codex".into()),
+            primary: Some(RateLimitWindowObservation {
+                used_percent: "12.5".into(),
+                window_minutes: Some(300),
+                resets_at: Some("1791018000".into()),
+            }),
+            secondary: None,
+            rate_limit_reached_type: None,
+        };
+        let members = vec![
+            AgentEvidence {
+                thread_id: "thread-root".into(),
+                rate_limit_snapshots: vec![snapshot.clone()],
+                ..Default::default()
+            },
+            AgentEvidence {
+                thread_id: "thread-child".into(),
+                rate_limit_snapshots: vec![snapshot],
+                ..Default::default()
+            },
+        ];
+
+        let snapshots = build_rate_limit_snapshots(&members);
+        assert_eq!(snapshots.len(), 1);
+        assert_eq!(snapshots[0].limit_id.as_deref(), Some("codex"));
+        assert_eq!(snapshots[0].primary_used_percent.as_deref(), Some("12.5"));
     }
 }

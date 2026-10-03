@@ -6,9 +6,10 @@ use rusqlite::{OptionalExtension, params};
 use thiserror::Error;
 use tokn_domain::{
     HISTORICAL_SNAPSHOT_SCHEMA_VERSION, HistoricalAgentRecord, HistoricalProvenanceRecord,
-    HistoricalRunRecord, HistoricalRuntimeProfileRecord, HistoricalSnapshot,
-    HistoricalToolActivityRecord, HistoricalWorkspaceRecord, MEASUREMENT_CONTRACT_ID,
-    MEASUREMENT_CONTRACT_VERSION, MeasurementContractManifest, ModelRuntimeProfile, RunGroup,
+    HistoricalRateLimitSnapshotRecord, HistoricalRunRecord, HistoricalRuntimeProfileRecord,
+    HistoricalSnapshot, HistoricalToolActivityRecord, HistoricalWorkspaceRecord,
+    MEASUREMENT_CONTRACT_ID, MEASUREMENT_CONTRACT_VERSION, MeasurementContractManifest,
+    ModelRuntimeProfile, RATE_LIMIT_HISTORY_SCHEMA_VERSION, RateLimitHistory, RunGroup,
     RunnerQualityStatus, RunnerResult, TOOL_ACTIVITY_HISTORY_SCHEMA_VERSION, TokenTotals,
     ToolActivityHistory,
 };
@@ -45,6 +46,7 @@ pub struct MeasurementStoreInput {
     pub group: RunGroup,
     pub profile: Option<ModelRuntimeProfile>,
     pub tool_activities: Vec<ToolActivityStoreInput>,
+    pub rate_limit_snapshots: Vec<RateLimitStoreInput>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -70,6 +72,19 @@ pub struct ToolActivityStoreInput {
     pub parse_error_present: bool,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+pub struct RateLimitStoreInput {
+    pub observed_at: String,
+    pub limit_id: Option<String>,
+    pub primary_used_percent: Option<String>,
+    pub primary_window_minutes: Option<i64>,
+    pub primary_resets_at: Option<String>,
+    pub secondary_used_percent: Option<String>,
+    pub secondary_window_minutes: Option<i64>,
+    pub secondary_resets_at: Option<String>,
+    pub rate_limit_reached_type: Option<String>,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct MeasurementStoreSummary {
     pub run_id: String,
@@ -79,6 +94,7 @@ pub struct MeasurementStoreSummary {
     pub source_id: String,
     pub agent_count: u64,
     pub tool_activity_count: u64,
+    pub rate_limit_snapshot_count: u64,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -281,6 +297,10 @@ impl Database {
             params![input.result.run_id],
         )?;
         tx.execute(
+            "DELETE FROM rate_limit_snapshots_v2 WHERE run_id = ?1",
+            params![input.result.run_id],
+        )?;
+        tx.execute(
             "DELETE FROM agents_v2 WHERE run_id = ?1",
             params![input.result.run_id],
         )?;
@@ -368,6 +388,47 @@ impl Database {
             )?;
         }
 
+        for snapshot in &input.rate_limit_snapshots {
+            let snapshot_id = private_id(
+                "rls",
+                &format!(
+                    "{}|{}|{:?}|{:?}|{:?}|{:?}|{:?}|{:?}|{:?}|{:?}",
+                    input.result.run_id,
+                    snapshot.observed_at,
+                    snapshot.limit_id,
+                    snapshot.primary_used_percent,
+                    snapshot.primary_window_minutes,
+                    snapshot.primary_resets_at,
+                    snapshot.secondary_used_percent,
+                    snapshot.secondary_window_minutes,
+                    snapshot.secondary_resets_at,
+                    snapshot.rate_limit_reached_type
+                ),
+            );
+            tx.execute(
+                "INSERT INTO rate_limit_snapshots_v2(
+                    snapshot_id, run_id, observed_at, limit_id,
+                    primary_used_percent, primary_window_minutes, primary_resets_at,
+                    secondary_used_percent, secondary_window_minutes, secondary_resets_at,
+                    rate_limit_reached_type, created_at_unix
+                 ) VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12)",
+                params![
+                    snapshot_id,
+                    input.result.run_id,
+                    snapshot.observed_at,
+                    snapshot.limit_id,
+                    snapshot.primary_used_percent,
+                    snapshot.primary_window_minutes,
+                    snapshot.primary_resets_at,
+                    snapshot.secondary_used_percent,
+                    snapshot.secondary_window_minutes,
+                    snapshot.secondary_resets_at,
+                    snapshot.rate_limit_reached_type,
+                    now
+                ],
+            )?;
+        }
+
         tx.execute(
             "INSERT INTO provenance_v2(
                 source_id, run_id, source_kind, source_fingerprint, snapshot_bytes,
@@ -402,6 +463,7 @@ impl Database {
             source_id,
             agent_count: input.group.agents.len() as u64,
             tool_activity_count: input.tool_activities.len() as u64,
+            rate_limit_snapshot_count: input.rate_limit_snapshots.len() as u64,
         })
     }
 
@@ -460,6 +522,83 @@ impl Database {
             .query_row("SELECT COUNT(*) FROM tool_activity_v1", [], |row| {
                 row.get(0)
             })
+    }
+
+    pub fn rate_limit_snapshot_count(&self) -> rusqlite::Result<i64> {
+        self.connection()
+            .query_row("SELECT COUNT(*) FROM rate_limit_snapshots_v2", [], |row| {
+                row.get(0)
+            })
+    }
+
+    pub fn rate_limit_history(
+        &self,
+        project_filter: Option<&str>,
+        workspace_filter: Option<&str>,
+        run_limit: usize,
+    ) -> Result<RateLimitHistory, MeasurementStoreError> {
+        let mut history = RateLimitHistory {
+            schema_version: RATE_LIMIT_HISTORY_SCHEMA_VERSION,
+            project_filter: project_filter.map(str::to_string),
+            workspace_filter: workspace_filter.map(str::to_string),
+            run_limit: u64::try_from(run_limit).unwrap_or(u64::MAX),
+            ..Default::default()
+        };
+        if run_limit == 0 {
+            return Ok(history);
+        }
+
+        let mut stmt = self.connection().prepare(
+            "WITH selected_runs AS (
+                SELECT run_id, project_id, workspace_id, created_at_unix
+                FROM measurement_runs_v2
+                WHERE (?1 IS NULL OR project_id = ?1)
+                  AND (?2 IS NULL OR workspace_id = ?2)
+                ORDER BY created_at_unix DESC, run_id ASC
+                LIMIT ?3
+             )
+             SELECT
+                snapshot.snapshot_id, snapshot.run_id, selected.project_id,
+                selected.workspace_id, snapshot.observed_at, snapshot.limit_id,
+                snapshot.primary_used_percent, snapshot.primary_window_minutes,
+                snapshot.primary_resets_at, snapshot.secondary_used_percent,
+                snapshot.secondary_window_minutes, snapshot.secondary_resets_at,
+                snapshot.rate_limit_reached_type, snapshot.created_at_unix
+             FROM rate_limit_snapshots_v2 AS snapshot
+             INNER JOIN selected_runs AS selected ON selected.run_id = snapshot.run_id
+             ORDER BY selected.created_at_unix DESC, snapshot.observed_at ASC,
+                snapshot.limit_id ASC, snapshot.snapshot_id ASC",
+        )?;
+
+        history.snapshots = stmt
+            .query_map(
+                params![
+                    project_filter,
+                    workspace_filter,
+                    i64::try_from(run_limit).unwrap_or(i64::MAX)
+                ],
+                |row| {
+                    Ok(HistoricalRateLimitSnapshotRecord {
+                        snapshot_id: row.get(0)?,
+                        run_id: row.get(1)?,
+                        project_id: row.get(2)?,
+                        workspace_id: row.get(3)?,
+                        observed_at: row.get(4)?,
+                        limit_id: row.get(5)?,
+                        primary_used_percent: row.get(6)?,
+                        primary_window_minutes: row.get(7)?,
+                        primary_resets_at: row.get(8)?,
+                        secondary_used_percent: row.get(9)?,
+                        secondary_window_minutes: row.get(10)?,
+                        secondary_resets_at: row.get(11)?,
+                        rate_limit_reached_type: row.get(12)?,
+                        created_at_unix: row.get(13)?,
+                    })
+                },
+            )?
+            .collect::<rusqlite::Result<Vec<_>>>()?;
+
+        Ok(history)
     }
 
     pub fn recent_measurement_runs(
@@ -942,6 +1081,67 @@ fn validate_input(input: &MeasurementStoreInput) -> Result<(), MeasurementStoreE
         }
     }
 
+    for snapshot in &input.rate_limit_snapshots {
+        if snapshot.observed_at.trim().is_empty() {
+            return Err(MeasurementStoreError::Invalid(
+                "rate-limit observed_at cannot be empty".into(),
+            ));
+        }
+        if snapshot
+            .limit_id
+            .as_deref()
+            .is_some_and(|value| value.trim().is_empty())
+        {
+            return Err(MeasurementStoreError::Invalid(
+                "rate-limit limit_id cannot be empty when provided".into(),
+            ));
+        }
+        if snapshot.primary_used_percent.is_none()
+            && snapshot.secondary_used_percent.is_none()
+            && snapshot.rate_limit_reached_type.is_none()
+        {
+            return Err(MeasurementStoreError::Invalid(
+                "rate-limit snapshot has no diagnostic window or reached type".into(),
+            ));
+        }
+        if snapshot.primary_used_percent.is_none()
+            && (snapshot.primary_window_minutes.is_some() || snapshot.primary_resets_at.is_some())
+        {
+            return Err(MeasurementStoreError::Invalid(
+                "primary rate-limit metadata requires primary_used_percent".into(),
+            ));
+        }
+        if snapshot.secondary_used_percent.is_none()
+            && (snapshot.secondary_window_minutes.is_some()
+                || snapshot.secondary_resets_at.is_some())
+        {
+            return Err(MeasurementStoreError::Invalid(
+                "secondary rate-limit metadata requires secondary_used_percent".into(),
+            ));
+        }
+        for (name, raw) in [
+            (
+                "primary_used_percent",
+                snapshot.primary_used_percent.as_deref(),
+            ),
+            (
+                "secondary_used_percent",
+                snapshot.secondary_used_percent.as_deref(),
+            ),
+        ] {
+            if let Some(raw) = raw {
+                let parsed = raw.parse::<f64>().map_err(|_| {
+                    MeasurementStoreError::Invalid(format!("{name} is not numeric"))
+                })?;
+                if !parsed.is_finite() {
+                    return Err(MeasurementStoreError::Invalid(format!(
+                        "{name} must be finite"
+                    )));
+                }
+            }
+        }
+    }
+
     if let Some(profile) = input.profile.as_ref() {
         let errors = profile.validation_errors();
         if !errors.is_empty() {
@@ -1126,6 +1326,7 @@ mod tests {
             group: group(private_path),
             profile: Some(profile()),
             tool_activities: Vec::new(),
+            rate_limit_snapshots: Vec::new(),
         }
     }
 
@@ -1179,6 +1380,50 @@ mod tests {
         assert!(!haystack.contains("private-user"));
         assert!(!haystack.contains("Secret Project"));
 
+        let _ = fs::remove_file(path);
+    }
+
+    #[test]
+    fn rate_limit_history_is_idempotent_and_filterable() {
+        let path = temp_db("rate-limit-history");
+        let _ = fs::remove_file(&path);
+        let private_path = format!(r"C:\{}\rate-user\Secret Project\session.jsonl", "Users");
+        let mut input = input(&private_path);
+        input.rate_limit_snapshots.push(RateLimitStoreInput {
+            observed_at: "2026-10-03T07:15:00Z".into(),
+            limit_id: Some("codex".into()),
+            primary_used_percent: Some("12.5".into()),
+            primary_window_minutes: Some(300),
+            primary_resets_at: Some("1791018000".into()),
+            secondary_used_percent: Some("42".into()),
+            secondary_window_minutes: Some(10_080),
+            secondary_resets_at: Some("1791622800".into()),
+            rate_limit_reached_type: Some("primary".into()),
+        });
+
+        let db = Database::open(&path).expect("open db");
+        let first = db.save_measurement(&input).expect("first save");
+        let second = db.save_measurement(&input).expect("second save");
+        assert_eq!(first, second);
+        assert_eq!(first.rate_limit_snapshot_count, 1);
+        assert_eq!(db.rate_limit_snapshot_count().unwrap(), 1);
+
+        let history = db
+            .rate_limit_history(Some(&input.project_id), Some(&input.workspace_id), 10)
+            .expect("rate-limit history");
+        assert_eq!(history.schema_version, RATE_LIMIT_HISTORY_SCHEMA_VERSION);
+        assert_eq!(history.snapshots.len(), 1);
+        let snapshot = &history.snapshots[0];
+        assert_eq!(snapshot.limit_id.as_deref(), Some("codex"));
+        assert_eq!(snapshot.primary_used_percent.as_deref(), Some("12.5"));
+        assert_eq!(snapshot.secondary_window_minutes, Some(10_080));
+        assert_eq!(snapshot.run_id, "run-store-v2");
+
+        drop(db);
+        let bytes = fs::read(&path).expect("read sqlite");
+        let haystack = String::from_utf8_lossy(&bytes);
+        assert!(!haystack.contains("rate-user"));
+        assert!(!haystack.contains("Secret Project"));
         let _ = fs::remove_file(path);
     }
 

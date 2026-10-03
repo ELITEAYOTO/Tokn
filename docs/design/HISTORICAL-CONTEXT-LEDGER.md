@@ -118,14 +118,14 @@ Future activity history must preserve the same rule.
 If file/tool identity is needed for repeated-read analysis, use an explicitly designed
 privacy-preserving identity instead of persisting raw personal paths by default.
 
-## M4 work still required
+## M4 evidence status and remaining work
 
 Before M4 can be marked DONE:
-- rate-limit snapshots over time where supported ;
-- tool/file activity timeline ;
+- rate-limit snapshots over time where supported : ACCEPTED FOUNDATION ;
+- tool/file activity timeline : ACCEPTED FOUNDATION ;
 - phase timeline from direct evidence ;
 - parent/subagent shared-evidence analysis ;
-- repeated reads/searches/retries ;
+- repeated reads/searches/retries : exact-repeat foundation ACCEPTED ;
 - compaction observations where directly available ;
 - duplicate evidence ;
 - rediscovery across runs ;
@@ -151,4 +151,14 @@ ActivityTimeline V1:
 
 CLI: `tokn-observe activity-timeline`.
 
-Remaining M4 work is cross-run compatibility/rate-limit/shared-evidence/rediscovery analysis, not per-turn token invention.
+## Accepted RateLimitHistory V1 slice - 2026-10-03
+
+Rate-limit snapshots are ingested only when directly present in Codex token-count evidence.
+
+Retained evidence is deliberately minimal: observation timestamp, limit_id, primary/secondary used percentage, window duration, reset timestamp and reached type. Tokn does not retain limit_name, credit balance, plan/account identity or other monetary/account metadata in this contract.
+
+Re-ingestion replaces the run-owned snapshot set deterministically, duplicate agent copies are collapsed, and missing telemetry remains absent rather than being inferred.
+
+CLI: `tokn-observe rate-limit-history`.
+
+Automatic runtime compatibility and rate-limit history are now accepted foundations. Remaining M4 work is shared/duplicate-evidence, rediscovery/compaction and explicit cross-run analysis, not per-turn token invention.

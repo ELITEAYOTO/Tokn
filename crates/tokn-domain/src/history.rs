@@ -4,6 +4,7 @@ use crate::{ModelRuntimeProfile, TokenTotals};
 
 pub const HISTORICAL_SNAPSHOT_SCHEMA_VERSION: u64 = 1;
 pub const TOOL_ACTIVITY_HISTORY_SCHEMA_VERSION: u64 = 1;
+pub const RATE_LIMIT_HISTORY_SCHEMA_VERSION: u64 = 1;
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct HistoricalWorkspaceRecord {
@@ -62,6 +63,45 @@ pub struct HistoricalProvenanceRecord {
 pub struct HistoricalRuntimeProfileRecord {
     pub profile_id: String,
     pub profile: ModelRuntimeProfile,
+}
+
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct HistoricalRateLimitSnapshotRecord {
+    pub snapshot_id: String,
+    pub run_id: String,
+    pub project_id: String,
+    pub workspace_id: String,
+    pub observed_at: String,
+    pub limit_id: Option<String>,
+    pub primary_used_percent: Option<String>,
+    pub primary_window_minutes: Option<i64>,
+    pub primary_resets_at: Option<String>,
+    pub secondary_used_percent: Option<String>,
+    pub secondary_window_minutes: Option<i64>,
+    pub secondary_resets_at: Option<String>,
+    pub rate_limit_reached_type: Option<String>,
+    pub created_at_unix: i64,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct RateLimitHistory {
+    pub schema_version: u64,
+    pub project_filter: Option<String>,
+    pub workspace_filter: Option<String>,
+    pub run_limit: u64,
+    pub snapshots: Vec<HistoricalRateLimitSnapshotRecord>,
+}
+
+impl Default for RateLimitHistory {
+    fn default() -> Self {
+        Self {
+            schema_version: RATE_LIMIT_HISTORY_SCHEMA_VERSION,
+            project_filter: None,
+            workspace_filter: None,
+            run_limit: 0,
+            snapshots: Vec::new(),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]

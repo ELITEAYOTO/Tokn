@@ -109,7 +109,7 @@ Resultat :
 - migration legacy efface physiquement les anciens chemins apres VACUUM ;
 - replay Experiment 001 valide Runner -> Store deux fois sans multiplier le run.
 
-Rate-limit ingestion, Findings et Experiment Lab restent differes jusqu'a un consommateur concret.
+L ingestion de l historique rate-limit est maintenant implementee dans M4. Findings et Experiment Lab restent differes jusqu'a un consommateur concret.
 
 ## M3.7 - Local MCP integration prototype
 
@@ -149,7 +149,7 @@ Valide dans le slice courant :
 
 Reste M4 :
 - granularite par tour seulement si un futur contrat la capture directement ;
-- rate-limit snapshots over time ;
+- rate-limit snapshots over time : ACCEPTED FOUNDATION ;
 - timeline de phases ;
 - file/tool activity graph : ACCEPTED FOUNDATION ;
 - repeated reads/searches/retries : exact-repeat foundation ACCEPTED ;

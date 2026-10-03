@@ -13,6 +13,7 @@ mod hook_probe_pre_tool_use;
 mod import;
 mod inspect_policy;
 mod inspect_schema;
+mod rate_limit_history;
 mod report;
 mod resolve_workspace;
 mod runner;
@@ -55,6 +56,19 @@ pub fn run(cli: Cli) -> anyhow::Result<()> {
             db,
             output_json,
         } => activity_timeline::run(
+            project_id.as_deref(),
+            workspace_id.as_deref(),
+            limit,
+            db.as_deref(),
+            output_json.as_deref(),
+        ),
+        Command::RateLimitHistory {
+            project_id,
+            workspace_id,
+            limit,
+            db,
+            output_json,
+        } => rate_limit_history::run(
             project_id.as_deref(),
             workspace_id.as_deref(),
             limit,

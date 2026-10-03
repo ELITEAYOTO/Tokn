@@ -227,7 +227,7 @@ Foundation implemented:
 - versioned Store schema + fail-closed migrations;
 - `store-evidence` ingestion from immutable Runner evidence.
 
-The rate-limit table exists, but ingestion remains deferred.
+The prepared rate-limit table is now populated from directly observed Codex token-count telemetry, with a privacy-minimized historical query contract.
 Findings and Experiment Lab persistence remain deferred until their consumer contracts are justified.
 
 Do not store raw prompts or secrets by default.
@@ -290,13 +290,13 @@ Contract V1 boundaries:
 - current retained-context occupancy is `UNKNOWN` ;
 - model_context_window, total usage and last usage must not be relabeled as current retained context.
 
-Still required before Phase G is DONE:
-- rate-limit snapshots over time;
-- tool/file activity timeline;
-- parent/subagent shared-evidence analysis;
-- compaction events when observable;
-- repeated reads/searches/retries;
-- duplicate evidence;
+Phase G evidence status:
+- rate-limit snapshots over time: ACCEPTED FOUNDATION;
+- tool/file activity timeline: ACCEPTED FOUNDATION;
+- parent/subagent shared-evidence analysis: remaining;
+- compaction events when observable: remaining;
+- repeated reads/searches/retries: exact-repeat foundation accepted, richer analysis remaining;
+- duplicate evidence: remaining;
 - rediscovery and explicit cross-run comparison primitives.
 
 ## Phase H - Findings Engine
@@ -402,7 +402,7 @@ Next inside M4:
 
 ## 2026-10-02 insertion - shadow before active optimizer
 
-Current M4 activity foundation and automatic runtime-profile compatibility reducer are accepted. Next: rate-limit snapshots, shared/duplicate evidence and rediscovery primitives.
+Current M4 activity foundation, automatic runtime-profile compatibility reducer and rate-limit history are accepted. Next: shared/duplicate evidence and rediscovery primitives.
 
 Before Findings become interventions, introduce an observation-only shadow layer where useful:
 - repo/symbol index + Git/hash invalidation;

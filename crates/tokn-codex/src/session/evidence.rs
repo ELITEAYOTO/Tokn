@@ -4,7 +4,10 @@ use anyhow::{Context, Result};
 use tokn_domain::{AgentEvidence, KeyedTokenUsage, TerminalObservation, TerminalStatus};
 use tokn_ingest::{JsonlConfig, read_jsonl};
 
-use super::{extract_session_tools, extract_terminal_observation, extract_usage_record};
+use super::{
+    extract_rate_limit_snapshot, extract_session_tools, extract_terminal_observation,
+    extract_usage_record,
+};
 
 pub fn read_session_evidence(path: &Path) -> Result<AgentEvidence> {
     let mut evidence = AgentEvidence {
@@ -42,6 +45,10 @@ pub fn read_session_evidence(path: &Path) -> Result<AgentEvidence> {
                 key,
                 usage: observation.usage,
             });
+        }
+
+        if let Some(snapshot) = extract_rate_limit_snapshot(&record.value) {
+            evidence.rate_limit_snapshots.push(snapshot);
         }
 
         if let Some(batch) = extract_session_tools(&record.value) {

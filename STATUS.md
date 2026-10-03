@@ -204,7 +204,7 @@ Privacy : aucun chemin workspace/session brut n'est persiste dans le Store V2.
 Les anciens chemins du schema legacy sont pseudonymises puis physiquement nettoyes par VACUUM lors de la migration V2.
 Les versions futures inconnues sont refusees fail-closed.
 
-Rate-limit ingestion, Findings et Experiment Lab persistence restent differes.
+L ingestion de l historique rate-limit est maintenant acceptee dans M4. Findings et Experiment Lab persistence restent differes.
 
 ## Local MCP transport prototype - accepte
 
@@ -246,8 +246,8 @@ Limites explicites du contrat V1 :
 ## Prochaine action
 
 Continuer **M4** avec l'activite historique evidence-bounded :
-tool/file activity timeline, repeated reads/searches/retries, compaction quand observable,
-duplicate/shared evidence et rediscovery multi-run.
+shared/duplicate evidence parent/subagent, compaction quand observable,
+rediscovery multi-run et comparaison cross-run explicite.
 
 Ne pas creer artificiellement du per-turn a partir des agregats V1.
 Ne pas commencer M5 Findings tant que ces observations historiques ne sont pas fiables.
@@ -310,12 +310,14 @@ Accepted M4 additions:
 - exact repeated-operation observations across runs/threads;
 - no raw command/workdir/parse-error persistence;
 - synthetic-secret persistence regression;
-- 	okn-observe activity-timeline CLI;
+- `tokn-observe activity-timeline` CLI;
 - automatic ModelRuntimeProfile compatibility reducer with PASS/FAIL/UNKNOWN evidence semantics;
-- causal compatibility is PASS only when required runtime/model/config evidence is complete and equal.
+- causal compatibility is PASS only when required runtime/model/config evidence is complete and equal;
+- RateLimitHistory V1 with privacy-minimized limit/window/reset evidence;
+- `tokn-observe rate-limit-history` filtered historical query;
+- no credit balance, plan/account identity or `limit_name` retained in Tokn rate-limit evidence.
 
 Next M4 work:
-- rate-limit snapshot ingestion with window/limit identity;
 - shared/duplicate evidence parent/subagent;
 - compaction/rediscovery only when directly observable;
 - explicit cross-run comparison primitives.

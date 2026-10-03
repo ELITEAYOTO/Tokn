@@ -115,7 +115,8 @@ It intentionally does not store the original runtime path.
 The schema exists so the Store does not need another structural migration for the
 first rate-limit history work.
 
-Ingestion is not implemented yet.
+M4 ingestion is implemented from directly observed Codex token-count rate-limit snapshots.
+The Store retains only limit identity, primary/secondary percentage-window-reset data and reached type. It deliberately excludes credit balances, plan/account identity and limit_name.
 No rate-limit values are invented or backfilled.
 
 ## Deferred by design
@@ -123,8 +124,7 @@ No rate-limit values are invented or backfilled.
 Not yet implemented in the Store foundation:
 - Findings persistence;
 - Experiment Lab persistence;
-- rate-limit snapshot ingestion;
-- historical query/index APIs beyond basic counts/profile load;
+- broader historical query/index APIs beyond the accepted Context Ledger, Tool Activity and RateLimitHistory surfaces;
 - Context Ledger tables;
 - cross-run finding aggregation.
 
