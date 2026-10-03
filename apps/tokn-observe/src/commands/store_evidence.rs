@@ -173,11 +173,8 @@ fn build_tool_activities(
                 let workdir = workdir.trim();
                 (!workdir.is_empty()).then(|| private_id("cwd", &format!("{project_id}:{workdir}")))
             });
-            let source_locator = extract_file_read_source_locator(
-                tool,
-                member.cwd.as_deref(),
-                selected_workspace,
-            );
+            let source_locator =
+                extract_file_read_source_locator(tool, member.cwd.as_deref(), selected_workspace);
             let source_stable_id = source_locator
                 .locator
                 .as_deref()
@@ -452,13 +449,18 @@ mod tests {
             &[member_b],
         );
 
-        assert_eq!(left[0].source_identity_coverage, EvidenceIdentityCoverage::Observed);
+        assert_eq!(
+            left[0].source_identity_coverage,
+            EvidenceIdentityCoverage::Observed
+        );
         assert_eq!(left[0].source_stable_id, right[0].source_stable_id);
         assert_ne!(left[0].source_stable_id, other_project[0].source_stable_id);
-        assert!(left[0]
-            .source_stable_id
-            .as_deref()
-            .is_some_and(|value| value.starts_with("src-v1-")));
+        assert!(
+            left[0]
+                .source_stable_id
+                .as_deref()
+                .is_some_and(|value| value.starts_with("src-v1-"))
+        );
         let debug = format!("{left:?}{right:?}");
         assert!(!debug.contains("clone-a"));
         assert!(!debug.contains("clone-b"));
@@ -498,10 +500,18 @@ mod tests {
             ..Default::default()
         };
         let project_id = "prj-0123456789abcdef01234567";
-        let first =
-            build_tool_activities(project_id, "project-key-a", None, std::slice::from_ref(&member));
-        let second =
-            build_tool_activities(project_id, "project-key-a", None, std::slice::from_ref(&member));
+        let first = build_tool_activities(
+            project_id,
+            "project-key-a",
+            None,
+            std::slice::from_ref(&member),
+        );
+        let second = build_tool_activities(
+            project_id,
+            "project-key-a",
+            None,
+            std::slice::from_ref(&member),
+        );
         let other_project = build_tool_activities(project_id, "project-key-b", None, &[member]);
 
         assert_eq!(

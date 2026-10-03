@@ -1262,8 +1262,7 @@ fn validate_scoped_fingerprint(
             "{name} must be a privacy-preserving {prefix}-v1-<hex> fingerprint"
         )));
     };
-    if hex.len() != SCOPED_FINGERPRINT_HEX_LEN
-        || !hex.bytes().all(|byte| byte.is_ascii_hexdigit())
+    if hex.len() != SCOPED_FINGERPRINT_HEX_LEN || !hex.bytes().all(|byte| byte.is_ascii_hexdigit())
     {
         return Err(MeasurementStoreError::Invalid(format!(
             "{name} must contain exactly {SCOPED_FINGERPRINT_HEX_LEN} hexadecimal characters"
@@ -1333,20 +1332,13 @@ mod tests {
     #[test]
     fn scoped_identity_validator_accepts_only_versioned_project_scoped_fingerprints() {
         let source = scoped_source_id_bytes("project-a", b"file:src/lib.rs");
-        let content = scoped_fingerprint_bytes(
-            "cnt",
-            "project-a",
-            "tool-result-output-v1",
-            b"fixture",
-        );
+        let content =
+            scoped_fingerprint_bytes("cnt", "project-a", "tool-result-output-v1", b"fixture");
         assert!(validate_scoped_fingerprint("source", &source, "src").is_ok());
         assert!(validate_scoped_fingerprint("content", &content, "cnt").is_ok());
-        assert!(validate_scoped_fingerprint(
-            "source",
-            &private_id("src", "raw-path"),
-            "src"
-        )
-        .is_err());
+        assert!(
+            validate_scoped_fingerprint("source", &private_id("src", "raw-path"), "src").is_err()
+        );
         assert!(validate_scoped_fingerprint("content", "cnt-v1-deadbeef", "cnt").is_err());
     }
 

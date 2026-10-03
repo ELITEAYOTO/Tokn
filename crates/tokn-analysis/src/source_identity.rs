@@ -1,4 +1,4 @@
-﻿use std::collections::{BTreeMap, BTreeSet};
+use std::collections::{BTreeMap, BTreeSet};
 use std::fmt;
 
 use serde::{Deserialize, Serialize};
@@ -318,10 +318,12 @@ mod tests {
         value.schema_version = 99;
         assert!(matches!(
             build_source_identity_history(&value),
-            Err(SourceIdentityHistoryBuildError::UnsupportedToolActivityHistorySchema {
-                actual: 99,
-                ..
-            })
+            Err(
+                SourceIdentityHistoryBuildError::UnsupportedToolActivityHistorySchema {
+                    actual: 99,
+                    ..
+                }
+            )
         ));
     }
 }

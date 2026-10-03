@@ -1,4 +1,4 @@
-﻿use tokn_domain::{EvidenceIdentityCoverage, ToolObservation};
+use tokn_domain::{EvidenceIdentityCoverage, ToolObservation};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct StableSourceLocatorObservation {
@@ -62,8 +62,7 @@ fn parse_simple_get_content_target(command: &str) -> Option<String> {
     let target = match tokens.as_slice() {
         [_, path] if !path.starts_with('-') => path,
         [_, flag, path]
-            if flag.eq_ignore_ascii_case("-LiteralPath")
-                || flag.eq_ignore_ascii_case("-Path") =>
+            if flag.eq_ignore_ascii_case("-LiteralPath") || flag.eq_ignore_ascii_case("-Path") =>
         {
             path
         }
@@ -251,14 +250,14 @@ mod tests {
         for candidate in [
             tool("Get-Content ..\\secret.txt", Some(r"E:\repo\PROJECT")),
             tool("Get-Content *.rs", Some(r"E:\repo\PROJECT")),
-            tool("Get-Content a.rs | Select-Object -First 1", Some(r"E:\repo\PROJECT")),
+            tool(
+                "Get-Content a.rs | Select-Object -First 1",
+                Some(r"E:\repo\PROJECT"),
+            ),
             tool("Get-Content $env:TEMP", Some(r"E:\repo\PROJECT")),
         ] {
-            let observed = extract_file_read_source_locator(
-                &candidate,
-                None,
-                Some(r"E:\repo\PROJECT"),
-            );
+            let observed =
+                extract_file_read_source_locator(&candidate, None, Some(r"E:\repo\PROJECT"));
             assert_eq!(observed.coverage, EvidenceIdentityCoverage::NotCaptured);
             assert!(observed.locator.is_none());
         }
@@ -268,11 +267,7 @@ mod tests {
     fn ignores_non_file_read_categories() {
         let mut value = tool("Get-Content README.md", Some(r"E:\repo\PROJECT"));
         value.category = "search".into();
-        let observed = extract_file_read_source_locator(
-            &value,
-            None,
-            Some(r"E:\repo\PROJECT"),
-        );
+        let observed = extract_file_read_source_locator(&value, None, Some(r"E:\repo\PROJECT"));
         assert_eq!(observed.coverage, EvidenceIdentityCoverage::NotCaptured);
     }
 }
