@@ -298,8 +298,8 @@ fn ancestor_status(
 
 #[cfg(test)]
 mod tests {
-    use tokn_domain::HistoricalToolActivityRecord;
     use super::*;
+    use tokn_domain::HistoricalToolActivityRecord;
 
     const PROJECT: &str = "prj-0123456789abcdef01234567";
     const WORKSPACE: &str = "wsp-0123456789abcdef01234567";
