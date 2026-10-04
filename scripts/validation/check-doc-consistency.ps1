@@ -173,6 +173,8 @@ Assert-Contains ".github/workflows/ci.yml" "cargo deny check advisories licenses
 Assert-Contains ".github/workflows/ci.yml" "gitleaks_8.30.1_windows_x64.zip"
 Assert-Contains ".github/workflows/ci.yml" "d29144deff3a68aa93ced33dddf84b7fdc26070add4aa0f4513094c8332afc4e"
 Assert-Contains ".github/workflows/ci.yml" 'gitleaks git --no-banner --redact=100 .'
+Assert-Contains ".gitleaksignore" "0c27477c8db97f427240c2ad5cb821d1c6298c27:docs/design/TOKN-STORE-V2.md:generic-api-key:139"
+Assert-Contains ".gitleaksignore" "0c27477c8db97f427240c2ad5cb821d1c6298c27:docs/design/TOKN-STORE-V2.md:generic-api-key:140"
 Assert-Contains ".github/dependabot.yml" "package-ecosystem: github-actions"
 Assert-Contains "deny.toml" 'unknown-registry = "deny"'
 Assert-Contains "deny.toml" 'wildcards = "deny"'
