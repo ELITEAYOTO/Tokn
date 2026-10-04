@@ -136,6 +136,14 @@ Assert-Contains "docs/benchmarks/SHADOW-INDEX-PROTOCOL-V0.md" '`tokn-observe sha
 Assert-Contains "docs/plans/IMPLEMENTATION-PATH.md" "FTS5 capability probe: **ACCEPTED CAPABILITY FOUNDATION / FULL GATES PASS**"
 Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "SQLite FTS5 capability probe: **ACCEPTED CAPABILITY FOUNDATION / FULL GATES PASS**"
 Assert-Contains "docs/INDEX.md" 'probe SQLite/FTS5 `tokn-shadow` est ACCEPTED CAPABILITY FOUNDATION'
+Assert-Contains "STATUS.md" '`SQLITE_FTS5_UNICODE61_V0` est maintenant **FUNCTIONAL BENCHMARK CANDIDATE / FULL GATES PASS**'
+Assert-Contains "docs/design/SHADOW-REPOSITORY-INDEX.md" '`sdoc-v1-*`'
+Assert-Contains "docs/design/SHADOW-REPOSITORY-INDEX.md" 'every query re-verifies the complete current manifest'
+Assert-Contains "docs/design/SHADOW-REPOSITORY-INDEX.md" 'functional benchmark candidate, not an eligible backend'
+Assert-Contains "docs/benchmarks/SHADOW-INDEX-PROTOCOL-V0.md" '`SQLITE_FTS5_UNICODE61_V0`: **FUNCTIONAL BENCHMARK CANDIDATE / FULL GATES PASS**'
+Assert-Contains "docs/plans/IMPLEMENTATION-PATH.md" '`SQLITE_FTS5_UNICODE61_V0`: **FUNCTIONAL BENCHMARK CANDIDATE / FULL GATES PASS**'
+Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" '`SQLITE_FTS5_UNICODE61_V0`: **FUNCTIONAL BENCHMARK CANDIDATE / FULL GATES PASS**'
+Assert-Contains "ROADMAP.md" '`SQLITE_FTS5_UNICODE61_V0`: FUNCTIONAL BENCHMARK CANDIDATE / FULL GATES PASS'
 Assert-Contains "ROADMAP.md" '`tokn_status` + `tokn_recent_runs` + `tokn_context_ledger`'
 Assert-Contains "docs/plans/IMPLEMENTATION-PATH.md" "Task Input Identity V0 ACCEPTED OBSERVATION FOUNDATION"
 Assert-NotContains "docs/plans/NEXT-SESSION-CHECKLIST.md" "Cross-Run Comparability V0 est le slice courant"

@@ -1,6 +1,6 @@
 # Shadow Repository Index V0
 
-Status: M4.5 ACCEPTED DESIGN / PREREQUISITES IMPLEMENTED / DIRECT_SCAN ACCEPTED REFERENCE FOUNDATION
+Status: M4.5 ACCEPTED DESIGN / PREREQUISITES IMPLEMENTED / DIRECT_SCAN ACCEPTED REFERENCE FOUNDATION / UNICODE61 FUNCTIONAL BENCHMARK CANDIDATE
 Date: 2026-10-04
 
 ## Purpose
@@ -111,7 +111,7 @@ Implementation prerequisite accepted: `scoped_index_content_hash_bytes()` now de
 
 ### ShadowDocumentId
 
-If a backend needs a row/document key, derive a dedicated deterministic ID from the project scope + SourceStableId + index content version. It is a backend identity, not evidence that the runtime saw the document.
+Accepted candidate identity primitive: `scoped_shadow_document_id_bytes()` derives project-scoped `sdoc-v1-*` from project scope + SourceStableId + IndexContentHash using a dedicated derivation domain. `sdoc-v1-*` is a backend/document identity only; it is domain-separated from `src-v1-*`, `ixc-v1-*`, `cnt-v1-*` and `ver-v1-*` and is never evidence that the runtime saw or needed the document. SQLite `rowid` remains transient backend-local plumbing and must not replace this exposed identity.
 
 ## Project scope input
 
@@ -171,6 +171,17 @@ Candidate lexical index:
 - contentless/contentless-delete mode preferred for evaluation so the FTS database does not keep a second raw-text copy;
 - current file is reopened for any returned source text/snippet;
 - exact file hash must be checked before content is returned.
+
+Functional benchmark candidate now implemented in `tokn-shadow::unicode61_candidate` with **FULL GATES PASS**:
+- SQLite connection and contentless FTS table are in-memory only; no backend filename/layout or durable index is selected;
+- build consumes the accepted `DirectScanManifest` and reuses `tokn-platform` verification/visitor primitives instead of duplicating path/corpus/hash rules;
+- build first reconstructs/verifies the complete DIRECT_SCAN manifest, then performs a second verified read pass to feed FTS; build accounting therefore includes both read passes;
+- candidate metadata retains only relative path, `sdoc-v1-*`, `src-v1-*`, `ixc-v1-*` and byte count, never source text;
+- every query re-verifies the complete current manifest before consulting FTS, so additions/removals/eligibility/hash changes fail closed with `REFRESH_REQUIRED` instead of producing a false negative from an incomplete index;
+- returned hits expose only IDs/path/hash/bytes + BM25 ordering score; source text is not returned and a hit may be re-verified against the current file before any future source retrieval;
+- query terms reuse the bounded DIRECT_SCAN query parser, but FTS tokenization is intentionally not forced to emulate substring semantics. The fixture records a real quality difference: `alpha widget` matches both prose and `AlphaWidget` under DIRECT_SCAN, but unicode61 matches only the prose document because `AlphaWidget` is one token; exact `AlphaWidget` still matches.
+
+This is a **functional benchmark candidate, not an eligible backend**. Incremental refresh, persistent index format, resource measurement, frozen gold-query execution and the full correctness suite remain future benchmark work.
 
 ### SQLITE_FTS5_TRIGRAM_V0
 

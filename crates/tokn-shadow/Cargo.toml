@@ -6,8 +6,11 @@ rust-version.workspace = true
 license.workspace = true
 
 [dependencies]
+anyhow.workspace = true
 rusqlite.workspace = true
 serde.workspace = true
+tokn-domain = { path = "../tokn-domain" }
+tokn-platform = { path = "../tokn-platform" }
 
 [dev-dependencies]
 serde_json.workspace = true

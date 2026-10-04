@@ -56,6 +56,24 @@ pub fn scoped_source_id_bytes(scope_key: &str, locator: &[u8]) -> String {
 /// `ixc-v1-*` is intentionally domain-separated from SourceStableId,
 /// ContentFingerprint and SourceVersionFingerprint. Equality across those
 /// identity domains must never be inferred from digest text.
+pub fn scoped_shadow_document_id_bytes(
+    scope_key: &str,
+    source_stable_id: &str,
+    index_content_hash: &str,
+) -> String {
+    let key = blake3::derive_key(
+        "tokn.project-scoped-shadow-document-id.v1",
+        scope_key.as_bytes(),
+    );
+    let mut hasher = blake3::Hasher::new_keyed(&key);
+    hasher.update(b"shadow-document-identity-v1");
+    hasher.update(&[0]);
+    hasher.update(source_stable_id.as_bytes());
+    hasher.update(&[0]);
+    hasher.update(index_content_hash.as_bytes());
+    format!("sdoc-v1-{}", hasher.finalize().to_hex())
+}
+
 pub fn scoped_index_content_hash_bytes(scope_key: &str, bytes: &[u8]) -> String {
     let key = blake3::derive_key(
         "tokn.project-scoped-index-content-hash.v1",
@@ -103,6 +121,27 @@ mod tests {
         assert_eq!(baseline, repeat);
         assert_ne!(baseline, other_project);
         assert_ne!(baseline, other_locator);
+    }
+
+    #[test]
+    fn shadow_document_id_is_deterministic_project_scoped_and_domain_separated() {
+        let source = scoped_source_id_bytes("project-a", b"file:src/lib.rs");
+        let content = scoped_index_content_hash_bytes("project-a", b"fn alpha() {}\n");
+        let baseline = scoped_shadow_document_id_bytes("project-a", &source, &content);
+        let repeat = scoped_shadow_document_id_bytes("project-a", &source, &content);
+        let other_project = scoped_shadow_document_id_bytes("project-b", &source, &content);
+        let other_content = scoped_shadow_document_id_bytes(
+            "project-a",
+            &source,
+            &scoped_index_content_hash_bytes("project-a", b"fn beta() {}\n"),
+        );
+
+        assert_eq!(baseline, repeat);
+        assert!(baseline.starts_with("sdoc-v1-"));
+        assert_ne!(baseline, other_project);
+        assert_ne!(baseline, other_content);
+        assert_ne!(baseline, source);
+        assert_ne!(baseline, content);
     }
 
     #[test]
