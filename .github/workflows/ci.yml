@@ -53,13 +53,24 @@ jobs:
         shell: pwsh
         run: ./scripts/validation/check-repo-publication.ps1
 
+      - name: Install Gitleaks 8.30.1
+        shell: pwsh
+        run: |
+          $archive = Join-Path $env:RUNNER_TEMP "gitleaks_8.30.1_windows_x64.zip"
+          $toolDir = Join-Path $env:RUNNER_TEMP "gitleaks-8.30.1"
+          Invoke-WebRequest -Uri "https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_windows_x64.zip" -OutFile $archive
+          $actualHash = (Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($actualHash -ne "d29144deff3a68aa93ced33dddf84b7fdc26070add4aa0f4513094c8332afc4e") {
+            throw "Gitleaks archive checksum mismatch"
+          }
+          Expand-Archive -LiteralPath $archive -DestinationPath $toolDir -Force
+          & (Join-Path $toolDir "gitleaks.exe") version
+
       - name: Secret history scan
-        uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITLEAKS_VERSION: 8.30.1
-          GITLEAKS_ENABLE_COMMENTS: false
-          GITLEAKS_ENABLE_UPLOAD_ARTIFACT: false
+        shell: pwsh
+        run: |
+          $gitleaks = Join-Path $env:RUNNER_TEMP "gitleaks-8.30.1\gitleaks.exe"
+          & $gitleaks git --no-banner --redact=100 .
 
       - name: PowerShell syntax
         shell: pwsh

@@ -170,10 +170,9 @@ Assert-Contains ".github/workflows/ci.yml" "fetch-depth: 0"
 Assert-Contains ".github/workflows/ci.yml" "persist-credentials: false"
 Assert-Contains ".github/workflows/ci.yml" "cargo-audit@0.22.2,cargo-deny@0.20.2"
 Assert-Contains ".github/workflows/ci.yml" "cargo deny check advisories licenses bans sources"
-Assert-Contains ".github/workflows/ci.yml" "gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e"
-Assert-Contains ".github/workflows/ci.yml" "GITLEAKS_VERSION: 8.30.1"
-Assert-Contains ".github/workflows/ci.yml" "GITLEAKS_ENABLE_COMMENTS: false"
-Assert-Contains ".github/workflows/ci.yml" "GITLEAKS_ENABLE_UPLOAD_ARTIFACT: false"
+Assert-Contains ".github/workflows/ci.yml" "gitleaks_8.30.1_windows_x64.zip"
+Assert-Contains ".github/workflows/ci.yml" "d29144deff3a68aa93ced33dddf84b7fdc26070add4aa0f4513094c8332afc4e"
+Assert-Contains ".github/workflows/ci.yml" 'gitleaks git --no-banner --redact=100 .'
 Assert-Contains ".github/dependabot.yml" "package-ecosystem: github-actions"
 Assert-Contains "deny.toml" 'unknown-registry = "deny"'
 Assert-Contains "deny.toml" 'wildcards = "deny"'
