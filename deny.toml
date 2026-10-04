@@ -24,9 +24,12 @@ allow = [
 
 [bans]
 # Duplicate transitive versions are visible but do not fail the build yet.
-# Wildcard dependency requirements are not accepted.
+# Wildcard dependency requirements are denied for external dependencies. Private
+# workspace path dependencies are allowed because Cargo resolves them from this
+# exact repository rather than from an unconstrained registry version.
 multiple-versions = "warn"
 wildcards = "deny"
+allow-wildcard-paths = true
 highlight = "all"
 
 [sources]

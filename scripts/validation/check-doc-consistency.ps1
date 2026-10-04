@@ -154,13 +154,14 @@ Assert-Contains "docs/audits/2026-10-04-CLAUDE-TECHNICAL-AUDIT-RECONCILIATION.md
 Assert-Contains "STATUS.md" "Wave A remediation is in progress: R-01 JSONL early-EOF/shrink infinite-loop risk is fixed and merged"
 Assert-Contains "STATUS.md" "D-01 SQLite"
 Assert-Contains "STATUS.md" "CI supply-chain hardening"
-Assert-Contains ".github/workflows/ci.yml" "actions/checkout@11d5960a326750d5838078e36cf38b85af677262"
+Assert-Contains ".github/workflows/ci.yml" "actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803"
 Assert-Contains ".github/workflows/ci.yml" "persist-credentials: false"
 Assert-Contains ".github/workflows/ci.yml" "cargo-audit@0.22.2,cargo-deny@0.20.2"
 Assert-Contains ".github/workflows/ci.yml" "cargo deny check advisories licenses bans sources"
 Assert-Contains ".github/dependabot.yml" "package-ecosystem: github-actions"
 Assert-Contains "deny.toml" 'unknown-registry = "deny"'
 Assert-Contains "deny.toml" 'wildcards = "deny"'
+Assert-Contains "deny.toml" 'allow-wildcard-paths = true'
 Assert-Contains "SECURITY.md" "this is not a cryptographic-secrecy guarantee"
 Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "Wave A integrity remediation is now in progress."
 Assert-Contains "docs/INDEX.md" "2026-10-04-CLAUDE-TECHNICAL-AUDIT-RECONCILIATION.md"
