@@ -162,6 +162,17 @@ Assert-Contains ".github/dependabot.yml" "package-ecosystem: github-actions"
 Assert-Contains "deny.toml" 'unknown-registry = "deny"'
 Assert-Contains "deny.toml" 'wildcards = "deny"'
 Assert-Contains "deny.toml" 'allow-wildcard-paths = true'
+Assert-Contains "Cargo.toml" 'publish = false'
+Assert-Contains "apps/tokn-observe/Cargo.toml" 'publish.workspace = true'
+Assert-Contains "apps/tokn-mcp/Cargo.toml" 'publish.workspace = true'
+Assert-Contains "crates/tokn-domain/Cargo.toml" 'publish.workspace = true'
+Assert-Contains "crates/tokn-platform/Cargo.toml" 'publish.workspace = true'
+Assert-Contains "crates/tokn-ingest/Cargo.toml" 'publish.workspace = true'
+Assert-Contains "crates/tokn-codex/Cargo.toml" 'publish.workspace = true'
+Assert-Contains "crates/tokn-analysis/Cargo.toml" 'publish.workspace = true'
+Assert-Contains "crates/tokn-storage/Cargo.toml" 'publish.workspace = true'
+Assert-Contains "crates/tokn-shadow/Cargo.toml" 'publish.workspace = true'
+Assert-Contains "crates/tokn-report/Cargo.toml" 'publish.workspace = true'
 Assert-Contains "SECURITY.md" "this is not a cryptographic-secrecy guarantee"
 Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "Wave A integrity remediation is now in progress."
 Assert-Contains "docs/INDEX.md" "2026-10-04-CLAUDE-TECHNICAL-AUDIT-RECONCILIATION.md"
