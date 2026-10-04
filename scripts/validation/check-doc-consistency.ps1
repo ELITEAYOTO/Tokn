@@ -151,9 +151,9 @@ Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "sanitized Shadow Index p
 Assert-Contains "docs/plans/IMPLEMENTATION-PATH.md" "sanitized pilot harness: **IMPLEMENTED / FULL GATES PASS**"
 Assert-Contains "docs/design/SHADOW-REPOSITORY-INDEX.md" 'the measured condition is `REJECTED`'
 Assert-Contains "docs/audits/2026-10-04-CLAUDE-TECHNICAL-AUDIT-RECONCILIATION.md" "NO REMEDIATION APPLIED"
-Assert-Contains "STATUS.md" "MATERIAL DEBT CONFIRMED / NO REMEDIATION APPLIED"
+Assert-Contains "STATUS.md" "Wave A remediation has started: R-01 JSONL early-EOF/shrink infinite-loop risk is fixed with deterministic regression coverage"
 Assert-Contains "SECURITY.md" "this is not a cryptographic-secrecy guarantee"
-Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "Audit checkpoint before any new implementation."
+Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "Wave A integrity remediation is now authorized and started."
 Assert-Contains "docs/INDEX.md" "2026-10-04-CLAUDE-TECHNICAL-AUDIT-RECONCILIATION.md"
 Assert-Contains "ROADMAP.md" '`tokn_status` + `tokn_recent_runs` + `tokn_context_ledger`'
 Assert-Contains "docs/plans/IMPLEMENTATION-PATH.md" "Task Input Identity V0 ACCEPTED OBSERVATION FOUNDATION"

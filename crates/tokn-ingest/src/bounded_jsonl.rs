@@ -27,17 +27,26 @@ pub enum IngestError {
     Io(#[from] std::io::Error),
 }
 
-pub fn read_jsonl<F>(
-    path: &Path,
-    cfg: &JsonlConfig,
-    mut sink: F,
-) -> Result<IngestStats, IngestError>
+pub fn read_jsonl<F>(path: &Path, cfg: &JsonlConfig, sink: F) -> Result<IngestStats, IngestError>
 where
     F: FnMut(ParsedRecord),
 {
     let file = File::open(path)?;
     let snapshot_end = file.metadata()?.len();
     let mut reader = BufReader::with_capacity(cfg.io_buffer_bytes, file);
+    read_jsonl_snapshot(&mut reader, snapshot_end, cfg, sink)
+}
+
+fn read_jsonl_snapshot<R, F>(
+    reader: &mut R,
+    snapshot_end: u64,
+    cfg: &JsonlConfig,
+    mut sink: F,
+) -> Result<IngestStats, IngestError>
+where
+    R: BufRead,
+    F: FnMut(ParsedRecord),
+{
     let mut stats = IngestStats {
         snapshot_bytes: snapshot_end,
         ..Default::default()
@@ -52,10 +61,12 @@ where
         let mut hasher = blake3::Hasher::new();
         let mut oversized = false;
         let mut ended_newline = false;
+        let mut eof_before_snapshot = false;
 
         loop {
             let buf = reader.fill_buf()?;
             if buf.is_empty() {
+                eof_before_snapshot = offset < snapshot_end;
                 break;
             }
 
@@ -84,6 +95,14 @@ where
             if ended_newline || offset >= snapshot_end {
                 break;
             }
+        }
+
+        if eof_before_snapshot {
+            if offset > start {
+                stats.records_seen += 1;
+            }
+            stats.truncated_tail += 1;
+            break;
         }
 
         stats.records_seen += 1;
@@ -121,4 +140,42 @@ where
 
     stats.snapshot_hash = snapshot_hasher.finalize().to_hex().to_string();
     Ok(stats)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::io::{BufReader, Cursor};
+
+    #[test]
+    fn stops_when_reader_reaches_eof_before_snapshot_end() {
+        let bytes = b"{\"type\":\"a\"}\n{\"type\":\"partial\"";
+        let snapshot_end = bytes.len() as u64 + 64;
+        let mut reader = BufReader::new(Cursor::new(bytes));
+        let mut records = 0;
+
+        let stats = read_jsonl_snapshot(&mut reader, snapshot_end, &JsonlConfig::default(), |_| {
+            records += 1
+        })
+        .unwrap();
+
+        assert_eq!(records, 1);
+        assert_eq!(stats.records_seen, 2);
+        assert_eq!(stats.records_valid, 1);
+        assert_eq!(stats.truncated_tail, 1);
+        assert_eq!(stats.malformed_records, 0);
+    }
+
+    #[test]
+    fn stops_when_snapshot_disappears_before_first_read() {
+        let mut reader = BufReader::new(Cursor::new(Vec::<u8>::new()));
+        let stats = read_jsonl_snapshot(&mut reader, 128, &JsonlConfig::default(), |_| {
+            panic!("no record should be emitted")
+        })
+        .unwrap();
+
+        assert_eq!(stats.records_seen, 0);
+        assert_eq!(stats.records_valid, 0);
+        assert_eq!(stats.truncated_tail, 1);
+    }
 }
