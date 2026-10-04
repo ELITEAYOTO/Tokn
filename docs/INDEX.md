@@ -191,8 +191,9 @@ Avant de creer un nouveau document :
 
 Les chats ne sont jamais la source de verite du projet.
 
-## Audit / design review 2026-10-02
+## Audit / design reviews
 
+- `audits/2026-10-04-CLAUDE-TECHNICAL-AUDIT-RECONCILIATION.md` - current reconciliation of the owner-supplied technical/security/product audit against main after PR #22; no remediation applied.
 - `audits/2026-10-02-CLAUDE-HANDOFF-REVIEW.md` - current-code review of the Claude handoff and accepted/deferred recommendations.
 - `audits/2026-10-03-LONG-TERM-AUTOLAB-REVIEW.md` - review of owner-supplied AutoLab, Intelligence Layer, data/ML and optimizer strategy research; accepted sequencing changes and deferred ideas.
 - Multi-runtime research is distilled into ADR-006 + `design/MULTI-RUNTIME-CORE-AND-DATA-ARCHITECTURE.md`; the uploaded research itself is not an implementation-status source.

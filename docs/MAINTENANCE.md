@@ -133,8 +133,11 @@ Decision :
 - PowerShell > ~300 lignes : revue ; > ~400 : extraction avant croissance ;
 - pas de micro-crates sans frontiere durable.
 
-Audit :
-`audits/2026-09-29-MAINTAINABILITY.md`.
+Audits :
+- `audits/2026-09-29-MAINTAINABILITY.md` - historical baseline;
+- `audits/2026-10-04-CLAUDE-TECHNICAL-AUDIT-RECONCILIATION.md` - current technical/security/product reconciliation against main after PR #22.
+
+The 2026-09-29 CLEAN verdict must not be treated as current after the 2026-10-04 reconciliation.
 
 ## Confidentialite
 

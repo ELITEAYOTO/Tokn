@@ -1,3 +1,11 @@
+## 2026-10-04 - Technical audit reconciliation checkpoint
+
+- reconciled the owner-supplied Claude technical/security/product audit against current main after PR #22 instead of applying its older `c9d49c2` findings blindly;
+- documented confirmed, partial, prospective and superseded findings plus current local-tooling/GitHub-governance state in `docs/audits/2026-10-04-CLAUDE-TECHNICAL-AUDIT-RECONCILIATION.md`;
+- refreshed the manual RustSec point-in-time result to 2026-10-04 / 96 dependencies and clarified that it is not an automated CI supply-chain gate;
+- corrected stale maintainability/next-session wording and documented that durable IDs provide local pseudonymization rather than cryptographic secrecy if the Store is obtained;
+- paused new implementation at an explicit owner-decision boundary; no Rust/SQL/CI/GitHub-setting/tool-install remediation is part of this documentation checkpoint.
+
 ## 2026-10-04 - M4.5 sanitized Shadow Index pilot benchmark
 
 - added `benchmarks/shadow-index-sanitized-pilot-v1.json`, freezing a generated Git corpus, eight gold queries, K={1,5,10}, five timing repetitions and predeclared 0.95 quality ratios before execution;

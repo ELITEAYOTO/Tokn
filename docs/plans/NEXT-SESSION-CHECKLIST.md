@@ -1,6 +1,6 @@
 # Tokn V0.1 - Next Session Checklist
 
-Derniere mise a jour : **2026-10-03**
+Derniere mise a jour : **2026-10-04**
 
 ## Etat de depart
 
@@ -28,7 +28,7 @@ Ne pas refaire l'enquete P6 ni la recherche plugin/telemetry R1-R8 avant qu'un b
 
 ## Premiere action
 
-Commencer **M4.5 Context Identity + Shadow Foundations** en observation-only, sans modifier le comportement d'Astra/runtime.
+**Audit checkpoint before any new implementation.** The first M4.5 Shadow sequence through the sanitized pilot (PR #17 -> #22) is complete. Read `../audits/2026-10-04-CLAUDE-TECHNICAL-AUDIT-RECONCILIATION.md`, obtain owner approval for the remediation/value-spike order, and do not automatically continue with trigram, persistence or another foundation slice before that decision.
 
 Le core deja valide ne doit pas etre refait :
 - HistoricalSnapshot V1 + Store history queries ;
@@ -98,7 +98,7 @@ Tests obligatoires :
 ## Apres V0.1
 
 CURRENT :
-M4.5 Context Identity + Shadow Foundations (STARTED / OBSERVATION-ONLY).
+M4.5 Context Identity + Shadow Foundations (STARTED / OBSERVATION-ONLY); initial Shadow design/reference/unicode61/pilot sequence complete, further implementation paused at the 2026-10-04 audit checkpoint.
 
 M4 core est ACCEPTED ; ses extensions sans preuve directe restent evidence-gated.
 
@@ -153,7 +153,7 @@ Next concrete work:
 3. DIRECT_SCAN_V0 reference semantics: **ACCEPTED REFERENCE FOUNDATION / FULL GATES PASS** on a sanitized temporary Git corpus;
 4. SQLite FTS5 capability probe: **ACCEPTED CAPABILITY FOUNDATION / FULL GATES PASS**;
 5. `SQLITE_FTS5_UNICODE61_V0`: **FUNCTIONAL BENCHMARK CANDIDATE / FULL GATES PASS**; exact DIRECT_SCAN corpus, in-memory/contentless only, `sdoc-v1-*`, full manifest verification before every query;
-6. sanitized Shadow Index pilot: **IMPLEMENTED / FULL GATES PASS**; frozen generated corpus + 8 gold queries + K={1,5,10} + 5 repetitions + 0.95 quality ratios. DIRECT_SCAN=`BASELINE_ONLY`; unicode61=`REJECTED` for this measured condition because the frozen quality floor fails. Next work is full correctness/refresh/resource coverage and/or a separately frozen candidate such as trigram, not promotion of unicode61;
+6. sanitized Shadow Index pilot: **IMPLEMENTED / FULL GATES PASS**; frozen generated corpus + 8 gold queries + K={1,5,10} + 5 repetitions + 0.95 quality ratios. DIRECT_SCAN=`BASELINE_ONLY`; unicode61=`REJECTED` for this measured condition because the frozen quality floor fails. Further correctness/refresh/resource or trigram work is now **DEFERRED PENDING OWNER AUDIT/VALUE-SPIKE DECISION**, not an automatic next slice;
 7. keep all active context injection disabled and add future M4 phase/compaction/delivery evidence only when directly observable and fixtureable.
 
 Parallel descriptive work allowed now: prepare/collect 6-10 frozen native baseline tasks using `docs/benchmarks/BASELINE-PROTOCOL-V1.md`, starting with a >=3-run variance pilot per task and no active Tokn intervention.

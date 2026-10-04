@@ -9,7 +9,7 @@ The current V0.1 design is **local-first** and observation-first.
 - original Codex evidence is never modified;
 - raw rollout/trace files are not persisted into the Tokn Store;
 - raw tool-result content is not stored durably merely to create identity;
-- durable identities/fingerprints are project-scoped and privacy-safe where the current contract requires it;
+- durable identities/fingerprints are project-scoped and pseudonymized to avoid raw project/path/content strings; this is not a cryptographic-secrecy guarantee against dictionary confirmation by an adversary who obtains the Store;
 - repository publication is checked for common secret/private-path patterns;
 - release packages are checked again before they are kept as publishable artifacts.
 
@@ -40,9 +40,11 @@ A failed privacy check must delete the generated ZIP.
 
 ## Dependency audit status
 
-RustSec `cargo audit` passed on 2026-10-03 for the current `Cargo.lock` (95 dependencies). This is a point-in-time check only; public releases still require release-time dependency/SBOM review.
+RustSec `cargo audit` passed on 2026-10-04 for the current `Cargo.lock` (96 dependencies scanned). This is a point-in-time manual check only; CI still lacks an automated dependency/supply-chain gate and public releases still require release-time dependency/SBOM review.
 
 ## Not complete yet
+
+The MCP tool surface is read-only, but the current MCP process still opens the SQLite Store through the normal `Database::open` path, which may run migrations/VACUUM. A true storage-level read-only open path is not yet implemented.
 
 Before public binary distribution, Tokn still requires a documented threat model plus retention/purge/export policy, dependency/SBOM review, signing/update integrity and a hostile parser/privacy corpus.
 These are roadmap gates, not current guarantees.

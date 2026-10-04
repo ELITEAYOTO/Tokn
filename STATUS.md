@@ -39,7 +39,7 @@ but the already-installed Visual Studio Build Tools 2022 toolchain is complete
 and is the validated build environment.
 Rustup is now installed locally; `rust-toolchain.toml` pins Rust 1.97.1 + rustfmt + Clippy so local checks match CI.
 
-Maintainability audit : CLEAN / NO MAJOR REFACTOR REQUIRED.
+Maintainability/audit checkpoint 2026-10-04 : MATERIAL DEBT CONFIRMED / NO REMEDIATION APPLIED. See `docs/audits/2026-10-04-CLAUDE-TECHNICAL-AUDIT-RECONCILIATION.md`.
 Git local : `main` aligne sur `origin/main` (GitHub).
 GitHub governance : `main` est actuellement non protegee (`protected=false`) ; le workflow PR + CI + garde SHA est applique par discipline, mais une protection/ruleset GitHub reste a configurer cote administration.
 
@@ -190,7 +190,7 @@ Points figes :
 - analyzer semantics version.
 
 Versions workspace/snapshot inconnues : rejet fail-closed.
-Experiment 001 golden : inchangÃƒÂ© et replay PASS avec toutes les versions du contrat.
+Experiment 001 golden : inchange et replay PASS avec toutes les versions du contrat.
 
 ## Store V2 foundation - termine
 
@@ -251,6 +251,8 @@ Limites explicites du contrat V1 :
 Le gate `docs/design/M4-EXIT-GATE.md` classe le coeur M4 comme **ACCEPTED**. Les signaux non directement observables restent des extensions evidence-gated et ne sont pas remplaces par des heuristiques.
 
 ## Prochaine action
+
+**Implementation pause / audit checkpoint:** the initial Shadow design/reference/unicode61/pilot sequence through PR #22 is complete. The 2026-10-04 external technical audit has been reconciled against current `main`; no remediation has been applied. Do not start a new backend/foundation or audit fix until the owner approves the remediation/value-spike order in `docs/audits/2026-10-04-CLAUDE-TECHNICAL-AUDIT-RECONCILIATION.md`.
 
 Le design + contrat de mesure du **Shadow Repository Index V0** sont ACCEPTED et `DIRECT_SCAN_V0` est **ACCEPTED REFERENCE FOUNDATION**. Le capability probe SQLite/FTS5 est **ACCEPTED CAPABILITY FOUNDATION / FULL GATES PASS**. `SQLITE_FTS5_UNICODE61_V0` reste **FUNCTIONAL BENCHMARK CANDIDATE / FULL GATES PASS**. Le premier pilote sanitise fige maintenant corpus/query/gold/K/repetitions/seuils avant execution et compare DIRECT_SCAN au candidat via `tokn-observe shadow-index-pilot`. DIRECT_SCAN est `BASELINE_ONLY`; le pilote unicode61 ne peut pas devenir eligible dans ce slice et le fixture connu fait echouer le plancher qualite a 95 %, donc le verdict mesure est **REJECTED pour cette condition unicode61**. Ce verdict ne selectionne aucun autre backend, ne rejette pas trigram et ne mesure aucune economie de tokens. Aucun backend FTS persistant, refresh incremental complet ni injection active de contexte n'existe encore.
 
@@ -364,7 +366,7 @@ M4 core exit state:
 Stability / benchmark readiness 2026-10-03:
 - local Rust 1.97.1 toolchain installed and aligned with CI;
 - local Rust resource guard defaults to 2 Cargo jobs / 2 test threads; heavy exceptional work should use TOKN_CARGO_JOBS=1 and run sequentially;
-- RustSec cargo audit PASS on 2026-10-03 for the current Cargo.lock (95 dependencies); this is a point-in-time audit, not a substitute for release-time SBOM/dependency review;
+- RustSec `cargo audit` PASS on 2026-10-04 for the current Cargo.lock (96 dependencies); this remains a point-in-time manual audit, not a CI/supply-chain gate or substitute for release-time SBOM/dependency review;
 - `scripts/dev-check.ps1` is the canonical local pre-PR gate;
 - PowerShell syntax validation is part of CI;
 - packaging is clean-worktree + tracked-files-only, with package-wide privacy scanning and provenance;
