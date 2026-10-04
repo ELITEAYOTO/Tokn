@@ -1,3 +1,14 @@
+## 2026-10-04 - M4.5 SQLite FTS5 unicode61 functional benchmark candidate
+
+- added project-scoped `sdoc-v1-*` ShadowDocumentId derivation, domain-separated from `src-v1-*`, `ixc-v1-*`, content and version evidence identities;
+- added verified DIRECT_SCAN manifest/document visitor primitives so indexed candidates reuse the exact accepted Git corpus and whole-file hash rules without duplicating filesystem semantics;
+- implemented `SQLITE_FTS5_UNICODE61_V0` as an in-memory, contentless FTS5 benchmark candidate in `tokn-shadow`; candidate metadata retains IDs/path/hash/bytes only and never source text;
+- every candidate build verifies corpus parity and every query re-verifies the complete current manifest before consulting FTS, failing closed with `REFRESH_REQUIRED` on additions/removals/hash/eligibility changes; returned hits can also be individually re-verified before any future source-text retrieval;
+- BM25 remains an ordering signal only; no semantic-confidence, context-value or token-savings claim is added;
+- targeted tests intentionally preserve an observed quality gap: DIRECT_SCAN finds both `AlphaWidget` and prose for `alpha widget`, while unicode61 finds only the tokenized prose match; exact `AlphaWidget` still matches the identifier;
+- full local developer gate passes with one Cargo job / one Rust test thread, including release/provenance, MCP smoke, Experiment 001 golden and Experiment 002 source-selection;
+- candidate is measurement-only: no persistent SQLite file, incremental refresh implementation, MCP/runtime hook, active context injection or backend-selection verdict.
+
 ## 2026-10-04 - M4.5 SQLite FTS5 capability probe accepted
 
 - added dedicated `tokn-shadow` crate for SQLite-specific derived-index capability mechanics, separate from Measurement Store and platform filesystem primitives;

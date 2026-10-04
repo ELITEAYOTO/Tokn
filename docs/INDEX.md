@@ -99,7 +99,7 @@ Un document historique ne doit pas remplacer une source de verite courante.
 - `design/M4-EXIT-GATE.md`
   Gate de sortie M4 : coeur accepte, extensions phase/compaction/delivery/rediscovery evidence-gated, et conditions d'entree M4.5 sans heuristiques.
 - `design/SHADOW-REPOSITORY-INDEX.md`
-  M4.5 Shadow Repository Index V0 : design measurement-first, file-level, DERIVED/rebuildable, separe du Store; DIRECT_SCAN est ACCEPTED REFERENCE FOUNDATION et le probe SQLite/FTS5 `tokn-shadow` est ACCEPTED CAPABILITY FOUNDATION, sans backend persistant selectionne.
+  M4.5 Shadow Repository Index V0 : design measurement-first, file-level, DERIVED/rebuildable, separe du Store; DIRECT_SCAN est ACCEPTED REFERENCE FOUNDATION, le probe SQLite/FTS5 `tokn-shadow` est ACCEPTED CAPABILITY FOUNDATION, et `SQLITE_FTS5_UNICODE61_V0` est FUNCTIONAL BENCHMARK CANDIDATE / FULL GATES PASS sans backend persistant selectionne.
 - `design/SESSION-ROLLOUT-ADAPTER.md`
 - `design/AGENT-COST-ATTRIBUTION.md`
 - `design/WORKSPACE-TRACKING.md`

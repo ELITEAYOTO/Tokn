@@ -674,9 +674,12 @@ dependencies = [
 name = "tokn-shadow"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "rusqlite",
  "serde",
  "serde_json",
+ "tokn-domain",
+ "tokn-platform",
 ]
 
 [[package]]

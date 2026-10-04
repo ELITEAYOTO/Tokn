@@ -251,6 +251,7 @@ Current prerequisite state:
 2. SourceStableId derivation reuse: **RESOLVED** in `tokn-domain::identity`, byte-compatible with existing `src-v1-*`;
 3. local shadow cache root: **RESOLVED** under `observer_shadow_index_root()` / safe per-project cache segment;
 4. direct-scan reference semantics + sanitized Git fixture: **ACCEPTED REFERENCE FOUNDATION / FULL GATES PASS**;
-5. FTS capability probing: **ACCEPTED CAPABILITY FOUNDATION / FULL GATES PASS** with runtime-observed in-memory probes and DIRECT_SCAN fallback; indexed candidate implementation/benchmark is **NEXT / NOT STARTED**.
+5. FTS capability probing: **ACCEPTED CAPABILITY FOUNDATION / FULL GATES PASS** with runtime-observed in-memory probes and DIRECT_SCAN fallback;
+6. `SQLITE_FTS5_UNICODE61_V0`: **FUNCTIONAL BENCHMARK CANDIDATE / FULL GATES PASS** using an in-memory contentless table over the exact verified DIRECT_SCAN manifest. Full benchmark execution, refresh/correctness suite, resource measurement and promotion verdict are **NEXT / NOT STARTED**; the existing fixture already records a deliberate unicode61 camelCase/sub-string recall gap that must remain visible in quality metrics.
 
 Even after an index backend becomes eligible, active runtime context injection remains a separate future gate.

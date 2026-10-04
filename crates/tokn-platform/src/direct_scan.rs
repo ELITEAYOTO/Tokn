@@ -171,6 +171,109 @@ pub fn build_direct_scan_manifest(
     })
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct DirectScanManifestVerification {
+    pub discovered_files: u64,
+    pub eligible_files: u64,
+    pub skipped_files: u64,
+    pub eligible_bytes: u64,
+}
+
+pub fn verify_direct_scan_manifest(
+    manifest: &DirectScanManifest,
+    project_scope_key: &str,
+) -> Result<DirectScanManifestVerification> {
+    if project_scope_key.is_empty() {
+        bail!("DIRECT_SCAN_V0 project scope key must not be empty");
+    }
+    let current = build_direct_scan_manifest(&manifest.root, project_scope_key, manifest.policy)?;
+    if current.discovered_files != manifest.discovered_files
+        || current.documents != manifest.documents
+        || current.skipped != manifest.skipped
+    {
+        bail!("DIRECT_SCAN_V0 manifest verification failed: REFRESH_REQUIRED");
+    }
+    Ok(DirectScanManifestVerification {
+        discovered_files: current.discovered_files,
+        eligible_files: current.eligible_files(),
+        skipped_files: current.skipped_files(),
+        eligible_bytes: current.eligible_bytes(),
+    })
+}
+
+pub fn verify_direct_scan_document(
+    manifest: &DirectScanManifest,
+    project_scope_key: &str,
+    document: &DirectScanDocument,
+) -> Result<u64> {
+    if project_scope_key.is_empty() {
+        bail!("DIRECT_SCAN_V0 project scope key must not be empty");
+    }
+    if !manifest
+        .documents
+        .iter()
+        .any(|candidate| candidate == document)
+    {
+        bail!("DIRECT_SCAN_V0 document is not part of the manifest");
+    }
+    let current = read_candidate(&manifest.root, &document.relative_path, manifest.policy)
+        .map_err(|reason| {
+            anyhow::anyhow!(
+                "DIRECT_SCAN_V0 manifest verification failed for {}: {}",
+                document.source_stable_id,
+                reason.as_str()
+            )
+        })?;
+    let current_hash = scoped_index_content_hash_bytes(project_scope_key, &current.bytes);
+    if current_hash != document.index_content_hash {
+        bail!(
+            "DIRECT_SCAN_V0 manifest verification failed for {}: REFRESH_REQUIRED",
+            document.source_stable_id
+        );
+    }
+    Ok(current.bytes.len() as u64)
+}
+
+pub fn visit_verified_direct_scan_documents<F>(
+    manifest: &DirectScanManifest,
+    project_scope_key: &str,
+    mut visitor: F,
+) -> Result<u64>
+where
+    F: FnMut(&DirectScanDocument, &str) -> Result<()>,
+{
+    if project_scope_key.is_empty() {
+        bail!("DIRECT_SCAN_V0 project scope key must not be empty");
+    }
+    let mut source_bytes_read = 0_u64;
+    for document in &manifest.documents {
+        let current = read_candidate(&manifest.root, &document.relative_path, manifest.policy)
+            .map_err(|reason| {
+                anyhow::anyhow!(
+                    "DIRECT_SCAN_V0 manifest verification failed for {}: {}",
+                    document.source_stable_id,
+                    reason.as_str()
+                )
+            })?;
+        let current_hash = scoped_index_content_hash_bytes(project_scope_key, &current.bytes);
+        if current_hash != document.index_content_hash {
+            bail!(
+                "DIRECT_SCAN_V0 manifest verification failed for {}: REFRESH_REQUIRED",
+                document.source_stable_id
+            );
+        }
+        let text = std::str::from_utf8(&current.bytes)
+            .context("DIRECT_SCAN_V0 verified document unexpectedly became non-UTF-8")?;
+        visitor(document, text)?;
+        source_bytes_read = source_bytes_read.saturating_add(current.bytes.len() as u64);
+    }
+    Ok(source_bytes_read)
+}
+
+pub fn direct_scan_query_terms(query: &str) -> Result<Vec<String>> {
+    normalized_query_terms(query)
+}
+
 pub fn query_direct_scan_manifest(
     manifest: &DirectScanManifest,
     project_scope_key: &str,
@@ -183,7 +286,7 @@ pub fn query_direct_scan_manifest(
     if limit == 0 {
         bail!("DIRECT_SCAN_V0 result limit must be at least 1");
     }
-    let terms = normalized_query_terms(query)?;
+    let terms = direct_scan_query_terms(query)?;
     let mut hits = Vec::new();
     let mut files_examined = 0_u64;
     let mut source_bytes_read = 0_u64;
