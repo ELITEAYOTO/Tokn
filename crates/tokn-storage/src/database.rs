@@ -1,8 +1,10 @@
 use std::path::{Path, PathBuf};
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use rusqlite::{Connection, params};
 use tokn_domain::{RunId, SourceId};
+
+const SQLITE_BUSY_TIMEOUT: Duration = Duration::from_secs(5);
 
 #[derive(Debug, Clone)]
 pub struct RunRecord {
@@ -36,6 +38,7 @@ impl Database {
             let _ = std::fs::create_dir_all(parent);
         }
         let conn = Connection::open(path)?;
+        configure_connection(&conn)?;
         conn.execute_batch(include_str!("../migrations/0001_initial.sql"))?;
         ensure_usage_conflicts_column(&conn)?;
         ensure_cache_write_input_tokens_column(&conn)?;
@@ -163,6 +166,12 @@ impl Database {
             invariant_conflicts: row.get(17)?,
         }))
     }
+}
+
+fn configure_connection(conn: &Connection) -> rusqlite::Result<()> {
+    conn.execute_batch("PRAGMA foreign_keys = ON;")?;
+    conn.busy_timeout(SQLITE_BUSY_TIMEOUT)?;
+    Ok(())
 }
 
 fn ensure_usage_conflicts_column(conn: &Connection) -> rusqlite::Result<()> {
@@ -324,6 +333,53 @@ mod tests {
             logical_tokens: 12,
             invariant_conflicts: 0,
         }
+    }
+
+    #[test]
+    fn database_open_enables_foreign_keys_and_busy_timeout() {
+        let path = std::env::temp_dir().join(format!(
+            "tokn-storage-connection-guards-{}.sqlite3",
+            std::process::id()
+        ));
+        let _ = fs::remove_file(&path);
+        let db = Database::open(&path).unwrap();
+
+        let foreign_keys: i64 = db
+            .connection()
+            .query_row("PRAGMA foreign_keys", [], |row| row.get(0))
+            .unwrap();
+        let busy_timeout_ms: i64 = db
+            .connection()
+            .query_row("PRAGMA busy_timeout", [], |row| row.get(0))
+            .unwrap();
+
+        assert_eq!(foreign_keys, 1);
+        assert_eq!(busy_timeout_ms, 5_000);
+        drop(db);
+        let _ = fs::remove_file(path);
+    }
+
+    #[test]
+    fn database_open_enforces_source_run_foreign_key() {
+        let path = std::env::temp_dir().join(format!(
+            "tokn-storage-foreign-key-{}.sqlite3",
+            std::process::id()
+        ));
+        let _ = fs::remove_file(&path);
+        let db = Database::open(&path).unwrap();
+
+        let error = db
+            .connection()
+            .execute(
+                "INSERT INTO sources(source_id, run_id, canonical_path, snapshot_bytes, source_kind)
+                 VALUES ('orphan-source','missing-run','private:orphan-source',1,'fixture')",
+                [],
+            )
+            .expect_err("foreign key must reject an orphan source row");
+
+        assert!(matches!(error, rusqlite::Error::SqliteFailure(_, _)));
+        drop(db);
+        let _ = fs::remove_file(path);
     }
 
     #[test]
