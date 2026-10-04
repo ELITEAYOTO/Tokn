@@ -153,7 +153,7 @@ Next concrete work:
 3. DIRECT_SCAN_V0 reference semantics: **ACCEPTED REFERENCE FOUNDATION / FULL GATES PASS** on a sanitized temporary Git corpus;
 4. SQLite FTS5 capability probe: **ACCEPTED CAPABILITY FOUNDATION / FULL GATES PASS**;
 5. `SQLITE_FTS5_UNICODE61_V0`: **FUNCTIONAL BENCHMARK CANDIDATE / FULL GATES PASS**; exact DIRECT_SCAN corpus, in-memory/contentless only, `sdoc-v1-*`, full manifest verification before every query;
-6. sanitized Shadow Index pilot: **IMPLEMENTED / TARGETED TESTS PASS**; frozen generated corpus + 8 gold queries + K={1,5,10} + 5 repetitions + 0.95 quality ratios. DIRECT_SCAN=`BASELINE_ONLY`; unicode61=`REJECTED` for this measured condition because the frozen quality floor fails. Next work is full correctness/refresh/resource coverage and/or a separately frozen candidate such as trigram, not promotion of unicode61;
+6. sanitized Shadow Index pilot: **IMPLEMENTED / FULL GATES PASS**; frozen generated corpus + 8 gold queries + K={1,5,10} + 5 repetitions + 0.95 quality ratios. DIRECT_SCAN=`BASELINE_ONLY`; unicode61=`REJECTED` for this measured condition because the frozen quality floor fails. Next work is full correctness/refresh/resource coverage and/or a separately frozen candidate such as trigram, not promotion of unicode61;
 7. keep all active context injection disabled and add future M4 phase/compaction/delivery evidence only when directly observable and fixtureable.
 
 Parallel descriptive work allowed now: prepare/collect 6-10 frozen native baseline tasks using `docs/benchmarks/BASELINE-PROTOCOL-V1.md`, starting with a >=3-run variance pilot per task and no active Tokn intervention.

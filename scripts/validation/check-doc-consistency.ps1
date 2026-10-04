@@ -144,11 +144,11 @@ Assert-Contains "docs/benchmarks/SHADOW-INDEX-PROTOCOL-V0.md" '`SQLITE_FTS5_UNIC
 Assert-Contains "docs/plans/IMPLEMENTATION-PATH.md" '`SQLITE_FTS5_UNICODE61_V0`: **FUNCTIONAL BENCHMARK CANDIDATE / FULL GATES PASS**'
 Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" '`SQLITE_FTS5_UNICODE61_V0`: **FUNCTIONAL BENCHMARK CANDIDATE / FULL GATES PASS**'
 Assert-Contains "ROADMAP.md" '`SQLITE_FTS5_UNICODE61_V0`: FUNCTIONAL BENCHMARK CANDIDATE / FULL GATES PASS'
-Assert-Contains "ROADMAP.md" "sanitized Shadow Index pilot: IMPLEMENTED / TARGETED TESTS PASS"
+Assert-Contains "ROADMAP.md" "sanitized Shadow Index pilot: IMPLEMENTED / FULL GATES PASS"
 Assert-Contains "STATUS.md" "unicode61**. Ce verdict ne selectionne aucun autre backend"
-Assert-Contains "docs/benchmarks/SHADOW-INDEX-PROTOCOL-V0.md" "sanitized pilot harness: **IMPLEMENTED / TARGETED TESTS PASS**"
-Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "sanitized Shadow Index pilot: **IMPLEMENTED / TARGETED TESTS PASS**"
-Assert-Contains "docs/plans/IMPLEMENTATION-PATH.md" "sanitized pilot harness: **IMPLEMENTED / TARGETED TESTS PASS**"
+Assert-Contains "docs/benchmarks/SHADOW-INDEX-PROTOCOL-V0.md" "sanitized pilot harness: **IMPLEMENTED / FULL GATES PASS**"
+Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "sanitized Shadow Index pilot: **IMPLEMENTED / FULL GATES PASS**"
+Assert-Contains "docs/plans/IMPLEMENTATION-PATH.md" "sanitized pilot harness: **IMPLEMENTED / FULL GATES PASS**"
 Assert-Contains "docs/design/SHADOW-REPOSITORY-INDEX.md" 'the measured condition is `REJECTED`'
 Assert-Contains "ROADMAP.md" '`tokn_status` + `tokn_recent_runs` + `tokn_context_ledger`'
 Assert-Contains "docs/plans/IMPLEMENTATION-PATH.md" "Task Input Identity V0 ACCEPTED OBSERVATION FOUNDATION"

@@ -5,7 +5,7 @@
 - added `tokn-observe shadow-index-pilot`, writing separate local `direct-scan.json` and `unicode61.json` records without publishing fixture paths or source text;
 - DIRECT_SCAN is forced to `BASELINE_ONLY`; the unicode61 pilot cannot emit `ELIGIBLE_FOR_IMPLEMENTATION` in this slice: it is `REJECTED` when the predeclared quality floor fails, otherwise `INCONCLUSIVE` while resource/refresh/full-correctness evidence remains incomplete;
 - the frozen sanitized pilot deterministically exposes the known camelCase/substring gap (`phaWid` / `alpha widget`), so unicode61 fails the 95% quality floor and is REJECTED for this measured condition; this does not reject trigram or other future candidates and does not claim token savings;
-- targeted `tokn-shadow` tests, CLI pilot test and strict Clippy pass; full developer/CI gates remain required before acceptance.
+- full local workspace/release/golden gates pass and exact-SHA GitHub CI passes publication privacy, PowerShell syntax, benchmark manifest, format/Clippy/tests, release/provenance, package privacy, MCP smoke, Experiment 001, Experiment 002 and documentation consistency.
 
 ## 2026-10-04 - M4.5 SQLite FTS5 unicode61 functional benchmark candidate
 
