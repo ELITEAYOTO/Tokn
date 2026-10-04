@@ -207,6 +207,19 @@ pub enum Command {
         #[arg(long)]
         output_json: Option<PathBuf>,
     },
+    ShadowIndexPilot {
+        #[arg(
+            long,
+            default_value = "benchmarks/shadow-index-sanitized-pilot-v1.json"
+        )]
+        config: PathBuf,
+        #[arg(long, default_value = "target/shadow-index-pilot")]
+        output_dir: PathBuf,
+        #[arg(long)]
+        observed_at: String,
+        #[arg(long)]
+        tokn_commit: String,
+    },
     StoreEvidence {
         evidence_dir: PathBuf,
         #[arg(long)]

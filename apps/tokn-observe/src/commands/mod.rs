@@ -21,6 +21,7 @@ mod resolve_workspace;
 mod runner;
 mod sessions;
 mod shadow_index_capabilities;
+mod shadow_index_pilot;
 mod simulate_caps;
 mod source_freshness_evidence;
 mod source_identity_history;
@@ -221,6 +222,12 @@ pub fn run(cli: Cli) -> anyhow::Result<()> {
         Command::ShadowIndexCapabilities { output_json } => {
             shadow_index_capabilities::run(output_json.as_deref())
         }
+        Command::ShadowIndexPilot {
+            config,
+            output_dir,
+            observed_at,
+            tokn_commit,
+        } => shadow_index_pilot::run(&config, &output_dir, &observed_at, &tokn_commit),
         Command::StoreEvidence {
             evidence_dir,
             project_key,

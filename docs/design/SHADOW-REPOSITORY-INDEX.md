@@ -181,7 +181,7 @@ Functional benchmark candidate now implemented in `tokn-shadow::unicode61_candid
 - returned hits expose only IDs/path/hash/bytes + BM25 ordering score; source text is not returned and a hit may be re-verified against the current file before any future source retrieval;
 - query terms reuse the bounded DIRECT_SCAN query parser, but FTS tokenization is intentionally not forced to emulate substring semantics. The fixture records a real quality difference: `alpha widget` matches both prose and `AlphaWidget` under DIRECT_SCAN, but unicode61 matches only the prose document because `AlphaWidget` is one token; exact `AlphaWidget` still matches.
 
-This is a **functional benchmark candidate, not an eligible backend**. Incremental refresh, persistent index format, resource measurement, frozen gold-query execution and the full correctness suite remain future benchmark work.
+This is a **functional benchmark candidate, not an eligible backend**. A sanitized pilot harness now freezes the generated corpus, eight gold queries, K={1,5,10}, five repetitions and 0.95 quality ratios before execution, then emits separate V1 measurements for DIRECT_SCAN and unicode61. DIRECT_SCAN is forced to `BASELINE_ONLY`; the frozen fixture makes unicode61 fail the quality floor, so the measured condition is `REJECTED`. This is not a product-wide backend rejection: trigram and other candidates require separate frozen runs. Incremental refresh, persistent index format, complete resource/RSS measurement and the full correctness suite remain future benchmark work.
 
 ### SQLITE_FTS5_TRIGRAM_V0
 

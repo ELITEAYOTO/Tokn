@@ -327,7 +327,8 @@ Implementation prerequisites/state:
 3. local shadow cache root: **DONE** via `observer_shadow_index_root()` + safe per-project segment, with no backend filename selected;
 4. bounded DIRECT_SCAN_V0 corpus/query semantics + sanitized Git fixture: **ACCEPTED REFERENCE FOUNDATION / FULL GATES PASS**;
 5. FTS5 capability probe: **ACCEPTED CAPABILITY FOUNDATION / FULL GATES PASS** via `tokn-shadow` + `tokn-observe shadow-index-capabilities`;
-6. `SQLITE_FTS5_UNICODE61_V0`: **FUNCTIONAL BENCHMARK CANDIDATE / FULL GATES PASS**; in-memory contentless build on the exact verified DIRECT_SCAN corpus, dedicated `sdoc-v1-*`, complete manifest verification before every query and explicit unicode61 camelCase/sub-string quality gap. Full frozen benchmark/correctness/resource execution is NEXT. DIRECT_SCAN remains the fail-closed reference/fallback and no persistent backend is selected.
+6. `SQLITE_FTS5_UNICODE61_V0`: **FUNCTIONAL BENCHMARK CANDIDATE / FULL GATES PASS**; in-memory contentless build on the exact verified DIRECT_SCAN corpus, dedicated `sdoc-v1-*`, complete manifest verification before every query and explicit unicode61 camelCase/sub-string quality gap;
+7. sanitized pilot harness: **IMPLEMENTED / TARGETED TESTS PASS**. `benchmarks/shadow-index-sanitized-pilot-v1.json` freezes corpus/query/gold/K/repetitions/quality ratios before execution; `tokn-observe shadow-index-pilot` emits separate V1 baseline/candidate measurements. DIRECT_SCAN is `BASELINE_ONLY`; unicode61 is `REJECTED` for the frozen pilot because the 0.95 quality floor fails. Resource/refresh/full correctness remain incomplete, DIRECT_SCAN remains the fail-closed reference/fallback and no persistent backend is selected.
 
 Exit toward active shadow retrieval requires a backend to meet every predeclared quality/correctness/resource gate. Active context injection remains a later separate gate.
 

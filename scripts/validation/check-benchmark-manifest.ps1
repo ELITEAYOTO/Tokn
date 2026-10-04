@@ -6,8 +6,9 @@ $SchemaPath = Join-Path $Root "benchmarks\manifest.schema.json"
 $ExamplePath = Join-Path $Root "benchmarks\example-manifest.json"
 $ShadowSchemaPath = Join-Path $Root "benchmarks\shadow-index-measurement.schema.json"
 $ShadowExamplePath = Join-Path $Root "benchmarks\example-shadow-index-measurement.json"
+$ShadowPilotPath = Join-Path $Root "benchmarks\shadow-index-sanitized-pilot-v1.json"
 
-foreach ($path in @($SchemaPath, $ExamplePath, $ShadowSchemaPath, $ShadowExamplePath)) {
+foreach ($path in @($SchemaPath, $ExamplePath, $ShadowSchemaPath, $ShadowExamplePath, $ShadowPilotPath)) {
     if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
         throw "benchmark manifest file missing: $path"
     }
@@ -18,6 +19,8 @@ $example = Get-Content -Raw -LiteralPath $ExamplePath | ConvertFrom-Json
 $shadowSchema = Get-Content -Raw -LiteralPath $ShadowSchemaPath | ConvertFrom-Json
 $shadowRaw = Get-Content -Raw -LiteralPath $ShadowExamplePath
 $shadowExample = $shadowRaw | ConvertFrom-Json
+$shadowPilotRaw = Get-Content -Raw -LiteralPath $ShadowPilotPath
+$shadowPilot = $shadowPilotRaw | ConvertFrom-Json
 
 if ($schema.title -ne "Tokn BenchmarkManifest V1") {
     throw "unexpected benchmark schema title"
@@ -167,6 +170,34 @@ if ($shadowRaw -match '(?i)[A-Z]:\\') {
 }
 if (-not [bool]$shadowExample.decision_gate.quality_floor_predeclared -or -not [bool]$shadowExample.decision_gate.resource_budgets_predeclared) {
     throw "shadow index example decision gates must be predeclared"
+}
+
+
+if ([int]$shadowPilot.schema_version -ne 1 -or [string]$shadowPilot.pilot_id -ne "shadow-index-sanitized-pilot-v1") {
+    throw "unexpected shadow index sanitized pilot identity"
+}
+if (@($shadowPilot.queries).Count -ne 8 -or [int]$shadowPilot.timing_repetitions_per_query -ne 5) {
+    throw "shadow index sanitized pilot query/repetition freeze changed"
+}
+if ((@($shadowPilot.k_values) -join ',') -ne '1,5,10') {
+    throw "shadow index sanitized pilot K values changed"
+}
+if ([double]$shadowPilot.thresholds.min_recall_at_5_ratio_to_direct -ne 0.95 -or
+    [double]$shadowPilot.thresholds.min_mrr_ratio_to_direct -ne 0.95 -or
+    -not [bool]$shadowPilot.thresholds.quality_floor_predeclared -or
+    -not [bool]$shadowPilot.thresholds.resource_budgets_predeclared) {
+    throw "shadow index sanitized pilot thresholds must remain predeclared at 0.95"
+}
+$pilotPaths = @($shadowPilot.corpus.tracked_files + $shadowPilot.corpus.untracked_files + $shadowPilot.corpus.ignored_files | ForEach-Object { [string]$_.path })
+foreach ($query in @($shadowPilot.queries)) {
+    foreach ($goldPath in @($query.gold_paths)) {
+        if ($pilotPaths -notcontains [string]$goldPath) {
+            throw "shadow index sanitized pilot gold path is not part of the frozen fixture: $goldPath"
+        }
+    }
+}
+if ($shadowPilotRaw -match '(?i)([A-Z]:\\|/home/|/Users/)') {
+    throw "shadow index sanitized pilot must not contain absolute user paths"
 }
 
 Write-Host "Benchmark manifest validation: PASS"
