@@ -28,7 +28,7 @@ Ne pas refaire l'enquete P6 ni la recherche plugin/telemetry R1-R8 avant qu'un b
 
 ## Premiere action
 
-**Audit checkpoint before any new implementation.** The first M4.5 Shadow sequence through the sanitized pilot (PR #17 -> #22) is complete. Read `../audits/2026-10-04-CLAUDE-TECHNICAL-AUDIT-RECONCILIATION.md`, obtain owner approval for the remediation/value-spike order, and do not automatically continue with trigram, persistence or another foundation slice before that decision.
+**Wave A integrity remediation is now authorized and started.** The first M4.5 Shadow sequence through the sanitized pilot (PR #17 -> #22) remains complete and paused. R-01 JSONL early-EOF/shrink handling is the first bounded remediation; continue with the remaining approved audit order only after each isolated change passes local gates and exact-SHA CI. Do not automatically resume trigram, persistence or another Shadow foundation slice before the Value Spike decision.
 
 Le core deja valide ne doit pas etre refait :
 - HistoricalSnapshot V1 + Store history queries ;

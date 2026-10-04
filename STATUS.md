@@ -39,7 +39,7 @@ but the already-installed Visual Studio Build Tools 2022 toolchain is complete
 and is the validated build environment.
 Rustup is now installed locally; `rust-toolchain.toml` pins Rust 1.97.1 + rustfmt + Clippy so local checks match CI.
 
-Maintainability/audit checkpoint 2026-10-04 : MATERIAL DEBT CONFIRMED / NO REMEDIATION APPLIED. See `docs/audits/2026-10-04-CLAUDE-TECHNICAL-AUDIT-RECONCILIATION.md`.
+Maintainability/audit checkpoint 2026-10-04 : MATERIAL DEBT CONFIRMED. Wave A remediation has started: R-01 JSONL early-EOF/shrink infinite-loop risk is fixed with deterministic regression coverage; remaining audit findings stay pending. See `docs/audits/2026-10-04-CLAUDE-TECHNICAL-AUDIT-RECONCILIATION.md`.
 Git local : `main` aligne sur `origin/main` (GitHub).
 GitHub governance : `main` est actuellement non protegee (`protected=false`) ; le workflow PR + CI + garde SHA est applique par discipline, mais une protection/ruleset GitHub reste a configurer cote administration.
 
