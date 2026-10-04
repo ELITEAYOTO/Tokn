@@ -1,3 +1,12 @@
+## 2026-10-04 - M4.5 sanitized Shadow Index pilot benchmark
+
+- added `benchmarks/shadow-index-sanitized-pilot-v1.json`, freezing a generated Git corpus, eight gold queries, K={1,5,10}, five timing repetitions and predeclared 0.95 quality ratios before execution;
+- added `tokn-shadow::benchmark` to execute the same frozen corpus/query/gold set through DIRECT_SCAN_V0 and `SQLITE_FTS5_UNICODE61_V0`, emit `Tokn ShadowIndexMeasurement V1` records, and compute Recall@K/MRR/no-match/latency summaries;
+- added `tokn-observe shadow-index-pilot`, writing separate local `direct-scan.json` and `unicode61.json` records without publishing fixture paths or source text;
+- DIRECT_SCAN is forced to `BASELINE_ONLY`; the unicode61 pilot cannot emit `ELIGIBLE_FOR_IMPLEMENTATION` in this slice: it is `REJECTED` when the predeclared quality floor fails, otherwise `INCONCLUSIVE` while resource/refresh/full-correctness evidence remains incomplete;
+- the frozen sanitized pilot deterministically exposes the known camelCase/substring gap (`phaWid` / `alpha widget`), so unicode61 fails the 95% quality floor and is REJECTED for this measured condition; this does not reject trigram or other future candidates and does not claim token savings;
+- full local workspace/release/golden gates pass and exact-SHA GitHub CI passes publication privacy, PowerShell syntax, benchmark manifest, format/Clippy/tests, release/provenance, package privacy, MCP smoke, Experiment 001, Experiment 002 and documentation consistency.
+
 ## 2026-10-04 - M4.5 SQLite FTS5 unicode61 functional benchmark candidate
 
 - added project-scoped `sdoc-v1-*` ShadowDocumentId derivation, domain-separated from `src-v1-*`, `ixc-v1-*`, content and version evidence identities;

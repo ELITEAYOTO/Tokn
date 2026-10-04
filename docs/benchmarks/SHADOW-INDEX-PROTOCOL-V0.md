@@ -252,6 +252,7 @@ Current prerequisite state:
 3. local shadow cache root: **RESOLVED** under `observer_shadow_index_root()` / safe per-project cache segment;
 4. direct-scan reference semantics + sanitized Git fixture: **ACCEPTED REFERENCE FOUNDATION / FULL GATES PASS**;
 5. FTS capability probing: **ACCEPTED CAPABILITY FOUNDATION / FULL GATES PASS** with runtime-observed in-memory probes and DIRECT_SCAN fallback;
-6. `SQLITE_FTS5_UNICODE61_V0`: **FUNCTIONAL BENCHMARK CANDIDATE / FULL GATES PASS** using an in-memory contentless table over the exact verified DIRECT_SCAN manifest. Full benchmark execution, refresh/correctness suite, resource measurement and promotion verdict are **NEXT / NOT STARTED**; the existing fixture already records a deliberate unicode61 camelCase/sub-string recall gap that must remain visible in quality metrics.
+6. `SQLITE_FTS5_UNICODE61_V0`: **FUNCTIONAL BENCHMARK CANDIDATE / FULL GATES PASS** using an in-memory contentless table over the exact verified DIRECT_SCAN manifest;
+7. sanitized pilot harness: **IMPLEMENTED / FULL GATES PASS**. `benchmarks/shadow-index-sanitized-pilot-v1.json` freezes a generated Git corpus, eight gold queries, K={1,5,10}, five timing repetitions and 0.95 quality ratios before execution. `tokn-observe shadow-index-pilot` emits separate `Tokn ShadowIndexMeasurement V1` records. DIRECT_SCAN is `BASELINE_ONLY`; unicode61 fails the frozen quality floor and is `REJECTED` for this condition. Full mutation/refresh correctness, RSS/resource evidence and any other backend candidate remain **NEXT**.
 
 Even after an index backend becomes eligible, active runtime context injection remains a separate future gate.

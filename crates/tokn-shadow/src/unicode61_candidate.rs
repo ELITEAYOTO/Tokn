@@ -37,6 +37,7 @@ pub struct SqliteFts5Unicode61Hit {
 pub struct SqliteFts5Unicode61QueryReport {
     pub backend_id: String,
     pub tokenizer_id: String,
+    pub source_bytes_read: u64,
     pub total_matching_files: u64,
     pub hits: Vec<SqliteFts5Unicode61Hit>,
 }
@@ -156,7 +157,7 @@ impl SqliteFts5Unicode61Candidate {
         query: &str,
         limit: usize,
     ) -> Result<SqliteFts5Unicode61QueryReport> {
-        verify_direct_scan_manifest(&self.manifest, project_scope_key)?;
+        let verification = verify_direct_scan_manifest(&self.manifest, project_scope_key)?;
         if limit == 0 {
             bail!("SQLITE_FTS5_UNICODE61_V0 result limit must be at least 1");
         }
@@ -213,6 +214,7 @@ impl SqliteFts5Unicode61Candidate {
         Ok(SqliteFts5Unicode61QueryReport {
             backend_id: SQLITE_FTS5_UNICODE61_BACKEND_ID.to_owned(),
             tokenizer_id: SQLITE_FTS5_UNICODE61_TOKENIZER_ID.to_owned(),
+            source_bytes_read: verification.eligible_bytes,
             total_matching_files: u64::try_from(total_matching_files)
                 .context("SQLITE_FTS5_UNICODE61_V0 negative match count")?,
             hits,

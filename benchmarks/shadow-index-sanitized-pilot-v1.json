@@ -1,0 +1,115 @@
+{
+  "schema_version": 1,
+  "pilot_id": "shadow-index-sanitized-pilot-v1",
+  "corpus": {
+    "corpus_id": "shadow-index-sanitized-corpus-v1",
+    "repository_ref": "generated-sanitized-fixture-v1",
+    "policy_id": "shadow-index-sanitized-corpus-policy-v1",
+    "max_file_bytes": 4096,
+    "max_files": 64,
+    "tracked_files": [
+      {
+        "path": ".gitignore",
+        "content": "ignored.txt\n"
+      },
+      {
+        "path": "src/alpha.rs",
+        "content": "pub fn AlphaWidget() -> &'static str { \"runtime orientation\" }\n"
+      },
+      {
+        "path": "src/beta.rs",
+        "content": "pub fn beta_worker() -> usize { 42 }\n"
+      },
+      {
+        "path": "src/cache.rs",
+        "content": "pub fn cache_refresh_budget() -> usize { 8 }\n"
+      },
+      {
+        "path": "docs/guide.md",
+        "content": "Alpha widget guide for repository operators.\n"
+      },
+      {
+        "path": "docs/cache.md",
+        "content": "Cache refresh budget and index rebuild notes.\n"
+      },
+      {
+        "path": "config/runtime.toml",
+        "content": "mode = \"shadow\"\n"
+      }
+    ],
+    "untracked_files": [
+      {
+        "path": "notes/untracked.md",
+        "content": "pub fn untracked_orientation() {}\n"
+      }
+    ],
+    "ignored_files": [
+      {
+        "path": "ignored.txt",
+        "content": "alpha widget ignored fixture material\n"
+      }
+    ]
+  },
+  "query_set_id": "shadow-index-sanitized-queries-v1",
+  "gold_set_id": "shadow-index-sanitized-gold-v1",
+  "correctness_suite_id": "shadow-index-correctness-v1",
+  "k_values": [1, 5, 10],
+  "timing_repetitions_per_query": 5,
+  "queries": [
+    {
+      "query_id": "q-exact-identifier-alpha",
+      "query_kind": "IDENTIFIER",
+      "text": "AlphaWidget",
+      "gold_paths": ["src/alpha.rs"]
+    },
+    {
+      "query_id": "q-snake-identifier-beta",
+      "query_kind": "IDENTIFIER",
+      "text": "beta_worker",
+      "gold_paths": ["src/beta.rs"]
+    },
+    {
+      "query_id": "q-path-docs-guide",
+      "query_kind": "PATH_OR_FILENAME",
+      "text": "docs guide",
+      "gold_paths": ["docs/guide.md"]
+    },
+    {
+      "query_id": "q-concept-cache-refresh",
+      "query_kind": "CONCEPT",
+      "text": "cache refresh",
+      "gold_paths": ["src/cache.rs", "docs/cache.md"]
+    },
+    {
+      "query_id": "q-substring-camel-fragment",
+      "query_kind": "SUBSTRING",
+      "text": "phaWid",
+      "gold_paths": ["src/alpha.rs"]
+    },
+    {
+      "query_id": "q-concept-alpha-widget",
+      "query_kind": "CONCEPT",
+      "text": "alpha widget",
+      "gold_paths": ["src/alpha.rs", "docs/guide.md"]
+    },
+    {
+      "query_id": "q-untracked-identifier",
+      "query_kind": "IDENTIFIER",
+      "text": "untracked_orientation",
+      "gold_paths": ["notes/untracked.md"]
+    },
+    {
+      "query_id": "q-no-match",
+      "query_kind": "NO_MATCH",
+      "text": "zzzxqvnever",
+      "gold_paths": []
+    }
+  ],
+  "thresholds": {
+    "thresholds_ref": "shadow-index-sanitized-thresholds-v1",
+    "quality_floor_predeclared": true,
+    "resource_budgets_predeclared": true,
+    "min_recall_at_5_ratio_to_direct": 0.95,
+    "min_mrr_ratio_to_direct": 0.95
+  }
+}
