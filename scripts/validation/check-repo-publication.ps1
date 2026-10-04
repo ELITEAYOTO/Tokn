@@ -31,6 +31,7 @@ try {
             }
         }
     }
+
     $secretPatterns = [ordered]@{
         github_token = '(?:ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}'
         openai_key = '\bsk-[A-Za-z0-9_-]{20,}\b'
@@ -39,20 +40,27 @@ try {
         jwt = '\beyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\b'
         bearer = '(?i)authorization\s*[:=]\s*bearer\s+[A-Za-z0-9._~+/=-]{16,}'
         secret_assignment = '(?i)\b(?:password|passwd|api[_-]?key|access[_-]?token|client[_-]?secret)\s*[:=]\s*["''][^"'']{8,}["'']'
-        user_home = '(?i)C:\\Users\\[^\\\r\n]+\\'
+        windows_user_home = '(?i)\b[A-Z]:[\\/]Users[\\/][\p{L}\p{N}._-]{1,64}[\\/]'
+        macos_user_home = '(?i)(?<![A-Za-z0-9_])/Users/[\p{L}\p{N}._-]{1,64}/'
+        unix_user_home = '(?i)(?<![A-Za-z0-9_])/home/[\p{L}\p{N}._-]{1,64}/'
     }
 
     $contentViolations = New-Object System.Collections.Generic.List[string]
     foreach ($file in $tracked) {
-        if (-not (Test-Path -LiteralPath $file -PathType Leaf)) { continue }
+        if (-not (Test-Path -LiteralPath $file -PathType Leaf)) {
+            throw "Tracked file is missing or is not a regular file: $file"
+        }
+
         try {
-            $bytes = [System.IO.File]::ReadAllBytes((Resolve-Path -LiteralPath $file))
-            if ($bytes -contains 0) { continue }
-            $text = [System.Text.Encoding]::UTF8.GetString($bytes)
+            $resolved = (Resolve-Path -LiteralPath $file -ErrorAction Stop).Path
+            $bytes = [System.IO.File]::ReadAllBytes($resolved)
         }
         catch {
-            continue
+            throw "Publication scan could not read tracked file '$file': $($_.Exception.Message)"
         }
+
+        if ($bytes -contains 0) { continue }
+        $text = [System.Text.Encoding]::UTF8.GetString($bytes)
 
         foreach ($rule in $secretPatterns.GetEnumerator()) {
             if ([regex]::IsMatch($text, [string]$rule.Value)) {
@@ -60,6 +68,7 @@ try {
             }
         }
     }
+
     if ($pathViolations.Count -gt 0 -or $contentViolations.Count -gt 0) {
         Write-Host 'Repository publication privacy check: FAIL' -ForegroundColor Red
         foreach ($item in ($pathViolations | Sort-Object -Unique)) {

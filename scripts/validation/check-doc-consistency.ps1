@@ -29,6 +29,15 @@ function Assert-NotContains {
     }
 }
 
+function Assert-FileMissing {
+    param([string]$RelativePath)
+    $path = Join-Path $Repo $RelativePath
+    if (Test-Path -LiteralPath $path) {
+        throw "obsolete file must be absent: $RelativePath"
+    }
+    Write-Host "[PASS] obsolete file absent: $RelativePath"
+}
+
 $Cargo = Read-RepoFile "Cargo.toml"
 if ($Cargo -notmatch '(?m)^version = "0\.1\.0"\r?$') {
     throw "Cargo workspace version is not 0.1.0"
@@ -151,13 +160,20 @@ Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "sanitized Shadow Index p
 Assert-Contains "docs/plans/IMPLEMENTATION-PATH.md" "sanitized pilot harness: **IMPLEMENTED / FULL GATES PASS**"
 Assert-Contains "docs/design/SHADOW-REPOSITORY-INDEX.md" 'the measured condition is `REJECTED`'
 Assert-Contains "docs/audits/2026-10-04-CLAUDE-TECHNICAL-AUDIT-RECONCILIATION.md" "NO REMEDIATION APPLIED"
-Assert-Contains "STATUS.md" "Wave A remediation is in progress: R-01 JSONL early-EOF/shrink infinite-loop risk is fixed and merged"
-Assert-Contains "STATUS.md" "D-01 SQLite"
+Assert-Contains "STATUS.md" "Wave A remediation is in progress"
+Assert-Contains "STATUS.md" "R-01 JSONL early-EOF/shrink infinite-loop risk"
+Assert-Contains "STATUS.md" "D-01 SQLite connection guards"
 Assert-Contains "STATUS.md" "CI supply-chain hardening"
+Assert-Contains "STATUS.md" "Publication/privacy hardening is the current remediation slice"
 Assert-Contains ".github/workflows/ci.yml" "actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803"
+Assert-Contains ".github/workflows/ci.yml" "fetch-depth: 0"
 Assert-Contains ".github/workflows/ci.yml" "persist-credentials: false"
 Assert-Contains ".github/workflows/ci.yml" "cargo-audit@0.22.2,cargo-deny@0.20.2"
 Assert-Contains ".github/workflows/ci.yml" "cargo deny check advisories licenses bans sources"
+Assert-Contains ".github/workflows/ci.yml" "gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e"
+Assert-Contains ".github/workflows/ci.yml" "GITLEAKS_VERSION: 8.30.1"
+Assert-Contains ".github/workflows/ci.yml" "GITLEAKS_ENABLE_COMMENTS: false"
+Assert-Contains ".github/workflows/ci.yml" "GITLEAKS_ENABLE_UPLOAD_ARTIFACT: false"
 Assert-Contains ".github/dependabot.yml" "package-ecosystem: github-actions"
 Assert-Contains "deny.toml" 'unknown-registry = "deny"'
 Assert-Contains "deny.toml" 'wildcards = "deny"'
@@ -173,6 +189,11 @@ Assert-Contains "crates/tokn-analysis/Cargo.toml" 'publish.workspace = true'
 Assert-Contains "crates/tokn-storage/Cargo.toml" 'publish.workspace = true'
 Assert-Contains "crates/tokn-shadow/Cargo.toml" 'publish.workspace = true'
 Assert-Contains "crates/tokn-report/Cargo.toml" 'publish.workspace = true'
+Assert-Contains "scripts/validation/check-repo-publication.ps1" "Tracked file is missing or is not a regular file"
+Assert-Contains "scripts/validation/check-repo-publication.ps1" "windows_user_home"
+Assert-Contains "scripts/validation/check-repo-publication.ps1" "macos_user_home"
+Assert-Contains "scripts/validation/check-repo-publication.ps1" "unix_user_home"
+Assert-FileMissing "scripts/rename_tokn.py"
 Assert-Contains "SECURITY.md" "this is not a cryptographic-secrecy guarantee"
 Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "Wave A integrity remediation is now in progress."
 Assert-Contains "docs/INDEX.md" "2026-10-04-CLAUDE-TECHNICAL-AUDIT-RECONCILIATION.md"

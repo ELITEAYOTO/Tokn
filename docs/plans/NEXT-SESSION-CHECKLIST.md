@@ -28,7 +28,7 @@ Ne pas refaire l'enquete P6 ni la recherche plugin/telemetry R1-R8 avant qu'un b
 
 ## Premiere action
 
-**Wave A integrity remediation is now in progress.** The first M4.5 Shadow sequence through the sanitized pilot (PR #17 -> #22) remains complete and paused. R-01 JSONL early-EOF/shrink handling and D-01 SQLite connection guards (`foreign_keys=ON` + 5 s `busy_timeout`) are fixed and merged. CI supply-chain hardening (immutable Action SHAs, cargo-audit, cargo-deny policy and Dependabot) is the current bounded remediation slice. Continue with the remaining approved audit order only after each isolated change passes local gates and exact-SHA CI. Do not automatically resume trigram, persistence or another Shadow foundation slice before the Value Spike decision.
+**Wave A integrity remediation is now in progress.** The first M4.5 Shadow sequence through the sanitized pilot (PR #17 -> #22) remains complete and paused. R-01 JSONL early-EOF/shrink handling, D-01 SQLite connection guards (`foreign_keys=ON` + 5 s `busy_timeout`) and CI supply-chain hardening are fixed and merged. Publication/privacy hardening is the current bounded remediation slice: fail-closed tracked-file scanning, multi-OS user-home detection, full-history Gitleaks CI and removal of the obsolete local rename script. Continue with the remaining approved audit order only after each isolated change passes local gates and exact-SHA CI. Do not automatically resume trigram, persistence or another Shadow foundation slice before the Value Spike decision.
 
 Le core deja valide ne doit pas etre refait :
 - HistoricalSnapshot V1 + Store history queries ;
