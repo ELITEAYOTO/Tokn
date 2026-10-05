@@ -1,6 +1,9 @@
 use std::fs::File;
+use std::io::Read;
 use std::path::{Path, PathBuf};
-use std::process::Command as ProcessCommand;
+use std::process::{Child, Command as ProcessCommand, ExitStatus, Stdio};
+use std::thread;
+use std::time::{Duration, Instant};
 
 use tokn_analysis::{
     ProjectSnapshot, WorkspaceInventory, WorkspaceResolutionStatus, build_policy_evidence_report,
@@ -26,6 +29,30 @@ use tokn_domain::{
 use super::common::{
     map_policy_observation_status, resolve_session_root_from_source, resolve_source,
 };
+
+const QUALITY_GATE_TIMEOUT: Duration = Duration::from_secs(120);
+const QUALITY_GATE_OUTPUT_LIMIT_BYTES: usize = 64 * 1024;
+const QUALITY_GATE_POLL_INTERVAL: Duration = Duration::from_millis(25);
+const QUALITY_GATE_ENV_ALLOWLIST: &[&str] = &[
+    "APPDATA",
+    "CARGO_HOME",
+    "COMSPEC",
+    "HOME",
+    "LOCALAPPDATA",
+    "PATH",
+    "PATHEXT",
+    "PROGRAMDATA",
+    "PROGRAMFILES",
+    "PROGRAMFILES(X86)",
+    "RUSTUP_HOME",
+    "SYSTEMDRIVE",
+    "SYSTEMROOT",
+    "TEMP",
+    "TMP",
+    "USERPROFILE",
+    "WINDIR",
+];
+const QUALITY_GATE_TRUNCATION_MARKER: &str = "\n[TOKN_OUTPUT_TRUNCATED]\n";
 
 pub fn run(request_path: &Path) -> anyhow::Result<()> {
     let request = read_request(request_path)?;
@@ -639,25 +666,32 @@ fn run_quality_gate(
         };
     };
 
-    match ProcessCommand::new(program)
-        .args(&request.args)
-        .current_dir(workspace)
-        .output()
-    {
-        Ok(output) => RunnerQualityReport {
+    match execute_quality_gate(
+        program,
+        &request.args,
+        Path::new(workspace),
+        QUALITY_GATE_TIMEOUT,
+        QUALITY_GATE_OUTPUT_LIMIT_BYTES,
+    ) {
+        Ok(execution) => RunnerQualityReport {
             required: request.required,
-            status: if output.status.success() {
-                RunnerQualityStatus::Pass
-            } else {
-                RunnerQualityStatus::Fail
+            status: match execution.status {
+                Some(status) if execution.error.is_none() && status.success() => {
+                    RunnerQualityStatus::Pass
+                }
+                Some(_) if execution.error.is_none() => RunnerQualityStatus::Fail,
+                _ => RunnerQualityStatus::Unavailable,
             },
             workspace: Some(workspace.to_string()),
             program: Some(program.to_string()),
             args: request.args.clone(),
-            exit_code: output.status.code(),
-            stdout: String::from_utf8_lossy(&output.stdout).into_owned(),
-            stderr: String::from_utf8_lossy(&output.stderr).into_owned(),
-            error: None,
+            exit_code: execution
+                .status
+                .filter(|_| execution.error.is_none())
+                .and_then(|status| status.code()),
+            stdout: execution.stdout,
+            stderr: execution.stderr,
+            error: execution.error,
         },
         Err(error) => RunnerQualityReport {
             required: request.required,
@@ -671,6 +705,225 @@ fn run_quality_gate(
             error: Some(error.to_string()),
         },
     }
+}
+
+#[derive(Debug)]
+struct QualityGateExecution {
+    status: Option<ExitStatus>,
+    stdout: String,
+    stderr: String,
+    error: Option<String>,
+}
+
+#[derive(Debug)]
+struct BoundedOutput {
+    bytes: Vec<u8>,
+    truncated: bool,
+}
+
+fn execute_quality_gate(
+    program: &str,
+    args: &[String],
+    workspace: &Path,
+    timeout: Duration,
+    output_limit: usize,
+) -> std::io::Result<QualityGateExecution> {
+    let mut command = ProcessCommand::new(program);
+    command
+        .args(args)
+        .current_dir(workspace)
+        .stdin(Stdio::null())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .env_clear();
+    for name in QUALITY_GATE_ENV_ALLOWLIST {
+        if let Some(value) = std::env::var_os(name) {
+            command.env(name, value);
+        }
+    }
+
+    let mut child = command.spawn()?;
+    let stdout = child
+        .stdout
+        .take()
+        .ok_or_else(|| std::io::Error::other("quality gate stdout pipe is unavailable"))?;
+    let stderr = child
+        .stderr
+        .take()
+        .ok_or_else(|| std::io::Error::other("quality gate stderr pipe is unavailable"))?;
+    let stdout_reader = thread::spawn(move || read_bounded_output(stdout, output_limit));
+    let stderr_reader = thread::spawn(move || read_bounded_output(stderr, output_limit));
+
+    let started = Instant::now();
+    let (status, error) = loop {
+        match child.try_wait() {
+            Ok(Some(status)) => break (Some(status), None),
+            Ok(None) if started.elapsed() >= timeout => {
+                let status = terminate_quality_gate(&mut child);
+                break (
+                    status,
+                    Some(format!(
+                        "quality gate timed out after {} seconds",
+                        timeout.as_secs()
+                    )),
+                );
+            }
+            Ok(None) => thread::sleep(QUALITY_GATE_POLL_INTERVAL),
+            Err(wait_error) => {
+                let _ = terminate_quality_gate(&mut child);
+                break (
+                    None,
+                    Some(format!("quality gate wait failed: {wait_error}")),
+                );
+            }
+        }
+    };
+
+    let stdout = join_bounded_output(stdout_reader, "stdout")?;
+    let stderr = join_bounded_output(stderr_reader, "stderr")?;
+
+    Ok(QualityGateExecution {
+        status,
+        stdout: finalize_quality_output(stdout),
+        stderr: finalize_quality_output(stderr),
+        error,
+    })
+}
+
+fn terminate_quality_gate(child: &mut Child) -> Option<ExitStatus> {
+    #[cfg(windows)]
+    {
+        let pid = child.id().to_string();
+        let taskkill = std::env::var_os("SYSTEMROOT")
+            .map(PathBuf::from)
+            .map(|root| root.join("System32").join("taskkill.exe"));
+        if let Some(taskkill) = taskkill {
+            let _ = ProcessCommand::new(taskkill)
+                .args(["/PID", &pid, "/T", "/F"])
+                .stdin(Stdio::null())
+                .stdout(Stdio::null())
+                .stderr(Stdio::null())
+                .env_clear()
+                .env(
+                    "SYSTEMROOT",
+                    std::env::var_os("SYSTEMROOT").unwrap_or_default(),
+                )
+                .status();
+        }
+    }
+
+    if child.try_wait().ok().flatten().is_none() {
+        let _ = child.kill();
+    }
+    child.wait().ok()
+}
+
+fn read_bounded_output(mut reader: impl Read, limit: usize) -> std::io::Result<BoundedOutput> {
+    let mut bytes = Vec::with_capacity(limit.min(8 * 1024));
+    let mut truncated = false;
+    let mut buffer = [0_u8; 8 * 1024];
+    loop {
+        let read = reader.read(&mut buffer)?;
+        if read == 0 {
+            break;
+        }
+        let remaining = limit.saturating_sub(bytes.len());
+        let retained = remaining.min(read);
+        bytes.extend_from_slice(&buffer[..retained]);
+        if retained < read {
+            truncated = true;
+        }
+    }
+    Ok(BoundedOutput { bytes, truncated })
+}
+
+fn join_bounded_output(
+    handle: thread::JoinHandle<std::io::Result<BoundedOutput>>,
+    stream: &str,
+) -> std::io::Result<BoundedOutput> {
+    handle
+        .join()
+        .map_err(|_| std::io::Error::other(format!("quality gate {stream} reader panicked")))?
+}
+
+fn finalize_quality_output(output: BoundedOutput) -> String {
+    let mut text = redact_sensitive_output(&String::from_utf8_lossy(&output.bytes));
+    if output.truncated {
+        text.push_str(QUALITY_GATE_TRUNCATION_MARKER);
+    }
+    text
+}
+
+fn redact_sensitive_output(input: &str) -> String {
+    let mut redacted = input
+        .split_inclusive('\n')
+        .map(redact_sensitive_line)
+        .collect::<String>();
+    for prefix in ["github_pat_", "ghp_", "gho_", "ghu_", "ghs_", "ghr_", "sk-"] {
+        redacted = redact_prefixed_tokens(redacted, prefix);
+    }
+    redacted
+}
+
+fn redact_sensitive_line(line: &str) -> String {
+    let lower = line.to_ascii_lowercase();
+    if let Some(position) = lower.find("bearer ") {
+        let value_start = position + "bearer ".len();
+        let mut redacted = line.to_string();
+        let value_end = token_end(line, value_start);
+        if value_end > value_start {
+            redacted.replace_range(value_start..value_end, "[REDACTED]");
+            return redacted;
+        }
+    }
+
+    for key in [
+        "authorization",
+        "password",
+        "passwd",
+        "api_key",
+        "api-key",
+        "access_token",
+        "access-token",
+        "client_secret",
+        "client-secret",
+    ] {
+        if let Some(key_start) = lower.find(key) {
+            let after_key = key_start + key.len();
+            if let Some(delimiter_offset) = line[after_key..].find(['=', ':']) {
+                let delimiter = after_key + delimiter_offset;
+                let newline = if line.ends_with('\n') { "\n" } else { "" };
+                return format!("{} [REDACTED]{newline}", &line[..=delimiter]);
+            }
+        }
+    }
+    line.to_string()
+}
+
+fn redact_prefixed_tokens(mut text: String, prefix: &str) -> String {
+    let mut search_from = 0;
+    while let Some(relative_start) = text[search_from..].find(prefix) {
+        let start = search_from + relative_start;
+        let value_start = start + prefix.len();
+        let end = token_end(&text, value_start);
+        if end <= value_start + 4 {
+            search_from = value_start;
+            continue;
+        }
+        text.replace_range(start..end, "[REDACTED]");
+        search_from = start + "[REDACTED]".len();
+    }
+    text
+}
+
+fn token_end(text: &str, start: usize) -> usize {
+    text[start..]
+        .char_indices()
+        .find_map(|(offset, ch)| {
+            (ch.is_whitespace() || matches!(ch, '"' | '\'' | '`' | ',' | ';' | ')' | ']' | '}'))
+                .then_some(start + offset)
+        })
+        .unwrap_or(text.len())
 }
 
 fn read_request(path: &Path) -> anyhow::Result<RunnerRequest> {
@@ -824,5 +1077,56 @@ mod tests {
                 .to_string()
                 .contains("project snapshot schema_version 99")
         );
+    }
+
+    #[test]
+    fn quality_gate_output_is_bounded_while_reader_is_fully_drained() {
+        let output =
+            read_bounded_output(std::io::Cursor::new(b"0123456789"), 4).expect("bounded reader");
+        assert_eq!(output.bytes, b"0123");
+        assert!(output.truncated);
+        assert!(finalize_quality_output(output).contains("[TOKN_OUTPUT_TRUNCATED]"));
+    }
+
+    #[test]
+    fn quality_gate_output_redacts_common_secret_shapes() {
+        let bearer_value = ["abcd", "efgh", "ijkl", "mnop"].concat();
+        let api_value = ["super", "secret", "value"].concat();
+        let github_value = ["gh", "p_", "abcdef", "ghijkl", "mnopqr", "stuvwxyz"].concat();
+        let openai_value = ["s", "k-", "abcdef", "ghijkl", "mnopqr", "stuvwxyz"].concat();
+        let input = format!(
+            "Authorization: Bearer {bearer_value}\napi_key={api_value}\n{github_value}\n{openai_value}\nnormal output\n"
+        );
+        let output = redact_sensitive_output(&input);
+        assert!(!output.contains(&bearer_value));
+        assert!(!output.contains(&api_value));
+        assert!(!output.contains(&github_value));
+        assert!(!output.contains(&openai_value));
+        assert!(output.contains("[REDACTED]"));
+        assert!(output.contains("normal output"));
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn quality_gate_timeout_terminates_the_spawned_process() {
+        let program = std::env::var("COMSPEC").expect("COMSPEC");
+        let args = vec!["/C".to_string(), "ping -n 6 127.0.0.1 >nul".to_string()];
+        let workspace = std::env::current_dir().expect("current directory");
+        let started = Instant::now();
+        let execution = execute_quality_gate(
+            &program,
+            &args,
+            &workspace,
+            Duration::from_millis(100),
+            1024,
+        )
+        .expect("quality gate execution");
+        assert!(
+            execution
+                .error
+                .as_deref()
+                .is_some_and(|error| error.contains("timed out"))
+        );
+        assert!(started.elapsed() < Duration::from_secs(2));
     }
 }
