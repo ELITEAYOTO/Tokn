@@ -160,11 +160,14 @@ Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "sanitized Shadow Index p
 Assert-Contains "docs/plans/IMPLEMENTATION-PATH.md" "sanitized pilot harness: **IMPLEMENTED / FULL GATES PASS**"
 Assert-Contains "docs/design/SHADOW-REPOSITORY-INDEX.md" 'the measured condition is `REJECTED`'
 Assert-Contains "docs/audits/2026-10-04-CLAUDE-TECHNICAL-AUDIT-RECONCILIATION.md" "NO REMEDIATION APPLIED"
-Assert-Contains "STATUS.md" "Wave A remediation is in progress"
-Assert-Contains "STATUS.md" "R-01 JSONL early-EOF/shrink infinite-loop risk"
-Assert-Contains "STATUS.md" "D-01 SQLite connection guards"
-Assert-Contains "STATUS.md" "CI supply-chain hardening"
-Assert-Contains "STATUS.md" "Publication/privacy hardening is the current remediation slice"
+Assert-Contains "STATUS.md" "Wave A code remediation is complete"
+Assert-Contains "STATUS.md" "C-06 GitHub branch governance remains an administration-side pending control"
+Assert-Contains "STATUS.md" "Wave B has started with S-02"
+Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "Wave A code remediation is complete; C-06 GitHub branch governance remains administration-side pending. Wave B has started with S-02."
+Assert-Contains "crates/tokn-storage/src/database.rs" "pub fn open_read_only"
+Assert-Contains "apps/tokn-mcp/src/main.rs" "Database::open_read_only(&db_path)"
+Assert-Contains "scripts/validation/check-mcp-prototype.ps1" '"tokn-observe.exe"'
+Assert-Contains "scripts/validation/check-mcp-prototype.ps1" "Failed to seed a writable Store before starting read-only MCP"
 Assert-Contains ".github/workflows/ci.yml" "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1"
 Assert-Contains ".github/workflows/ci.yml" "fetch-depth: 0"
 Assert-Contains ".github/workflows/ci.yml" "persist-credentials: false"
@@ -196,7 +199,7 @@ Assert-Contains "scripts/validation/check-repo-publication.ps1" "macos_user_home
 Assert-Contains "scripts/validation/check-repo-publication.ps1" "unix_user_home"
 Assert-FileMissing "scripts/rename_tokn.py"
 Assert-Contains "SECURITY.md" "this is not a cryptographic-secrecy guarantee"
-Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "Wave A integrity remediation is now in progress."
+Assert-Contains "docs/plans/NEXT-SESSION-CHECKLIST.md" "Wave B has started with S-02."
 Assert-Contains "docs/INDEX.md" "2026-10-04-CLAUDE-TECHNICAL-AUDIT-RECONCILIATION.md"
 Assert-Contains "ROADMAP.md" '`tokn_status` + `tokn_recent_runs` + `tokn_context_ledger`'
 Assert-Contains "docs/plans/IMPLEMENTATION-PATH.md" "Task Input Identity V0 ACCEPTED OBSERVATION FOUNDATION"
