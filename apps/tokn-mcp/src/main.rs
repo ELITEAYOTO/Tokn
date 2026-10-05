@@ -20,6 +20,6 @@ fn main() -> anyhow::Result<()> {
         .db
         .or_else(observer_database_path)
         .context("LOCALAPPDATA is unavailable and --db was not provided")?;
-    let db = Database::open(&db_path)?;
+    let db = Database::open_read_only(&db_path)?;
     server::run_stdio(db)
 }

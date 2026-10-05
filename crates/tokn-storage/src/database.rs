@@ -1,7 +1,7 @@
 use std::path::{Path, PathBuf};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
-use rusqlite::{Connection, params};
+use rusqlite::{Connection, OpenFlags, params};
 use tokn_domain::{RunId, SourceId};
 
 const SQLITE_BUSY_TIMEOUT: Duration = Duration::from_secs(5);
@@ -47,6 +47,15 @@ impl Database {
         apply_source_version_migrations(&conn)?;
         apply_workspace_git_provenance_migrations(&conn)?;
         apply_task_input_identity_migrations(&conn)?;
+        Ok(Self {
+            conn,
+            path: path.to_path_buf(),
+        })
+    }
+
+    pub fn open_read_only(path: &Path) -> rusqlite::Result<Self> {
+        let conn = Connection::open_with_flags(path, OpenFlags::SQLITE_OPEN_READ_ONLY)?;
+        configure_connection(&conn)?;
         Ok(Self {
             conn,
             path: path.to_path_buf(),
@@ -356,6 +365,69 @@ mod tests {
         assert_eq!(foreign_keys, 1);
         assert_eq!(busy_timeout_ms, 5_000);
         drop(db);
+        let _ = fs::remove_file(path);
+    }
+
+    #[test]
+    fn database_open_read_only_does_not_create_missing_store() {
+        let parent = std::env::temp_dir().join(format!(
+            "tokn-storage-read-only-missing-{}",
+            std::process::id()
+        ));
+        let path = parent.join("missing.sqlite3");
+        let _ = fs::remove_dir_all(&parent);
+
+        assert!(Database::open_read_only(&path).is_err());
+        assert!(!path.exists());
+        assert!(!parent.exists());
+    }
+
+    #[test]
+    fn database_open_read_only_does_not_migrate_uninitialized_store() {
+        let path = std::env::temp_dir().join(format!(
+            "tokn-storage-read-only-uninitialized-{}.sqlite3",
+            std::process::id()
+        ));
+        let _ = fs::remove_file(&path);
+        let seed = Connection::open(&path).unwrap();
+        seed.execute_batch("CREATE TABLE sentinel(value INTEGER NOT NULL);")
+            .unwrap();
+        drop(seed);
+        let before = fs::read(&path).unwrap();
+
+        let read_only = Database::open_read_only(&path).unwrap();
+        assert!(read_only.run_count().is_err());
+        drop(read_only);
+
+        let after = fs::read(&path).unwrap();
+        assert_eq!(before, after);
+        let _ = fs::remove_file(path);
+    }
+
+    #[test]
+    fn database_open_read_only_rejects_writes_without_mutating_store() {
+        let path = std::env::temp_dir().join(format!(
+            "tokn-storage-read-only-{}.sqlite3",
+            std::process::id()
+        ));
+        let _ = fs::remove_file(&path);
+        let writable = Database::open(&path).unwrap();
+        assert_eq!(writable.run_count().unwrap(), 0);
+        drop(writable);
+        let before = fs::read(&path).unwrap();
+
+        let read_only = Database::open_read_only(&path).unwrap();
+        assert_eq!(read_only.run_count().unwrap(), 0);
+        assert!(
+            read_only
+                .connection()
+                .execute("DELETE FROM runs", [])
+                .is_err()
+        );
+        drop(read_only);
+
+        let after = fs::read(&path).unwrap();
+        assert_eq!(before, after);
         let _ = fs::remove_file(path);
     }
 

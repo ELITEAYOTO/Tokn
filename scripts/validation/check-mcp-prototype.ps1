@@ -15,8 +15,22 @@ if (Test-Path -LiteralPath $Db) {
     Remove-Item -LiteralPath $Db -Force
 }
 
+$ResolvedMcpBinary = (Resolve-Path $BinaryPath).Path
+$ObserverBinary = Join-Path (Split-Path $ResolvedMcpBinary -Parent) "tokn-observe.exe"
+if (-not (Test-Path -LiteralPath $ObserverBinary -PathType Leaf)) {
+    throw "Tokn Observer binary not found beside MCP binary: $ObserverBinary"
+}
+
+& $ObserverBinary context-ledger --db $Db | Out-Null
+if ($LASTEXITCODE -ne 0 -or -not (Test-Path -LiteralPath $Db -PathType Leaf)) {
+    if (Test-Path -LiteralPath $Db) {
+        Remove-Item -LiteralPath $Db -Force
+    }
+    throw "Failed to seed a writable Store before starting read-only MCP"
+}
+
 $psi = [System.Diagnostics.ProcessStartInfo]::new()
-$psi.FileName = (Resolve-Path $BinaryPath).Path
+$psi.FileName = $ResolvedMcpBinary
 $psi.Arguments = '--db "' + $Db + '"'
 $psi.UseShellExecute = $false
 $psi.CreateNoWindow = $true

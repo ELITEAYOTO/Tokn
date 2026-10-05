@@ -39,7 +39,7 @@ but the already-installed Visual Studio Build Tools 2022 toolchain is complete
 and is the validated build environment.
 Rustup is now installed locally; `rust-toolchain.toml` pins Rust 1.97.1 + rustfmt + Clippy so local checks match CI.
 
-Maintainability/audit checkpoint 2026-10-04 : MATERIAL DEBT CONFIRMED. Wave A remediation is in progress: R-01 JSONL early-EOF/shrink infinite-loop risk, D-01 SQLite connection guards and CI supply-chain hardening are fixed and merged. Publication/privacy hardening is the current remediation slice: tracked-file scanning is fail-closed and multi-OS, full Git history is scanned for secrets in CI, and the obsolete local rename script is removed. Remaining audit findings stay pending. See `docs/audits/2026-10-04-CLAUDE-TECHNICAL-AUDIT-RECONCILIATION.md`.
+Maintainability/audit checkpoint 2026-10-04 : MATERIAL DEBT CONFIRMED. Wave A code remediation is complete: R-01 JSONL early-EOF/shrink handling, D-01 SQLite connection guards, CI supply-chain hardening and S-05 publication/privacy hardening are fixed and merged. C-06 GitHub branch governance remains an administration-side pending control. Wave B has started with S-02: the MCP production entrypoint now opens the existing Store through an explicit SQLite read-only connection and performs no schema creation/migration on that path. Remaining audit findings stay pending. See `docs/audits/2026-10-04-CLAUDE-TECHNICAL-AUDIT-RECONCILIATION.md`.
 Git local : `main` aligne sur `origin/main` (GitHub).
 GitHub governance : `main` est actuellement non protegee (`protected=false`) ; le workflow PR + CI + garde SHA est applique par discipline, mais une protection/ruleset GitHub reste a configurer cote administration.
 
